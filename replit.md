@@ -16,12 +16,13 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 - **Projects**: Project portfolio management
 - **Vendors**: Vendor management with due diligence status
 - **Document Generator**: Pre-built templates for ISO 37001 SMAP documents
-- **Document Builder** (NEW): Advanced document generator with company context
-  - 7 professional SMAP templates
-  - Category-based filtering (SK, Kebijakan, SOP, Formulir, Register, Berita Acara)
-  - Auto-population with company, management, FKAP, and vendor data
-  - Preview, copy, and download functionality
-  - Document history tracking
+- **AI Prompt Generator** (Document Builder): AI prompt generator for SMAP documents
+  - 9 professional SMAP templates (Pedoman, SK, Kebijakan, SOP, Formulir, Register, Berita Acara)
+  - Category-based filtering
+  - Auto-population with company, management, FKAP data
+  - Generates structured prompts for use with dokumenttender.com or other AI models
+  - Copy prompt to clipboard functionality
+  - Additional context input for customization
 - **SMAP Reference** (NEW): Comprehensive document reference table
   - 46 document references organized by category (Pedoman, Kebijakan, SOP, Formulir, Register, Instruksi)
   - Quick stats cards for document counts by category
@@ -100,14 +101,16 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 - **Language**: Indonesian (Bahasa Indonesia) as per SNI ISO 37001:2016 standard
 - **Date Handling**: Date fields stored as text with z.preprocess to accept empty strings and null values from forms
 
-## Document Builder Templates
-1. **SK Penetapan Tim FKAP** (5.3.2) - FKAP Team Appointment Decree
-2. **Kebijakan Anti Penyuapan** (5.2) - Anti-Bribery Policy
-3. **Pakta Integritas Personel** (7.2.2.3) - Personnel Integrity Pact
-4. **SOP Uji Tuntas Mitra Bisnis** (8.2) - Due Diligence SOP
-5. **Register Risiko Penyuapan** (4.5) - Bribery Risk Register
-6. **Checklist Audit Internal SMAP** (9.2) - Internal Audit Checklist
-7. **Berita Acara RTM** (9.3) - Management Review Meeting Minutes
+## AI Prompt Generator Templates
+1. **Pedoman SMAP (Manual)** (4-10) - Complete ABMS Manual/Guideline
+2. **SK Penetapan Tim FKAP** (5.3.2) - FKAP Team Appointment Decree
+3. **Kebijakan Anti Penyuapan** (5.2) - Anti-Bribery Policy
+4. **Pakta Integritas Personel** (7.2.2.3) - Personnel Integrity Pact
+5. **SOP Uji Tuntas Mitra Bisnis** (8.2) - Due Diligence SOP
+6. **Register Risiko Penyuapan** (4.5) - Bribery Risk Register
+7. **Checklist Audit Internal SMAP** (9.2) - Internal Audit Checklist
+8. **Berita Acara RTM** (9.3) - Management Review Meeting Minutes
+9. **Sasaran & Program Anti Penyuapan** (6.2) - Anti-Bribery Objectives & Programs
 
 ## PDCA Generator Clauses
 - **Plan** (16 clauses): Policies, risks, objectives, resources, training, documentation
@@ -152,17 +155,21 @@ The application includes a comprehensive reference table with 46 documents:
 - **Instruksi** (3): Panduan teknis pelaksanaan tugas
 
 ## Recent Changes
+- 2026-02-01: Converted Document Builder to AI Prompt Generator
+  - Output is now AI prompts (not full documents) to avoid token limitations
+  - Designed for use with dokumenttender.com AI aggregator
+  - 9 templates with detailed prompt structures based on real SMAP documents
+  - Prompts include company context, FKAP team, management data
+  - Added "Konteks Tambahan" input for customization
+- 2026-02-01: Enhanced PDCA Generator AI Prompt Master
+  - Structured prompts with PDCA phase context
+  - Includes legal references (UU, Permen PU, SNI ISO 37001)
+  - Better formatting for AI model consumption
 - 2026-02-01: Added SMAP Reference page
   - 46 document references with search and filter
   - Stats cards for category counts
   - Export to CSV functionality
   - Gemini AI integration for future document generation
-- 2026-02-01: Added Document Builder feature
-  - 7 professional SMAP document templates
-  - Auto-population with company data
-  - Preview, copy, and download functionality
-  - Document history and management
-  - Category filtering for templates
 - 2026-02-01: Enhanced Dashboard
   - Quick access cards to all document generators
   - Generated document count display

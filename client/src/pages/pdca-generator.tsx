@@ -156,37 +156,34 @@ export default function PDCAGenerator() {
     }
   }, [activeTab]);
 
-  const generateDraft = () => {
+  const generateQuickPrompt = () => {
     if (!selectedClause) {
       toast({ title: "Pilih klausul terlebih dahulu", variant: "destructive" });
       return;
     }
 
-    const content = `[DOKUMEN FORMAL SMAP - STANDAR ISO 37001]
+    const content = `=== QUICK PROMPT - DOKUMEN SMAP ===
 
-JUDUL: ${selectedClause}
-PERUSAHAAN: ${companyName.toUpperCase()}
-LOKASI: [LOKASI]
+Buatkan dokumen formal untuk klausul "${selectedClause}" SNI ISO 37001:2016.
+
+PERUSAHAAN: ${companyName}
+ALAMAT: ${company?.address || "[ALAMAT]"}
 TANGGAL: ${new Date().toLocaleDateString("id-ID")}
 
-ISI PERNYATAAN:
-Menimbang kepatuhan terhadap Permen PU No. 08 Tahun 2022, dengan ini Direktur menyatakan bahwa pelaksanaan butir "${selectedClause}" telah berjalan sebagai berikut:
+${narasi ? `KONTEKS PELAKSANAAN:\n"${narasi}"\n\n` : ""}INSTRUKSI:
+1. Format: Dokumen formal siap cetak dalam Bahasa Indonesia
+2. Sertakan header dengan identitas perusahaan
+3. Ikuti struktur standar dokumen SMAP konstruksi
+4. Referensi: Permen PU No. 08/2022, SNI ISO 37001:2016
 
-"${narasi || "[Narasi belum diisi]"}"
+Gunakan prompt ini di dokumenttender.com atau AI model lainnya.`;
 
-Demikian pernyataan ini dibuat dengan komitmen Zero Tolerance terhadap penyuapan.
-
-Disahkan oleh,
-Direktur,
-
-
-
-( [NAMA DIREKTUR] )
-Licensed exclusively for ${companyName.toUpperCase()}`;
-
-    setGeneratedContent({ type: "draft", content });
+    setGeneratedContent({ type: "prompt", content });
     setShowRepository(false);
-    toast({ title: "Draf dokumen berhasil dibuat" });
+    toast({ 
+      title: "Quick Prompt berhasil dibuat",
+      description: "Salin dan gunakan di dokumenttender.com"
+    });
   };
 
   const generateAIPrompt = () => {
@@ -195,22 +192,60 @@ Licensed exclusively for ${companyName.toUpperCase()}`;
       return;
     }
 
-    const content = `TUGAS: Buat draf dokumen SMAP formal (SK/Laporan) sesuai Permen PU 08/2022 untuk butir "${selectedClause}".
+    const phaseLabel = activeTab === "plan" ? "PLAN" : activeTab === "do" ? "DO" : activeTab === "check" ? "CHECK" : "ACT";
+    
+    const content = `=== PROMPT GENERATOR DOKUMEN SMAP - PDCA ===
+Gunakan prompt ini di dokumenttender.com atau AI model lainnya
 
-IDENTITAS: ${companyName}.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-NARASI: "${narasi}"
+KONTEKS PERUSAHAAN:
+- Nama Perusahaan: ${companyName}
+- NPWP: ${company?.npwp || "[NPWP]"}
+- Alamat: ${company?.address || "[ALAMAT]"}
+- Bidang Usaha: Jasa Konstruksi
+- Standar: SNI ISO 37001:2016
 
-FORMAT: Bahasa Indonesia formal, sertakan klausul menimbang dan mengingat sesuai ISO 37001.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STANDAR REFERENSI:
-- SNI ISO 37001:2016
-- Permen PU No. 08 Tahun 2022
-- Peraturan Anti Penyuapan Indonesia`;
+TUGAS PEMBUATAN DOKUMEN:
+
+Fase PDCA: ${phaseLabel}
+Klausul/Item: ${selectedClause}
+Tanggal: ${new Date().toLocaleDateString("id-ID")}
+
+INSTRUKSI:
+Buatkan dokumen SMAP formal (SK/Laporan/Formulir) sesuai Permen PU 08/2022 untuk butir "${selectedClause}".
+
+${narasi ? `KONTEKS PELAKSANAAN DI LAPANGAN:
+"${narasi}"
+
+` : ""}STRUKTUR DOKUMEN WAJIB:
+1. Header dengan identitas perusahaan dan nomor dokumen
+2. Judul dokumen yang sesuai dengan klausul
+3. Klausul MENIMBANG (dasar pertimbangan)
+4. Klausul MENGINGAT (dasar hukum):
+   - UU No. 31 Tahun 1999 jo. UU No. 20 Tahun 2001 tentang Pemberantasan Tindak Pidana Korupsi
+   - SNI ISO 37001:2016 Sistem Manajemen Anti Penyuapan
+   - Permen PU No. 08 Tahun 2022 tentang Standar Kemampuan Usaha Jasa Konstruksi
+5. Isi dokumen yang relevan dengan klausul
+6. Penutup dengan tanda tangan pejabat berwenang
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FORMAT OUTPUT:
+- Bahasa Indonesia formal dan profesional
+- Siap cetak untuk dokumentasi SMAP
+- Sesuai standar dokumen konstruksi Indonesia
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
     setGeneratedContent({ type: "prompt", content });
     setShowRepository(false);
-    toast({ title: "AI Prompt berhasil dibuat" });
+    toast({ 
+      title: "AI Prompt berhasil dibuat", 
+      description: "Salin dan gunakan di dokumenttender.com" 
+    });
   };
 
   const copyToClipboard = async (text: string, id: string) => {
