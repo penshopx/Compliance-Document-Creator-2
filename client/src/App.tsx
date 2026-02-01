@@ -21,6 +21,7 @@ import PDCAGenerator from "@/pages/pdca-generator";
 import DocumentBuilder from "@/pages/document-builder";
 import SMAPReferencePage from "@/pages/smap-reference";
 import TemplateRepository from "@/pages/template-repository";
+import SMAPChecklist from "@/pages/smap-checklist";
 
 function Router() {
   return (
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/document-builder" component={DocumentBuilder} />
       <Route path="/smap-reference" component={SMAPReferencePage} />
       <Route path="/template-repository" component={TemplateRepository} />
+      <Route path="/smap-checklist" component={SMAPChecklist} />
       <Route component={NotFound} />
     </Switch>
   );

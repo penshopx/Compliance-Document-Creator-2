@@ -27,6 +27,7 @@ import {
   FilePlus2,
   BookOpen,
   Library,
+  ListChecks,
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -46,6 +47,7 @@ const dataMenuItems = [
 ];
 
 const documentMenuItems = [
+  { title: "Checklist SMAP", url: "/smap-checklist", icon: ListChecks },
   { title: "Template Repository", url: "/template-repository", icon: Library },
   { title: "Referensi Dokumen", url: "/smap-reference", icon: BookOpen },
   { title: "Generator Dokumen", url: "/documents", icon: FileText },
