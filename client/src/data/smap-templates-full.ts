@@ -4489,6 +4489,1605 @@ Kuadran:
 9. Recognition dan rewards
 10. Case studies`,
   },
+
+  // ============================================
+  // PRODUK SIAP SMAP - ADDITIONAL TEMPLATES
+  // ============================================
+
+  // SIAP DOKUMEN SMAP - Klausul 4 (Konteks Organisasi)
+  {
+    id: "PED-SMAP-001",
+    kode: "PED-SMAP-001",
+    nama: "Pedoman SMAP (Manual SMAP)",
+    namaEn: "ABMS Manual",
+    kategori: "Pedoman",
+    klausul: "4",
+    deskripsi: "Dokumen induk sistem manajemen anti penyuapan yang mencakup kebijakan, ruang lingkup, dan kerangka kerja SMAP organisasi.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Pedoman SMAP untuk [NAMA PERUSAHAAN] yang mencakup:
+1. Pendahuluan dan tujuan SMAP
+2. Ruang lingkup penerapan
+3. Referensi normatif (SNI ISO 37001:2016)
+4. Istilah dan definisi
+5. Konteks organisasi
+6. Kepemimpinan dan komitmen
+7. Kebijakan anti penyuapan
+8. Perencanaan risiko
+9. Struktur dokumentasi SMAP`,
+  },
+  {
+    id: "FOR-KON-001",
+    kode: "FOR-KON-001",
+    nama: "Formulir Analisis Konteks Organisasi",
+    namaEn: "Organization Context Analysis Form",
+    kategori: "Formulir",
+    klausul: "4.1",
+    deskripsi: "Formulir untuk mendokumentasikan analisis isu internal dan eksternal yang mempengaruhi SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Formulir Analisis Konteks Organisasi dengan kolom:
+1. Isu Internal (struktur, budaya, tata kelola, kinerja)
+2. Isu Eksternal (regulasi, ekonomi, sosial, teknologi)
+3. Dampak terhadap SMAP
+4. Tindakan yang diperlukan
+5. Tanggal analisis dan verifikasi`,
+  },
+  {
+    id: "FOR-KON-002",
+    kode: "FOR-KON-002",
+    nama: "Formulir Identifikasi Pemangku Kepentingan",
+    namaEn: "Stakeholder Identification Form",
+    kategori: "Formulir",
+    klausul: "4.2",
+    deskripsi: "Formulir untuk mengidentifikasi pemangku kepentingan dan kebutuhan mereka terkait SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen", "Pelanggan", "Vendor"],
+    promptTemplate: `Buatkan Formulir Identifikasi Pemangku Kepentingan dengan kolom:
+1. Nama pemangku kepentingan
+2. Kategori (internal/eksternal)
+3. Kebutuhan dan harapan terkait anti penyuapan
+4. Prioritas kepentingan
+5. Cara komunikasi`,
+  },
+  {
+    id: "REG-STA-001",
+    kode: "REG-STA-001",
+    nama: "Register Pemangku Kepentingan",
+    namaEn: "Stakeholder Register",
+    kategori: "Register",
+    klausul: "4.2",
+    deskripsi: "Daftar pemangku kepentingan yang relevan dengan SMAP dan persyaratan mereka.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Register Pemangku Kepentingan dengan kolom:
+1. No.
+2. Nama stakeholder
+3. Kategori
+4. Persyaratan/harapan
+5. Tingkat pengaruh
+6. Metode engagement
+7. Status`,
+  },
+  {
+    id: "MAT-RIS-001",
+    kode: "MAT-RIS-001",
+    nama: "Matriks Penilaian Risiko Penyuapan",
+    namaEn: "Bribery Risk Assessment Matrix",
+    kategori: "Matriks",
+    klausul: "4.5",
+    deskripsi: "Matriks untuk menilai dan memprioritaskan risiko penyuapan berdasarkan kemungkinan dan dampak.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Audit", "Manajemen"],
+    promptTemplate: `Buatkan Matriks Penilaian Risiko Penyuapan dengan:
+1. Skala likelihood (1-5)
+2. Skala impact (1-5)
+3. Risk rating matrix
+4. Kategori risiko (rendah, sedang, tinggi, sangat tinggi)
+5. Panduan pengendalian per level risiko`,
+  },
+
+  // SIAP DOKUMEN SMAP - Klausul 5 (Kepemimpinan)
+  {
+    id: "KEP-APB-001",
+    kode: "KEP-APB-001",
+    nama: "Kebijakan Anti Penyuapan",
+    namaEn: "Anti-Bribery Policy",
+    kategori: "Kebijakan",
+    klausul: "5.2",
+    deskripsi: "Kebijakan zero tolerance terhadap penyuapan yang ditetapkan oleh manajemen puncak.",
+    penanggungJawab: "Direktur Utama",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Kebijakan Anti Penyuapan untuk [NAMA PERUSAHAAN]:
+1. Pernyataan komitmen zero tolerance
+2. Tujuan kebijakan
+3. Ruang lingkup penerapan
+4. Larangan-larangan spesifik
+5. Konsekuensi pelanggaran
+6. Mekanisme pelaporan
+7. Perlindungan pelapor
+8. Tandatangan Direktur Utama`,
+  },
+  {
+    id: "SK-KOM-001",
+    kode: "SK-KOM-001",
+    nama: "SK Komitmen Manajemen Puncak",
+    namaEn: "Top Management Commitment Decree",
+    kategori: "SK",
+    klausul: "5.1",
+    deskripsi: "Surat Keputusan yang menyatakan komitmen manajemen puncak terhadap implementasi SMAP.",
+    penanggungJawab: "Direktur Utama",
+    frekuensi: "Sekali/update",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Manajemen"],
+    promptTemplate: `Buatkan SK Komitmen Manajemen Puncak dengan format:
+1. Kop surat perusahaan
+2. Nomor SK
+3. Menimbang (dasar hukum)
+4. Mengingat (referensi)
+5. Memutuskan - pernyataan komitmen
+6. Tandatangan Direktur`,
+  },
+  {
+    id: "SK-FKP-001",
+    kode: "SK-FKP-001",
+    nama: "SK Penetapan Tim FKAP",
+    namaEn: "ABMS Compliance Function Appointment Decree",
+    kategori: "SK",
+    klausul: "5.3.2",
+    deskripsi: "Surat Keputusan penetapan Fungsi Kepatuhan Anti Penyuapan (FKAP).",
+    penanggungJawab: "Direktur Utama",
+    frekuensi: "Sekali/update",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan SK Penetapan Tim FKAP dengan:
+1. Nomor SK
+2. Dasar hukum penetapan
+3. Susunan Tim FKAP
+4. Tugas dan tanggung jawab
+5. Wewenang
+6. Masa berlaku`,
+  },
+  {
+    id: "SK-AUD-001",
+    kode: "SK-AUD-001",
+    nama: "SK Penetapan Tim Audit Internal SMAP",
+    namaEn: "Internal Audit Team Appointment Decree",
+    kategori: "SK",
+    klausul: "9.2",
+    deskripsi: "Surat Keputusan penetapan tim auditor internal untuk audit SMAP.",
+    penanggungJawab: "Direktur Utama",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit", "Manajemen"],
+    promptTemplate: `Buatkan SK Penetapan Tim Audit Internal SMAP:
+1. Nomor SK
+2. Susunan tim auditor
+3. Kualifikasi auditor
+4. Independensi
+5. Tugas dan wewenang
+6. Jadwal audit`,
+  },
+  {
+    id: "KEP-HAD-001",
+    kode: "KEP-HAD-001",
+    nama: "Kebijakan Hadiah dan Keramahtamahan",
+    namaEn: "Gifts and Hospitality Policy",
+    kategori: "Kebijakan",
+    klausul: "8.7",
+    deskripsi: "Kebijakan tentang penerimaan dan pemberian hadiah, hiburan, dan keramahtamahan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "SDM", "Operasional"],
+    promptTemplate: `Buatkan Kebijakan Hadiah dan Keramahtamahan:
+1. Definisi hadiah dan keramahtamahan
+2. Batasan nilai yang diperbolehkan
+3. Hadiah yang dilarang
+4. Prosedur persetujuan
+5. Kewajiban pelaporan
+6. Penanganan hadiah tidak pantas`,
+  },
+  {
+    id: "KEP-DON-001",
+    kode: "KEP-DON-001",
+    nama: "Kebijakan Donasi dan Sponsorship",
+    namaEn: "Donations and Sponsorship Policy",
+    kategori: "Kebijakan",
+    klausul: "8.7",
+    deskripsi: "Kebijakan tentang pemberian donasi, sumbangan, dan sponsorship.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan", "Keuangan"],
+    promptTemplate: `Buatkan Kebijakan Donasi dan Sponsorship:
+1. Tujuan kebijakan
+2. Jenis donasi yang diperbolehkan
+3. Prosedur persetujuan
+4. Batas nilai
+5. Larangan donasi ke pejabat
+6. Dokumentasi dan pelaporan`,
+  },
+  {
+    id: "KEP-KOI-001",
+    kode: "KEP-KOI-001",
+    nama: "Kebijakan Konflik Kepentingan",
+    namaEn: "Conflict of Interest Policy",
+    kategori: "Kebijakan",
+    klausul: "5.3",
+    deskripsi: "Kebijakan tentang identifikasi dan pengelolaan konflik kepentingan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "SDM", "Manajemen"],
+    promptTemplate: `Buatkan Kebijakan Konflik Kepentingan:
+1. Definisi konflik kepentingan
+2. Jenis-jenis konflik
+3. Kewajiban pengungkapan
+4. Prosedur pelaporan
+5. Pengelolaan konflik
+6. Sanksi pelanggaran`,
+  },
+  {
+    id: "MAT-TJW-001",
+    kode: "MAT-TJW-001",
+    nama: "Matriks Tanggung Jawab SMAP",
+    namaEn: "ABMS Responsibility Matrix",
+    kategori: "Matriks",
+    klausul: "5.3",
+    deskripsi: "Matriks RACI yang menjelaskan tanggung jawab setiap pihak dalam implementasi SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Matriks Tanggung Jawab SMAP (RACI) dengan:
+1. Daftar aktivitas SMAP per klausul
+2. Peran: Direktur, FKAP, Manajer, Karyawan
+3. R = Responsible
+4. A = Accountable
+5. C = Consulted
+6. I = Informed`,
+  },
+  {
+    id: "FOR-DEL-001",
+    kode: "FOR-DEL-001",
+    nama: "Formulir Pendelegasian Wewenang",
+    namaEn: "Authority Delegation Form",
+    kategori: "Formulir",
+    klausul: "5.3.3",
+    deskripsi: "Formulir untuk mendokumentasikan pendelegasian wewenang dalam pengambilan keputusan.",
+    penanggungJawab: "Direktur",
+    frekuensi: "Sesuai kebutuhan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Manajemen"],
+    promptTemplate: `Buatkan Formulir Pendelegasian Wewenang:
+1. Pemberi delegasi
+2. Penerima delegasi
+3. Lingkup wewenang
+4. Batasan nilai
+5. Periode berlaku
+6. Persyaratan uji tuntas`,
+  },
+
+  // SIAP DOKUMEN SMAP - Klausul 6 (Perencanaan)
+  {
+    id: "REG-RIS-001",
+    kode: "REG-RIS-001",
+    nama: "Register Risiko Penyuapan",
+    namaEn: "Bribery Risk Register",
+    kategori: "Register",
+    klausul: "4.5",
+    deskripsi: "Register komprehensif risiko penyuapan yang diidentifikasi, dinilai, dan dikelola.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Audit", "Manajemen"],
+    promptTemplate: `Buatkan Register Risiko Penyuapan dengan kolom:
+1. ID Risiko
+2. Deskripsi risiko
+3. Area/proses bisnis
+4. Likelihood (1-5)
+5. Impact (1-5)
+6. Risk rating
+7. Pengendalian existing
+8. Residual risk
+9. Rencana mitigasi
+10. PIC dan timeline`,
+  },
+  {
+    id: "PRO-APB-001",
+    kode: "PRO-APB-001",
+    nama: "Program Anti Penyuapan Tahunan",
+    namaEn: "Annual Anti-Bribery Program",
+    kategori: "Program",
+    klausul: "6.2",
+    deskripsi: "Program kerja tahunan untuk mencapai sasaran anti penyuapan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Program Anti Penyuapan Tahunan:
+1. Sasaran SMAP tahun ini
+2. Indikator kinerja (KPI)
+3. Target pencapaian
+4. Aktivitas utama
+5. Jadwal pelaksanaan
+6. Anggaran
+7. Penanggung jawab`,
+  },
+  {
+    id: "FOR-SAS-001",
+    kode: "FOR-SAS-001",
+    nama: "Formulir Sasaran Anti Penyuapan",
+    namaEn: "Anti-Bribery Objectives Form",
+    kategori: "Formulir",
+    klausul: "6.2",
+    deskripsi: "Formulir penetapan sasaran anti penyuapan yang terukur.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Formulir Sasaran Anti Penyuapan:
+1. Sasaran (SMART)
+2. Indikator keberhasilan
+3. Target kuantitatif
+4. Baseline
+5. Metode pengukuran
+6. Frekuensi monitoring`,
+  },
+  {
+    id: "MAT-PER-001",
+    kode: "MAT-PER-001",
+    nama: "Matriks Perencanaan Risiko",
+    namaEn: "Risk Planning Matrix",
+    kategori: "Matriks",
+    klausul: "6.1",
+    deskripsi: "Matriks yang menghubungkan risiko dengan rencana penanganan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Matriks Perencanaan Risiko:
+1. ID Risiko
+2. Strategi penanganan (avoid, mitigate, transfer, accept)
+3. Rencana aksi
+4. Resources
+5. Timeline
+6. Success criteria`,
+  },
+
+  // SIAP DOKUMEN SMAP - Klausul 7 (Dukungan)
+  {
+    id: "REG-PEL-001",
+    kode: "REG-PEL-001",
+    nama: "Register Pelatihan SMAP",
+    namaEn: "ABMS Training Register",
+    kategori: "Register",
+    klausul: "7.3",
+    deskripsi: "Register pelatihan dan awareness SMAP untuk seluruh personel.",
+    penanggungJawab: "SDM",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["SDM", "Kepatuhan"],
+    promptTemplate: `Buatkan Register Pelatihan SMAP dengan kolom:
+1. No.
+2. Nama peserta
+3. Jabatan
+4. Jenis pelatihan
+5. Tanggal pelatihan
+6. Durasi
+7. Materi
+8. Trainer
+9. Nilai evaluasi
+10. Sertifikat`,
+  },
+  {
+    id: "FOR-PEL-001",
+    kode: "FOR-PEL-001",
+    nama: "Formulir Kebutuhan Pelatihan",
+    namaEn: "Training Needs Form",
+    kategori: "Formulir",
+    klausul: "7.3",
+    deskripsi: "Formulir untuk mengidentifikasi kebutuhan pelatihan SMAP.",
+    penanggungJawab: "SDM",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["SDM"],
+    promptTemplate: `Buatkan Formulir Kebutuhan Pelatihan SMAP:
+1. Nama personel
+2. Jabatan
+3. Risiko penyuapan di posisi tersebut
+4. Kompetensi yang dibutuhkan
+5. Gap kompetensi
+6. Jenis pelatihan yang direkomendasikan`,
+  },
+  {
+    id: "SOP-PEL-001",
+    kode: "SOP-PEL-001",
+    nama: "SOP Pelatihan dan Awareness SMAP",
+    namaEn: "ABMS Training and Awareness SOP",
+    kategori: "SOP",
+    klausul: "7.3",
+    deskripsi: "Prosedur perencanaan, pelaksanaan, dan evaluasi pelatihan SMAP.",
+    penanggungJawab: "SDM",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["SDM", "Kepatuhan"],
+    promptTemplate: `Buatkan SOP Pelatihan dan Awareness SMAP:
+1. Tujuan
+2. Ruang lingkup
+3. Definisi
+4. Prosedur:
+   - Identifikasi kebutuhan
+   - Perencanaan pelatihan
+   - Pelaksanaan
+   - Evaluasi efektivitas
+5. Dokumentasi`,
+  },
+  {
+    id: "FOR-KES-001",
+    kode: "FOR-KES-001",
+    nama: "Formulir Pakta Integritas",
+    namaEn: "Integrity Pact Form",
+    kategori: "Formulir",
+    klausul: "7.2.2.3",
+    deskripsi: "Formulir pernyataan komitmen anti penyuapan personel.",
+    penanggungJawab: "SDM",
+    frekuensi: "Saat onboarding",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["SDM", "Kepatuhan"],
+    promptTemplate: `Buatkan Formulir Pakta Integritas:
+1. Pernyataan komitmen anti penyuapan
+2. Pemahaman kebijakan
+3. Kewajiban pelaporan
+4. Konsekuensi pelanggaran
+5. Tandatangan karyawan
+6. Saksi`,
+  },
+  {
+    id: "SOP-KOM-001",
+    kode: "SOP-KOM-001",
+    nama: "SOP Komunikasi SMAP",
+    namaEn: "ABMS Communication SOP",
+    kategori: "SOP",
+    klausul: "7.4",
+    deskripsi: "Prosedur komunikasi internal dan eksternal terkait SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan", "Pemasaran"],
+    promptTemplate: `Buatkan SOP Komunikasi SMAP:
+1. Tujuan
+2. Jenis komunikasi (internal/eksternal)
+3. Konten komunikasi
+4. Media komunikasi
+5. Frekuensi
+6. Penanggung jawab
+7. Dokumentasi`,
+  },
+  {
+    id: "FOR-KOM-001",
+    kode: "FOR-KOM-001",
+    nama: "Formulir Bukti Komunikasi SMAP",
+    namaEn: "ABMS Communication Evidence Form",
+    kategori: "Formulir",
+    klausul: "7.4",
+    deskripsi: "Formulir untuk mendokumentasikan bukti komunikasi SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Per kegiatan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Formulir Bukti Komunikasi SMAP:
+1. Tanggal komunikasi
+2. Jenis komunikasi
+3. Media yang digunakan
+4. Target audience
+5. Materi yang dikomunikasikan
+6. Daftar hadir/bukti
+7. Feedback`,
+  },
+  {
+    id: "SOP-DOK-001",
+    kode: "SOP-DOK-001",
+    nama: "SOP Pengendalian Dokumen dan Rekaman",
+    namaEn: "Document and Record Control SOP",
+    kategori: "SOP",
+    klausul: "7.5",
+    deskripsi: "Prosedur pengendalian dokumen dan rekaman SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan SOP Pengendalian Dokumen dan Rekaman:
+1. Pembuatan dokumen
+2. Review dan approval
+3. Penerbitan dan distribusi
+4. Identifikasi dan kodifikasi
+5. Penyimpanan dan pengamanan
+6. Revisi dan update
+7. Pemusnahan
+8. Backup dan recovery`,
+  },
+  {
+    id: "REG-DOK-001",
+    kode: "REG-DOK-001",
+    nama: "Register Dokumen SMAP",
+    namaEn: "ABMS Document Register",
+    kategori: "Register",
+    klausul: "7.5",
+    deskripsi: "Daftar induk dokumen SMAP yang terkendali.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Register Dokumen SMAP:
+1. No.
+2. Kode dokumen
+3. Nama dokumen
+4. Jenis (Kebijakan/SOP/Formulir/dll)
+5. Klausul ISO
+6. Revisi
+7. Tanggal terbit
+8. Penanggung jawab
+9. Lokasi penyimpanan`,
+  },
+
+  // SIAP AUDIT INTERNAL - Klausul 9.2
+  {
+    id: "PRO-AUD-001",
+    kode: "PRO-AUD-001",
+    nama: "Program Audit Internal Tahunan",
+    namaEn: "Annual Internal Audit Program",
+    kategori: "Program",
+    klausul: "9.2",
+    deskripsi: "Program audit internal SMAP untuk satu tahun.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit", "Kepatuhan"],
+    promptTemplate: `Buatkan Program Audit Internal Tahunan:
+1. Sasaran audit
+2. Ruang lingkup (klausul yang diaudit)
+3. Jadwal audit per departemen
+4. Tim auditor
+5. Kriteria audit
+6. Metode audit`,
+  },
+  {
+    id: "SOP-AUD-001",
+    kode: "SOP-AUD-001",
+    nama: "SOP Audit Internal SMAP",
+    namaEn: "ABMS Internal Audit SOP",
+    kategori: "SOP",
+    klausul: "9.2",
+    deskripsi: "Prosedur pelaksanaan audit internal SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit", "Kepatuhan"],
+    promptTemplate: `Buatkan SOP Audit Internal SMAP:
+1. Perencanaan audit
+2. Persiapan (checklist, dokumen)
+3. Opening meeting
+4. Pelaksanaan audit
+5. Pengumpulan bukti
+6. Closing meeting
+7. Penyusunan laporan
+8. Tindak lanjut temuan`,
+  },
+  {
+    id: "FOR-RAU-001",
+    kode: "FOR-RAU-001",
+    nama: "Formulir Rencana Audit",
+    namaEn: "Audit Plan Form",
+    kategori: "Formulir",
+    klausul: "9.2",
+    deskripsi: "Formulir rencana detail untuk setiap audit.",
+    penanggungJawab: "Lead Auditor",
+    frekuensi: "Per audit",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit"],
+    promptTemplate: `Buatkan Formulir Rencana Audit:
+1. Tujuan audit
+2. Ruang lingkup
+3. Kriteria audit
+4. Area yang diaudit
+5. Tanggal dan waktu
+6. Tim auditor
+7. Auditee
+8. Jadwal kegiatan`,
+  },
+  {
+    id: "CHK-AUD-001",
+    kode: "CHK-AUD-001",
+    nama: "Checklist Audit Internal SMAP",
+    namaEn: "ABMS Internal Audit Checklist",
+    kategori: "Checklist",
+    klausul: "9.2",
+    deskripsi: "Checklist audit berdasarkan klausul SNI ISO 37001:2016.",
+    penanggungJawab: "Auditor",
+    frekuensi: "Per audit",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit", "Kepatuhan"],
+    promptTemplate: `Buatkan Checklist Audit Internal SMAP per klausul:
+Untuk setiap klausul (4-10):
+1. Persyaratan standar
+2. Pertanyaan audit
+3. Bukti yang dicari
+4. Temuan (C/NC/OBS)
+5. Catatan auditor`,
+  },
+  {
+    id: "CHK-AUD-002",
+    kode: "CHK-AUD-002",
+    nama: "Checklist Verifikasi Implementasi",
+    namaEn: "Implementation Verification Checklist",
+    kategori: "Checklist",
+    klausul: "9.2",
+    deskripsi: "Checklist untuk memverifikasi implementasi pengendalian anti penyuapan.",
+    penanggungJawab: "Auditor",
+    frekuensi: "Per audit",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Audit"],
+    promptTemplate: `Buatkan Checklist Verifikasi Implementasi:
+1. Pengendalian yang diaudit
+2. Metode verifikasi
+3. Sampel yang diperiksa
+4. Hasil verifikasi
+5. Bukti objektif
+6. Kesimpulan`,
+  },
+  {
+    id: "LAP-AUD-001",
+    kode: "LAP-AUD-001",
+    nama: "Laporan Hasil Audit Internal",
+    namaEn: "Internal Audit Report",
+    kategori: "Laporan",
+    klausul: "9.2",
+    deskripsi: "Template laporan hasil audit internal SMAP.",
+    penanggungJawab: "Lead Auditor",
+    frekuensi: "Per audit",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit", "Kepatuhan"],
+    promptTemplate: `Buatkan Template Laporan Hasil Audit Internal:
+1. Ringkasan eksekutif
+2. Informasi audit (tanggal, tim, ruang lingkup)
+3. Metodologi audit
+4. Hasil audit per area
+5. Daftar temuan (NC mayor, minor, observasi)
+6. Kekuatan yang ditemukan
+7. Kesimpulan
+8. Rekomendasi`,
+  },
+  {
+    id: "REG-TEM-001",
+    kode: "REG-TEM-001",
+    nama: "Register Temuan Audit",
+    namaEn: "Audit Findings Register",
+    kategori: "Register",
+    klausul: "9.2",
+    deskripsi: "Register untuk mencatat dan melacak temuan audit.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit", "Kepatuhan"],
+    promptTemplate: `Buatkan Register Temuan Audit:
+1. No. Temuan
+2. Tanggal audit
+3. Area/departemen
+4. Klausul terkait
+5. Deskripsi temuan
+6. Klasifikasi (mayor/minor/obs)
+7. Root cause
+8. Tindakan korektif
+9. PIC
+10. Target selesai
+11. Status
+12. Verifikasi`,
+  },
+  {
+    id: "FOR-TLT-001",
+    kode: "FOR-TLT-001",
+    nama: "Formulir Tindak Lanjut Temuan",
+    namaEn: "Finding Follow-up Form",
+    kategori: "Formulir",
+    klausul: "9.2",
+    deskripsi: "Formulir untuk tindak lanjut dan close-out temuan audit.",
+    penanggungJawab: "Auditee",
+    frekuensi: "Per temuan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Audit"],
+    promptTemplate: `Buatkan Formulir Tindak Lanjut Temuan:
+1. No. Temuan
+2. Deskripsi temuan
+3. Analisis akar masalah
+4. Tindakan korektif
+5. Target penyelesaian
+6. Bukti implementasi
+7. Verifikasi auditor
+8. Status close-out`,
+  },
+  {
+    id: "MAT-AUD-001",
+    kode: "MAT-AUD-001",
+    nama: "Matriks Kompetensi Auditor",
+    namaEn: "Auditor Competency Matrix",
+    kategori: "Matriks",
+    klausul: "9.2",
+    deskripsi: "Matriks kompetensi dan kualifikasi auditor internal.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Audit", "SDM"],
+    promptTemplate: `Buatkan Matriks Kompetensi Auditor:
+1. Nama auditor
+2. Pendidikan
+3. Pelatihan audit
+4. Sertifikasi
+5. Pengalaman audit
+6. Area kompetensi
+7. Status (Lead/Member)`,
+  },
+  {
+    id: "IK-AUD-001",
+    kode: "IK-AUD-001",
+    nama: "Instruksi Kerja Teknik Audit",
+    namaEn: "Audit Techniques Work Instruction",
+    kategori: "Instruksi Kerja",
+    klausul: "9.2",
+    deskripsi: "Instruksi kerja tentang teknik-teknik audit yang efektif.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Pendukung",
+    areaBisnis: ["Audit"],
+    promptTemplate: `Buatkan Instruksi Kerja Teknik Audit:
+1. Teknik wawancara
+2. Teknik sampling
+3. Verifikasi dokumen
+4. Observasi proses
+5. Analisis data
+6. Penulisan temuan
+7. Do's and Don'ts`,
+  },
+  {
+    id: "FOR-KAU-001",
+    kode: "FOR-KAU-001",
+    nama: "Formulir Kehadiran Audit",
+    namaEn: "Audit Attendance Form",
+    kategori: "Formulir",
+    klausul: "9.2",
+    deskripsi: "Formulir kehadiran opening dan closing meeting audit.",
+    penanggungJawab: "Lead Auditor",
+    frekuensi: "Per audit",
+    tingkatKritis: "Pendukung",
+    areaBisnis: ["Audit"],
+    promptTemplate: `Buatkan Formulir Kehadiran Audit:
+1. Jenis meeting (opening/closing)
+2. Tanggal dan waktu
+3. Tempat
+4. Agenda
+5. Daftar hadir (nama, jabatan, tanda tangan)
+6. Notulen`,
+  },
+  {
+    id: "REG-AUD-001",
+    kode: "REG-AUD-001",
+    nama: "Register Audit Internal",
+    namaEn: "Internal Audit Register",
+    kategori: "Register",
+    klausul: "9.2",
+    deskripsi: "Register seluruh audit internal yang telah dilaksanakan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Audit"],
+    promptTemplate: `Buatkan Register Audit Internal:
+1. No. Audit
+2. Tanggal pelaksanaan
+3. Area yang diaudit
+4. Tim auditor
+5. Jumlah temuan
+6. Status laporan
+7. Status tindak lanjut`,
+  },
+
+  // SIAP SERTIFIKASI - Klausul 8
+  {
+    id: "SOP-UTU-001",
+    kode: "SOP-UTU-001",
+    nama: "SOP Uji Tuntas Mitra Bisnis",
+    namaEn: "Business Partner Due Diligence SOP",
+    kategori: "SOP",
+    klausul: "8.2",
+    deskripsi: "Prosedur uji tuntas (due diligence) untuk mitra bisnis.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Vendor", "Subkontraktor", "Pengadaan"],
+    promptTemplate: `Buatkan SOP Uji Tuntas Mitra Bisnis:
+1. Kriteria mitra bisnis yang wajib uji tuntas
+2. Level uji tuntas (sederhana, standar, diperluas)
+3. Informasi yang dikumpulkan
+4. Metode verifikasi
+5. Red flags
+6. Persetujuan
+7. Monitoring berkelanjutan`,
+  },
+  {
+    id: "CHK-UTU-001",
+    kode: "CHK-UTU-001",
+    nama: "Checklist Uji Tuntas",
+    namaEn: "Due Diligence Checklist",
+    kategori: "Checklist",
+    klausul: "8.2",
+    deskripsi: "Checklist untuk pelaksanaan uji tuntas mitra bisnis.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Per mitra",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Vendor", "Subkontraktor"],
+    promptTemplate: `Buatkan Checklist Uji Tuntas:
+1. Identitas dan legalitas
+2. Kepemilikan dan struktur
+3. Track record
+4. Kebijakan anti penyuapan mitra
+5. Reputasi dan media screening
+6. Conflict of interest
+7. Red flags identification`,
+  },
+  {
+    id: "REG-MBI-001",
+    kode: "REG-MBI-001",
+    nama: "Register Mitra Bisnis",
+    namaEn: "Business Partner Register",
+    kategori: "Register",
+    klausul: "8.2",
+    deskripsi: "Register mitra bisnis beserta status uji tuntasnya.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Vendor", "Subkontraktor"],
+    promptTemplate: `Buatkan Register Mitra Bisnis:
+1. No.
+2. Nama mitra
+3. Jenis mitra
+4. Nilai kontrak
+5. Tingkat risiko
+6. Status uji tuntas
+7. Tanggal uji tuntas
+8. Tanggal review berikutnya
+9. PIC`,
+  },
+  {
+    id: "SOP-HAD-001",
+    kode: "SOP-HAD-001",
+    nama: "SOP Pengelolaan Hadiah",
+    namaEn: "Gift Management SOP",
+    kategori: "SOP",
+    klausul: "8.7",
+    deskripsi: "Prosedur penerimaan, pencatatan, dan penanganan hadiah.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "SDM"],
+    promptTemplate: `Buatkan SOP Pengelolaan Hadiah:
+1. Definisi dan batasan
+2. Hadiah yang diperbolehkan
+3. Hadiah yang dilarang
+4. Prosedur pelaporan
+5. Approval threshold
+6. Penanganan hadiah tidak pantas
+7. Pencatatan di register`,
+  },
+  {
+    id: "REG-HAD-001",
+    kode: "REG-HAD-001",
+    nama: "Register Hadiah dan Keramahtamahan",
+    namaEn: "Gifts and Hospitality Register",
+    kategori: "Register",
+    klausul: "8.7",
+    deskripsi: "Register penerimaan dan pemberian hadiah.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Register Hadiah dan Keramahtamahan:
+1. Tanggal
+2. Penerima/pemberi
+3. Pemberi/penerima pihak lain
+4. Deskripsi hadiah
+5. Perkiraan nilai
+6. Alasan
+7. Status approval
+8. Disposisi`,
+  },
+  {
+    id: "SOP-WBS-001",
+    kode: "SOP-WBS-001",
+    nama: "SOP Whistleblowing System",
+    namaEn: "Whistleblowing System SOP",
+    kategori: "SOP",
+    klausul: "8.9",
+    deskripsi: "Prosedur pelaporan dan penanganan pengaduan pelanggaran.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "SDM"],
+    promptTemplate: `Buatkan SOP Whistleblowing System:
+1. Tujuan WBS
+2. Ruang lingkup laporan
+3. Saluran pelaporan
+4. Kerahasiaan
+5. Perlindungan pelapor
+6. Proses penanganan
+7. Timeline
+8. Non-retaliation`,
+  },
+  {
+    id: "REG-WBS-001",
+    kode: "REG-WBS-001",
+    nama: "Register Pengaduan WBS",
+    namaEn: "WBS Complaint Register",
+    kategori: "Register",
+    klausul: "8.9",
+    deskripsi: "Register pengaduan melalui whistleblowing system.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Register Pengaduan WBS:
+1. No. Pengaduan
+2. Tanggal terima
+3. Saluran pelaporan
+4. Kategori pengaduan
+5. Ringkasan laporan
+6. Status investigasi
+7. Tindak lanjut
+8. Tanggal selesai`,
+  },
+  {
+    id: "SOP-INV-001",
+    kode: "SOP-INV-001",
+    nama: "SOP Investigasi Dugaan Penyuapan",
+    namaEn: "Bribery Investigation SOP",
+    kategori: "SOP",
+    klausul: "8.10",
+    deskripsi: "Prosedur investigasi dugaan pelanggaran penyuapan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Legal"],
+    promptTemplate: `Buatkan SOP Investigasi Dugaan Penyuapan:
+1. Trigger investigasi
+2. Tim investigasi
+3. Metodologi investigasi
+4. Pengumpulan bukti
+5. Interview
+6. Dokumentasi
+7. Pelaporan hasil
+8. Sanksi dan tindak lanjut`,
+  },
+  {
+    id: "LAP-INV-001",
+    kode: "LAP-INV-001",
+    nama: "Laporan Hasil Investigasi",
+    namaEn: "Investigation Report",
+    kategori: "Laporan",
+    klausul: "8.10",
+    deskripsi: "Template laporan hasil investigasi dugaan penyuapan.",
+    penanggungJawab: "Tim Investigasi",
+    frekuensi: "Per kasus",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Legal"],
+    promptTemplate: `Buatkan Template Laporan Hasil Investigasi:
+1. Ringkasan kasus
+2. Latar belakang
+3. Tim investigasi
+4. Metodologi
+5. Kronologi
+6. Bukti-bukti
+7. Analisis
+8. Kesimpulan
+9. Rekomendasi sanksi
+10. Lesson learned`,
+  },
+
+  // SIAP SERTIFIKASI - Klausul 9.3 (Tinjauan Manajemen)
+  {
+    id: "SOP-RTM-001",
+    kode: "SOP-RTM-001",
+    nama: "SOP Rapat Tinjauan Manajemen",
+    namaEn: "Management Review Meeting SOP",
+    kategori: "SOP",
+    klausul: "9.3",
+    deskripsi: "Prosedur pelaksanaan tinjauan manajemen SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Manajemen", "Kepatuhan"],
+    promptTemplate: `Buatkan SOP Rapat Tinjauan Manajemen:
+1. Tujuan RTM
+2. Frekuensi (minimal tahunan)
+3. Peserta
+4. Input RTM (sesuai klausul 9.3)
+5. Proses pelaksanaan
+6. Output dan keputusan
+7. Dokumentasi`,
+  },
+  {
+    id: "FOR-RTM-001",
+    kode: "FOR-RTM-001",
+    nama: "Formulir Agenda RTM",
+    namaEn: "Management Review Agenda Form",
+    kategori: "Formulir",
+    klausul: "9.3",
+    deskripsi: "Formulir agenda rapat tinjauan manajemen.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Per RTM",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Manajemen"],
+    promptTemplate: `Buatkan Formulir Agenda RTM:
+1. Tanggal dan waktu
+2. Lokasi
+3. Peserta
+4. Agenda:
+   - Status tindak lanjut RTM sebelumnya
+   - Perubahan isu internal/eksternal
+   - Kinerja SMAP
+   - Hasil audit
+   - Tindakan korektif
+   - Peluang perbaikan`,
+  },
+  {
+    id: "BA-RTM-001",
+    kode: "BA-RTM-001",
+    nama: "Berita Acara Tinjauan Manajemen",
+    namaEn: "Management Review Minutes",
+    kategori: "Berita Acara",
+    klausul: "9.3",
+    deskripsi: "Berita acara/notulen rapat tinjauan manajemen.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Per RTM",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Manajemen", "Kepatuhan"],
+    promptTemplate: `Buatkan Berita Acara Tinjauan Manajemen:
+1. Header (tanggal, waktu, tempat)
+2. Daftar hadir
+3. Agenda yang dibahas
+4. Pembahasan per agenda
+5. Keputusan dan tindak lanjut
+6. Jadwal RTM berikutnya
+7. Penutup dan tanda tangan`,
+  },
+  {
+    id: "LAP-RTM-001",
+    kode: "LAP-RTM-001",
+    nama: "Laporan Tinjauan Manajemen",
+    namaEn: "Management Review Report",
+    kategori: "Laporan",
+    klausul: "9.3",
+    deskripsi: "Laporan komprehensif hasil tinjauan manajemen.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Per RTM",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Manajemen", "Kepatuhan"],
+    promptTemplate: `Buatkan Laporan Tinjauan Manajemen:
+1. Ringkasan eksekutif
+2. Status implementasi SMAP
+3. Kinerja terhadap sasaran
+4. Hasil audit internal
+5. Penanganan ketidaksesuaian
+6. Umpan balik stakeholder
+7. Status risiko penyuapan
+8. Keputusan dan arahan
+9. Rencana tindak lanjut`,
+  },
+
+  // SIAP SERTIFIKASI - Klausul 10 (Perbaikan)
+  {
+    id: "SOP-TKO-001",
+    kode: "SOP-TKO-001",
+    nama: "SOP Tindakan Korektif",
+    namaEn: "Corrective Action SOP",
+    kategori: "SOP",
+    klausul: "10.1",
+    deskripsi: "Prosedur penanganan ketidaksesuaian dan tindakan korektif.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan SOP Tindakan Korektif:
+1. Identifikasi ketidaksesuaian
+2. Analisis akar masalah (RCA)
+3. Penentuan tindakan korektif
+4. Implementasi tindakan
+5. Verifikasi efektivitas
+6. Update dokumentasi
+7. Pencegahan berulang`,
+  },
+  {
+    id: "REG-TKO-001",
+    kode: "REG-TKO-001",
+    nama: "Register Ketidaksesuaian dan Tindakan Korektif",
+    namaEn: "Nonconformity and Corrective Action Register",
+    kategori: "Register",
+    klausul: "10.1",
+    deskripsi: "Register untuk mencatat dan melacak ketidaksesuaian.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Register Ketidaksesuaian dan Tindakan Korektif:
+1. No. NC
+2. Tanggal identifikasi
+3. Sumber (audit/WBS/monitoring)
+4. Deskripsi NC
+5. Root cause
+6. Tindakan korektif
+7. PIC
+8. Target selesai
+9. Status
+10. Verifikasi efektivitas`,
+  },
+  {
+    id: "FOR-TKO-001",
+    kode: "FOR-TKO-001",
+    nama: "Formulir Tindakan Korektif",
+    namaEn: "Corrective Action Form",
+    kategori: "Formulir",
+    klausul: "10.1",
+    deskripsi: "Formulir untuk mendokumentasikan tindakan korektif.",
+    penanggungJawab: "PIC Terkait",
+    frekuensi: "Per NC",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Formulir Tindakan Korektif:
+1. No. NC
+2. Deskripsi ketidaksesuaian
+3. Analisis akar masalah (5 Why / Fishbone)
+4. Tindakan korektif
+5. Rencana implementasi
+6. Target penyelesaian
+7. Bukti pelaksanaan
+8. Hasil verifikasi
+9. Close-out`,
+  },
+  {
+    id: "LAP-PER-001",
+    kode: "LAP-PER-001",
+    nama: "Laporan Perbaikan Berkelanjutan",
+    namaEn: "Continuous Improvement Report",
+    kategori: "Laporan",
+    klausul: "10.2",
+    deskripsi: "Laporan inisiatif perbaikan berkelanjutan SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Periodik",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Laporan Perbaikan Berkelanjutan:
+1. Ringkasan perbaikan periode ini
+2. Inisiatif perbaikan yang dilakukan
+3. Hasil yang dicapai
+4. Lesson learned
+5. Best practices
+6. Rencana perbaikan berikutnya`,
+  },
+  {
+    id: "CHK-PRA-001",
+    kode: "CHK-PRA-001",
+    nama: "Checklist Pre-Sertifikasi",
+    namaEn: "Pre-Certification Checklist",
+    kategori: "Checklist",
+    klausul: "9",
+    deskripsi: "Checklist kesiapan sebelum audit sertifikasi.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Sebelum sertifikasi",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Audit"],
+    promptTemplate: `Buatkan Checklist Pre-Sertifikasi:
+1. Kelengkapan dokumentasi
+2. Status temuan audit internal
+3. Rekaman implementasi
+4. Bukti pelatihan
+5. Tinjauan manajemen
+6. Kesiapan personel
+7. Logistik audit`,
+  },
+  {
+    id: "MAT-KES-001",
+    kode: "MAT-KES-001",
+    nama: "Matriks Kesiapan Sertifikasi",
+    namaEn: "Certification Readiness Matrix",
+    kategori: "Matriks",
+    klausul: "9",
+    deskripsi: "Matriks untuk menilai kesiapan per klausul ISO 37001.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Sebelum sertifikasi",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Matriks Kesiapan Sertifikasi:
+1. Klausul ISO 37001
+2. Persyaratan
+3. Status implementasi (%)
+4. Dokumen pendukung
+5. Gap
+6. Action plan`,
+  },
+  {
+    id: "LAP-KES-001",
+    kode: "LAP-KES-001",
+    nama: "Laporan Kesiapan Sertifikasi",
+    namaEn: "Certification Readiness Report",
+    kategori: "Laporan",
+    klausul: "9",
+    deskripsi: "Laporan evaluasi kesiapan organisasi untuk sertifikasi.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Sebelum sertifikasi",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Laporan Kesiapan Sertifikasi:
+1. Ringkasan kesiapan
+2. Status per klausul
+3. Temuan audit internal yang outstanding
+4. Strength dan opportunity
+5. Risk areas
+6. Rekomendasi
+7. Go/No-Go decision`,
+  },
+
+  // SIAP SURVEILANCE - Klausul 9.1
+  {
+    id: "SOP-PMT-001",
+    kode: "SOP-PMT-001",
+    nama: "SOP Pemantauan dan Pengukuran SMAP",
+    namaEn: "ABMS Monitoring and Measurement SOP",
+    kategori: "SOP",
+    klausul: "9.1",
+    deskripsi: "Prosedur pemantauan dan pengukuran kinerja SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan SOP Pemantauan dan Pengukuran SMAP:
+1. Apa yang dipantau
+2. Metode pemantauan
+3. Frekuensi
+4. Penanggung jawab
+5. Analisis data
+6. Pelaporan
+7. Tindak lanjut`,
+  },
+  {
+    id: "FOR-PMT-001",
+    kode: "FOR-PMT-001",
+    nama: "Formulir Pemantauan Kinerja SMAP",
+    namaEn: "ABMS Performance Monitoring Form",
+    kategori: "Formulir",
+    klausul: "9.1",
+    deskripsi: "Formulir untuk mencatat hasil pemantauan kinerja SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Bulanan/Triwulan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Formulir Pemantauan Kinerja SMAP:
+1. Periode pemantauan
+2. Indikator yang dipantau
+3. Target
+4. Realisasi
+5. Variance
+6. Analisis
+7. Tindak lanjut`,
+  },
+  {
+    id: "REG-KPI-001",
+    kode: "REG-KPI-001",
+    nama: "Register KPI SMAP",
+    namaEn: "ABMS KPI Register",
+    kategori: "Register",
+    klausul: "9.1",
+    deskripsi: "Register indikator kinerja utama SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Register KPI SMAP:
+1. No.
+2. Nama KPI
+3. Definisi
+4. Formula perhitungan
+5. Target
+6. Frekuensi pengukuran
+7. Sumber data
+8. PIC`,
+  },
+  {
+    id: "LAP-KIN-001",
+    kode: "LAP-KIN-001",
+    nama: "Laporan Kinerja SMAP",
+    namaEn: "ABMS Performance Report",
+    kategori: "Laporan",
+    klausul: "9.1",
+    deskripsi: "Laporan kinerja implementasi SMAP secara periodik.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Triwulan/Semester",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Laporan Kinerja SMAP:
+1. Ringkasan eksekutif
+2. Pencapaian KPI
+3. Grafik trend
+4. Analisis variance
+5. Isu dan tantangan
+6. Tindakan perbaikan
+7. Rencana periode berikutnya`,
+  },
+  {
+    id: "MAT-KPI-001",
+    kode: "MAT-KPI-001",
+    nama: "Matriks Pengukuran Kinerja SMAP",
+    namaEn: "ABMS Performance Measurement Matrix",
+    kategori: "Matriks",
+    klausul: "9.1",
+    deskripsi: "Matriks pengukuran kinerja SMAP per aspek.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Periodik",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Matriks Pengukuran Kinerja SMAP:
+1. Aspek yang diukur
+2. Indikator
+3. Bobot
+4. Target
+5. Realisasi
+6. Skor
+7. Status (merah/kuning/hijau)`,
+  },
+
+  // SIAP SURVEILANCE - Klausul 10 (Perbaikan Berkelanjutan)
+  {
+    id: "SOP-PBB-001",
+    kode: "SOP-PBB-001",
+    nama: "SOP Perbaikan Berkelanjutan",
+    namaEn: "Continuous Improvement SOP",
+    kategori: "SOP",
+    klausul: "10.2",
+    deskripsi: "Prosedur untuk perbaikan berkelanjutan SMAP.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Review tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan SOP Perbaikan Berkelanjutan:
+1. Sumber input perbaikan
+2. Identifikasi peluang
+3. Prioritasi
+4. Implementasi perbaikan
+5. Evaluasi hasil
+6. Dokumentasi lesson learned
+7. Knowledge sharing`,
+  },
+  {
+    id: "FOR-PBB-001",
+    kode: "FOR-PBB-001",
+    nama: "Formulir Usulan Perbaikan",
+    namaEn: "Improvement Proposal Form",
+    kategori: "Formulir",
+    klausul: "10.2",
+    deskripsi: "Formulir untuk mengajukan usulan perbaikan SMAP.",
+    penanggungJawab: "Semua Personel",
+    frekuensi: "Sesuai kebutuhan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Formulir Usulan Perbaikan:
+1. Nama pengusul
+2. Tanggal
+3. Area yang diperbaiki
+4. Kondisi saat ini
+5. Kondisi yang diharapkan
+6. Usulan perbaikan
+7. Estimasi dampak
+8. Persetujuan`,
+  },
+  {
+    id: "REG-PBB-001",
+    kode: "REG-PBB-001",
+    nama: "Register Perbaikan Berkelanjutan",
+    namaEn: "Continuous Improvement Register",
+    kategori: "Register",
+    klausul: "10.2",
+    deskripsi: "Register inisiatif perbaikan berkelanjutan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Update berkala",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Register Perbaikan Berkelanjutan:
+1. No.
+2. Tanggal usulan
+3. Pengusul
+4. Deskripsi perbaikan
+5. Area dampak
+6. Status
+7. Hasil implementasi`,
+  },
+  {
+    id: "LAP-PBB-001",
+    kode: "LAP-PBB-001",
+    nama: "Laporan Inisiatif Perbaikan",
+    namaEn: "Improvement Initiative Report",
+    kategori: "Laporan",
+    klausul: "10.2",
+    deskripsi: "Laporan inisiatif dan hasil perbaikan berkelanjutan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Semester/Tahunan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Laporan Inisiatif Perbaikan:
+1. Ringkasan inisiatif periode ini
+2. Daftar perbaikan yang diimplementasikan
+3. Dampak yang dicapai
+4. Best practices
+5. Lesson learned
+6. Rencana ke depan`,
+  },
+
+  // SIAP SURVEILANCE - Dokumen Surveilance
+  {
+    id: "CHK-SUR-001",
+    kode: "CHK-SUR-001",
+    nama: "Checklist Kesiapan Surveilance",
+    namaEn: "Surveillance Readiness Checklist",
+    kategori: "Checklist",
+    klausul: "9",
+    deskripsi: "Checklist kesiapan menghadapi audit surveilance.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Sebelum surveilance",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Audit"],
+    promptTemplate: `Buatkan Checklist Kesiapan Surveilance:
+1. Status temuan audit sebelumnya
+2. Bukti tindakan korektif
+3. Rekaman tinjauan manajemen
+4. Bukti audit internal terakhir
+5. Update register risiko
+6. Bukti pelatihan/awareness
+7. Rekaman kinerja SMAP`,
+  },
+  {
+    id: "FOR-SUR-001",
+    kode: "FOR-SUR-001",
+    nama: "Formulir Persiapan Surveilance",
+    namaEn: "Surveillance Preparation Form",
+    kategori: "Formulir",
+    klausul: "9",
+    deskripsi: "Formulir checklist persiapan audit surveilance.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Per surveilance",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Formulir Persiapan Surveilance:
+1. Jadwal surveilance
+2. Ruang lingkup yang akan diaudit
+3. Dokumen yang disiapkan
+4. Personel yang disiapkan
+5. Status kesiapan per area
+6. Action items`,
+  },
+  {
+    id: "LAP-SUR-001",
+    kode: "LAP-SUR-001",
+    nama: "Laporan Tindak Lanjut Surveilance",
+    namaEn: "Surveillance Follow-up Report",
+    kategori: "Laporan",
+    klausul: "9",
+    deskripsi: "Laporan tindak lanjut hasil audit surveilance.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Pasca surveilance",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Laporan Tindak Lanjut Surveilance:
+1. Ringkasan hasil surveilance
+2. Temuan yang diperoleh
+3. Analisis root cause
+4. Rencana tindakan korektif
+5. Timeline implementasi
+6. Status progress`,
+  },
+  {
+    id: "PRO-SUR-001",
+    kode: "PRO-SUR-001",
+    nama: "Program Persiapan Surveilance",
+    namaEn: "Surveillance Preparation Program",
+    kategori: "Program",
+    klausul: "9",
+    deskripsi: "Program kerja persiapan audit surveilance tahunan.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Tahunan",
+    tingkatKritis: "Penting",
+    areaBisnis: ["Kepatuhan"],
+    promptTemplate: `Buatkan Program Persiapan Surveilance:
+1. Timeline persiapan
+2. Aktivitas persiapan
+3. PIC per aktivitas
+4. Resources yang dibutuhkan
+5. Milestone
+6. Kriteria keberhasilan`,
+  },
+
+  // SIAP SURVEILANCE - Dokumen Re-Sertifikasi
+  {
+    id: "CHK-RST-001",
+    kode: "CHK-RST-001",
+    nama: "Checklist Kesiapan Re-Sertifikasi",
+    namaEn: "Re-Certification Readiness Checklist",
+    kategori: "Checklist",
+    klausul: "9",
+    deskripsi: "Checklist kesiapan menghadapi audit re-sertifikasi.",
+    penanggungJawab: "FKAP",
+    frekuensi: "Sebelum re-sertifikasi",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Audit"],
+    promptTemplate: `Buatkan Checklist Kesiapan Re-Sertifikasi:
+1. Review seluruh dokumentasi SMAP
+2. Status implementasi 3 tahun terakhir
+3. Rekaman audit internal dan surveilance
+4. Bukti perbaikan berkelanjutan
+5. Perubahan signifikan organisasi
+6. Update ruang lingkup jika ada`,
+  },
+  {
+    id: "FOR-RST-001",
+    kode: "FOR-RST-001",
+    nama: "Formulir Evaluasi 3 Tahunan",
+    namaEn: "3-Year Evaluation Form",
+    kategori: "Formulir",
+    klausul: "9",
+    deskripsi: "Formulir evaluasi implementasi SMAP selama 3 tahun.",
+    penanggungJawab: "FKAP",
+    frekuensi: "3 tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Formulir Evaluasi 3 Tahunan:
+1. Pencapaian sasaran SMAP
+2. Trend kinerja 3 tahun
+3. Summary audit internal
+4. Summary temuan surveilance
+5. Efektivitas pengendalian
+6. Lesson learned
+7. Rekomendasi perbaikan`,
+  },
+  {
+    id: "LAP-RST-001",
+    kode: "LAP-RST-001",
+    nama: "Laporan Kesiapan Re-Sertifikasi",
+    namaEn: "Re-Certification Readiness Report",
+    kategori: "Laporan",
+    klausul: "9",
+    deskripsi: "Laporan komprehensif kesiapan re-sertifikasi.",
+    penanggungJawab: "FKAP",
+    frekuensi: "3 tahunan",
+    tingkatKritis: "Wajib",
+    areaBisnis: ["Kepatuhan", "Manajemen"],
+    promptTemplate: `Buatkan Laporan Kesiapan Re-Sertifikasi:
+1. Executive summary
+2. Perjalanan implementasi 3 tahun
+3. Pencapaian dan milestone
+4. Challenges dan solusi
+5. Bukti perbaikan berkelanjutan
+6. Status kesiapan per klausul
+7. Gap analysis
+8. Action plan
+9. Rekomendasi`,
+  },
 ];
 
 export function getTemplatesByKlausul(klausul: string): SMAPTemplate[] {
