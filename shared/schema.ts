@@ -280,11 +280,13 @@ export type ClauseReference = typeof clauseReferences.$inferSelect;
 export const subscriptionPlans = pgTable("subscription_plans", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
+  category: text("category").default("smap"),
   description: text("description"),
   price: integer("price").notNull(),
   currency: text("currency").default("IDR"),
   interval: text("interval").default("monthly"),
   features: text("features"),
+  materials: text("materials"),
   isActive: boolean("is_active").default(true),
   sortOrder: integer("sort_order").default(0),
 });

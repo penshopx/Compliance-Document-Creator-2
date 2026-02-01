@@ -1,7 +1,8 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Shield, 
   FileCheck, 
@@ -14,7 +15,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SubscriptionPlan } from "@shared/schema";
 
@@ -22,13 +23,22 @@ export default function LandingPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   
-  const { data: plans } = useQuery<SubscriptionPlan[]>({
+  const [pricingTab, setPricingTab] = useState<"smap" | "pancek">("smap");
+  
+  const { data: plans } = useQuery<(SubscriptionPlan & { category?: string; materials?: string })[]>({
     queryKey: ["/api/subscription-plans"],
   });
   
-  const starterPlan = plans?.find(p => p.name === "Starter");
-  const professionalPlan = plans?.find(p => p.name === "Professional");
-  const enterprisePlan = plans?.find(p => p.name === "Enterprise");
+  const smapPlans = plans?.filter(p => (p as any).category === "smap") || [];
+  const pancekPlans = plans?.filter(p => (p as any).category === "pancek") || [];
+  
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -219,84 +229,141 @@ export default function LandingPage() {
 
       <section id="pricing" className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-pricing-title">Pilih Paket yang Sesuai</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-pricing-title">Pilih Paket Sesuai Tahapan Anda</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Mulai gratis dan upgrade sesuai kebutuhan perusahaan Anda
+              Harga berdasarkan fase kesiapan sertifikasi - bayar sesuai kebutuhan
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="relative" data-testid="card-pricing-starter">
-              <CardContent className="p-6 pt-8">
-                <h3 className="font-bold text-xl mb-2">Starter</h3>
-                <p className="text-muted-foreground text-sm mb-4">Untuk memulai perjalanan compliance</p>
-                <div className="mb-6">
-                  <span className="text-3xl font-bold">Gratis</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  {["1 Profil Perusahaan", "Akses Pancek Basic", "5 Template Dokumen", "SMAP Mentor AI (terbatas)"].map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button className="w-full" variant="outline" asChild data-testid="button-starter-subscribe">
-                  <a href="/api/login">Mulai Gratis</a>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="relative border-primary shadow-lg scale-105" data-testid="card-pricing-professional">
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Paling Populer</Badge>
-              <CardContent className="p-6 pt-8">
-                <h3 className="font-bold text-xl mb-2">Professional</h3>
-                <p className="text-muted-foreground text-sm mb-4">Untuk perusahaan yang serius</p>
-                <div className="mb-6">
-                  <span className="text-3xl font-bold">Rp 499.000</span>
-                  <span className="text-muted-foreground">/bulan</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  {["Unlimited Perusahaan", "Akses SMAP + Pancek", "270+ Template Dokumen", "SMAP Mentor AI Unlimited", "Export PDF & Word", "Tracking Sertifikasi"].map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                {professionalPlan ? (
-                  <Button className="w-full" asChild data-testid="button-professional-subscribe">
-                    <Link href={`/checkout?plan=${professionalPlan.id}`}>Mulai Trial 14 Hari</Link>
-                  </Button>
-                ) : (
-                  <Button className="w-full" asChild data-testid="button-professional-subscribe">
-                    <a href="/api/login">Mulai Trial 14 Hari</a>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="relative" data-testid="card-pricing-enterprise">
-              <CardContent className="p-6 pt-8">
-                <h3 className="font-bold text-xl mb-2">Enterprise</h3>
-                <p className="text-muted-foreground text-sm mb-4">Untuk grup perusahaan besar</p>
-                <div className="mb-6">
-                  <span className="text-3xl font-bold">Custom</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  {["Semua fitur Professional", "Multi-User Access", "Dedicated Account Manager", "Training & Konsultasi", "Integrasi API", "SLA Support 24/7"].map((feature, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button className="w-full" variant="outline" asChild data-testid="button-enterprise-contact">
-                  <a href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20dengan%20paket%20Enterprise%20Compliance%20Hub" target="_blank" rel="noopener noreferrer">Hubungi Sales</a>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          
+          <Tabs value={pricingTab} onValueChange={(v) => setPricingTab(v as "smap" | "pancek")} className="w-full">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+              <TabsTrigger value="smap" data-testid="tab-smap">
+                <Shield className="h-4 w-4 mr-2" />
+                SMAP (ISO 37001)
+              </TabsTrigger>
+              <TabsTrigger value="pancek" data-testid="tab-pancek">
+                <Award className="h-4 w-4 mr-2" />
+                Pancek (KPK)
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="smap">
+              <div className="text-center mb-8">
+                <Badge variant="outline" className="mb-2">SNI ISO 37001:2016</Badge>
+                <p className="text-muted-foreground">4 Fase Produk Siap SMAP - Dari Dokumen hingga Perpanjangan Sertifikat</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {smapPlans.map((plan, index) => (
+                  <Card key={plan.id} className={`relative ${index === 2 ? "border-primary shadow-lg" : ""}`} data-testid={`card-smap-${index}`}>
+                    {index === 2 && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Terlengkap</Badge>}
+                    <CardHeader className="pb-2">
+                      <Badge variant="secondary" className="w-fit mb-2">Fase {index + 1}</Badge>
+                      <CardTitle className="text-lg">{plan.name}</CardTitle>
+                      <CardDescription className="text-xs">{plan.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <span className="text-2xl font-bold">{formatPrice(plan.price)}</span>
+                        <span className="text-sm text-muted-foreground">/bulan</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium mb-2">Fitur:</p>
+                        <ul className="space-y-1">
+                          {plan.features?.split(",").slice(0, 4).map((feature, i) => (
+                            <li key={i} className="flex items-start gap-1.5 text-xs">
+                              <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />
+                              <span>{feature.trim()}</span>
+                            </li>
+                          ))}
+                          {(plan.features?.split(",").length || 0) > 4 && (
+                            <li className="text-xs text-muted-foreground">+{(plan.features?.split(",").length || 0) - 4} fitur lainnya</li>
+                          )}
+                        </ul>
+                      </div>
+                      {plan.materials && (
+                        <div>
+                          <p className="text-xs font-medium mb-2">Materi:</p>
+                          <ul className="space-y-1">
+                            {plan.materials.split(",").slice(0, 3).map((material, i) => (
+                              <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                                <FileCheck className="h-3 w-3 text-primary shrink-0 mt-0.5" />
+                                <span>{material.trim()}</span>
+                              </li>
+                            ))}
+                            {(plan.materials.split(",").length || 0) > 3 && (
+                              <li className="text-xs text-muted-foreground">+{(plan.materials.split(",").length || 0) - 3} materi lainnya</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                      <Button className="w-full" size="sm" variant={index === 2 ? "default" : "outline"} asChild data-testid={`button-smap-${index}`}>
+                        <Link href={`/checkout?plan=${plan.id}`}>Pilih Paket</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="pancek">
+              <div className="text-center mb-8">
+                <Badge variant="outline" className="mb-2">Panduan Cegah Korupsi KPK</Badge>
+                <p className="text-muted-foreground">3 Fase Kesiapan Pancek - Dari Kuesioner hingga Surveilance</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {pancekPlans.map((plan, index) => (
+                  <Card key={plan.id} className={`relative ${index === 1 ? "border-primary shadow-lg" : ""}`} data-testid={`card-pancek-${index}`}>
+                    {index === 1 && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Populer</Badge>}
+                    <CardHeader className="pb-2">
+                      <Badge variant="secondary" className="w-fit mb-2">Fase {index + 1}</Badge>
+                      <CardTitle className="text-lg">{plan.name}</CardTitle>
+                      <CardDescription className="text-xs">{plan.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <span className="text-2xl font-bold">{formatPrice(plan.price)}</span>
+                        <span className="text-sm text-muted-foreground">/bulan</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium mb-2">Fitur:</p>
+                        <ul className="space-y-1">
+                          {plan.features?.split(",").slice(0, 4).map((feature, i) => (
+                            <li key={i} className="flex items-start gap-1.5 text-xs">
+                              <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0 mt-0.5" />
+                              <span>{feature.trim()}</span>
+                            </li>
+                          ))}
+                          {(plan.features?.split(",").length || 0) > 4 && (
+                            <li className="text-xs text-muted-foreground">+{(plan.features?.split(",").length || 0) - 4} fitur lainnya</li>
+                          )}
+                        </ul>
+                      </div>
+                      {plan.materials && (
+                        <div>
+                          <p className="text-xs font-medium mb-2">Materi:</p>
+                          <ul className="space-y-1">
+                            {plan.materials.split(",").slice(0, 3).map((material, i) => (
+                              <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                                <FileCheck className="h-3 w-3 text-primary shrink-0 mt-0.5" />
+                                <span>{material.trim()}</span>
+                              </li>
+                            ))}
+                            {(plan.materials.split(",").length || 0) > 3 && (
+                              <li className="text-xs text-muted-foreground">+{(plan.materials.split(",").length || 0) - 3} materi lainnya</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                      <Button className="w-full" size="sm" variant={index === 1 ? "default" : "outline"} asChild data-testid={`button-pancek-${index}`}>
+                        <Link href={`/checkout?plan=${plan.id}`}>Pilih Paket</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <Card className="mt-12 max-w-4xl mx-auto">
             <CardContent className="p-6">

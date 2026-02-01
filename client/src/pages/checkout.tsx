@@ -173,18 +173,43 @@ export default function CheckoutPage() {
           <>
             <Card className="mb-6" data-testid="card-order-summary">
               <CardHeader>
-                <CardTitle>Ringkasan Pesanan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium" data-testid="text-plan-name">{selectedPlan.name}</p>
-                    <p className="text-sm text-muted-foreground">{selectedPlan.description}</p>
+                    <Badge variant="outline" className="mb-2">
+                      {(selectedPlan as any).category === "pancek" ? "Pancek" : "SMAP"}
+                    </Badge>
+                    <CardTitle data-testid="text-plan-name">{selectedPlan.name}</CardTitle>
+                    <CardDescription>{selectedPlan.description}</CardDescription>
                   </div>
                   <p className="text-2xl font-bold text-primary" data-testid="text-plan-price">
                     {formatPrice(selectedPlan.price)}<span className="text-sm font-normal text-muted-foreground">/bulan</span>
                   </p>
                 </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium mb-2">Fitur yang didapat:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedPlan.features?.split(",").map((feature, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {feature.trim()}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                {(selectedPlan as any).materials && (
+                  <div>
+                    <p className="text-sm font-medium mb-2">Materi yang diperoleh:</p>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                      {(selectedPlan as any).materials.split(",").map((material: string, idx: number) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
+                          {material.trim()}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
