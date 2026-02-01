@@ -4,7 +4,7 @@
 A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuapan / Anti-Bribery Management System) Document Generator based on SNI ISO 37001:2016 Indonesian standard. The application helps organizations manage their compliance data and generate SMAP documentation templates.
 
 ## Features
-- **Dashboard**: Progress tracking with stats cards showing data completion status
+- **Dashboard**: Progress tracking with stats cards, quick access to document generators
 - **Company Profile**: Full company information management
 - **Personnel Management**: 
   - Management Team (Dewan Direksi)
@@ -16,7 +16,13 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 - **Projects**: Project portfolio management
 - **Vendors**: Vendor management with due diligence status
 - **Document Generator**: Pre-built templates for ISO 37001 SMAP documents
-- **PDCA Generator** (NEW): Advanced document generator with PDCA methodology
+- **Document Builder** (NEW): Advanced document generator with company context
+  - 7 professional SMAP templates
+  - Category-based filtering (SK, Kebijakan, SOP, Formulir, Register, Berita Acara)
+  - Auto-population with company, management, FKAP, and vendor data
+  - Preview, copy, and download functionality
+  - Document history tracking
+- **PDCA Generator**: Advanced document generator with PDCA methodology
   - Plan, Do, Check, Act navigation tabs
   - 51 clause items across PDCA phases
   - Document draft generation with company context
@@ -35,44 +41,63 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 ## Project Structure
 ```
 ├── client/src/
-│   ├── pages/           # All page components
-│   │   ├── dashboard.tsx
-│   │   ├── company.tsx
-│   │   ├── employees.tsx
-│   │   ├── management.tsx
-│   │   ├── fkap.tsx
-│   │   ├── audit-internal.tsx
-│   │   ├── qualifications.tsx
-│   │   ├── equipment.tsx
-│   │   ├── projects.tsx
-│   │   ├── vendors.tsx
-│   │   ├── documents.tsx
-│   │   └── pdca-generator.tsx  # PDCA Generator with three-panel layout
+│   ├── pages/
+│   │   ├── dashboard.tsx         # Main dashboard with stats & quick links
+│   │   ├── company.tsx           # Company profile management
+│   │   ├── employees.tsx         # Employee management
+│   │   ├── management.tsx        # Management team
+│   │   ├── fkap.tsx              # FKAP team management
+│   │   ├── audit-internal.tsx    # Internal audit team
+│   │   ├── qualifications.tsx    # SBU qualifications
+│   │   ├── equipment.tsx         # Equipment tracking
+│   │   ├── projects.tsx          # Project portfolio
+│   │   ├── vendors.tsx           # Vendor management
+│   │   ├── documents.tsx         # Basic document generator
+│   │   ├── document-builder.tsx  # Advanced SMAP document builder
+│   │   └── pdca-generator.tsx    # PDCA Generator with three-panel layout
 │   ├── components/
-│   │   ├── app-sidebar.tsx   # Main navigation sidebar
-│   │   └── ui/               # Shadcn components
+│   │   ├── app-sidebar.tsx       # Main navigation sidebar
+│   │   └── ui/                   # Shadcn components
 │   └── lib/
-│       └── queryClient.ts    # API client setup
+│       └── queryClient.ts        # API client setup
 ├── server/
-│   ├── routes.ts             # API endpoints
-│   └── storage.ts            # Database operations
+│   ├── routes.ts                 # API endpoints
+│   └── storage.ts                # Database operations
 └── shared/
-    └── schema.ts             # Database schema & types
+    └── schema.ts                 # Database schema & types
 ```
+
+## Database Schema
+### Core Tables
+- `companies` - Company profile data
+- `management_team` - Directors and management
+- `employees` - Staff records
+- `fkap_team` - Anti-bribery compliance team
+- `audit_team` - Internal audit team
+- `qualifications` - SBU certifications
+- `equipment` - Assets and machinery
+- `projects` - Project portfolio
+- `vendors` - Business partners and vendors
+
+### Document Tables
+- `documents` - Basic generated documents
+- `generated_documents` - Advanced SMAP documents with metadata
+- `document_templates` - Template definitions
+- `clause_references` - ISO 37001 clause library
 
 ## Design Choices
 - **Theme**: Professional blue color scheme (220° hue) to convey trust and compliance
 - **Language**: Indonesian (Bahasa Indonesia) as per SNI ISO 37001:2016 standard
 - **Date Handling**: Date fields stored as text with z.preprocess to accept empty strings and null values from forms
 
-## Document Templates
-The application includes pre-built templates for key SMAP documents:
-1. Kebijakan Anti Penyuapan (Anti-Bribery Policy) - Clause 5.2
-2. Sasaran Anti Penyuapan (Anti-Bribery Objectives) - Clause 6.2
-3. Register Risiko Penyuapan (Bribery Risk Register) - Clause 4.5
-4. Prosedur Uji Tuntas (Due Diligence Procedure) - Clause 8.2
-5. Program Pelatihan SMAP (Training Program) - Clause 7.2
-6. Prosedur Pelaporan Whistleblowing (Whistleblowing Procedure) - Clause 8.9
+## Document Builder Templates
+1. **SK Penetapan Tim FKAP** (5.3.2) - FKAP Team Appointment Decree
+2. **Kebijakan Anti Penyuapan** (5.2) - Anti-Bribery Policy
+3. **Pakta Integritas Personel** (7.2.2.3) - Personnel Integrity Pact
+4. **SOP Uji Tuntas Mitra Bisnis** (8.2) - Due Diligence SOP
+5. **Register Risiko Penyuapan** (4.5) - Bribery Risk Register
+6. **Checklist Audit Internal SMAP** (9.2) - Internal Audit Checklist
+7. **Berita Acara RTM** (9.3) - Management Review Meeting Minutes
 
 ## PDCA Generator Clauses
 - **Plan** (16 clauses): Policies, risks, objectives, resources, training, documentation
@@ -81,6 +106,7 @@ The application includes pre-built templates for key SMAP documents:
 - **Act** (6 clauses): Corrective actions, continuous improvement, lessons learned
 
 ## API Endpoints
+### Data Management
 - `GET/POST/PUT /api/company` - Company profile CRUD
 - `GET/POST/PUT/DELETE /api/management` - Management team
 - `GET/POST/PUT/DELETE /api/employees` - Employees
@@ -90,11 +116,28 @@ The application includes pre-built templates for key SMAP documents:
 - `GET/POST/PUT/DELETE /api/equipment` - Equipment
 - `GET/POST/PUT/DELETE /api/projects` - Projects
 - `GET/POST/PUT/DELETE /api/vendors` - Vendors
-- `GET /api/documents` - List documents
-- `POST /api/documents/generate` - Generate document from template
-- `GET /api/dashboard/stats` - Dashboard statistics
+
+### Document Generation
+- `GET /api/documents` - List basic documents
+- `POST /api/documents/generate` - Generate basic document
+- `GET/POST/PUT/DELETE /api/generated-documents` - Advanced document CRUD
+- `POST /api/generate-smap-document` - Generate SMAP document with context
+- `GET /api/document-templates` - List available templates
+- `GET /api/clause-references` - Get ISO 37001 clause references
+
+### Dashboard
+- `GET /api/dashboard/stats` - Dashboard statistics including document count
 
 ## Recent Changes
+- 2026-02-01: Added Document Builder feature
+  - 7 professional SMAP document templates
+  - Auto-population with company data
+  - Preview, copy, and download functionality
+  - Document history and management
+  - Category filtering for templates
+- 2026-02-01: Enhanced Dashboard
+  - Quick access cards to all document generators
+  - Generated document count display
 - 2026-02-01: Added PDCA Generator feature
   - Three-panel layout with PDCA navigation
   - 51 clause items across Plan, Do, Check, Act phases

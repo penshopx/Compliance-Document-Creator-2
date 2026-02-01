@@ -13,6 +13,9 @@ import {
   projects,
   vendors,
   documents,
+  generatedDocuments,
+  documentTemplates,
+  clauseReferences,
   users,
   type Company,
   type InsertCompany,
@@ -34,6 +37,12 @@ import {
   type InsertVendor,
   type Document,
   type InsertDocument,
+  type GeneratedDocument,
+  type InsertGeneratedDocument,
+  type DocumentTemplate,
+  type InsertDocumentTemplate,
+  type ClauseReference,
+  type InsertClauseReference,
   type User,
   type InsertUser,
 } from "@shared/schema";
@@ -103,6 +112,22 @@ export interface IStorage {
   createDocument(data: InsertDocument): Promise<Document>;
   deleteDocument(id: string): Promise<void>;
 
+  // Generated Documents
+  getGeneratedDocuments(): Promise<GeneratedDocument[]>;
+  getGeneratedDocument(id: string): Promise<GeneratedDocument | undefined>;
+  createGeneratedDocument(data: InsertGeneratedDocument): Promise<GeneratedDocument>;
+  updateGeneratedDocument(id: string, data: Partial<InsertGeneratedDocument>): Promise<GeneratedDocument>;
+  deleteGeneratedDocument(id: string): Promise<void>;
+
+  // Document Templates
+  getDocumentTemplates(): Promise<DocumentTemplate[]>;
+  getDocumentTemplate(id: string): Promise<DocumentTemplate | undefined>;
+  getDocumentTemplateByCode(code: string): Promise<DocumentTemplate | undefined>;
+
+  // Clause References
+  getClauseReferences(): Promise<ClauseReference[]>;
+  getClauseReferencesByPhase(phase: string): Promise<ClauseReference[]>;
+
   // Users (keeping for compatibility)
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -117,6 +142,9 @@ export interface IStorage {
     equipment: number;
     projects: number;
     vendors: number;
+    generatedDocuments: number;
+    management: number;
+    audit: number;
   }>;
 }
 
@@ -303,6 +331,57 @@ export class DatabaseStorage implements IStorage {
     await db.delete(documents).where(eq(documents.id, id));
   }
 
+  // Generated Documents
+  async getGeneratedDocuments(): Promise<GeneratedDocument[]> {
+    return db.select().from(generatedDocuments).orderBy(generatedDocuments.createdAt);
+  }
+
+  async getGeneratedDocument(id: string): Promise<GeneratedDocument | undefined> {
+    const result = await db.select().from(generatedDocuments).where(eq(generatedDocuments.id, id));
+    return result[0];
+  }
+
+  async createGeneratedDocument(data: InsertGeneratedDocument): Promise<GeneratedDocument> {
+    const result = await db.insert(generatedDocuments).values(data).returning();
+    return result[0];
+  }
+
+  async updateGeneratedDocument(id: string, data: Partial<InsertGeneratedDocument>): Promise<GeneratedDocument> {
+    const result = await db.update(generatedDocuments)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(generatedDocuments.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteGeneratedDocument(id: string): Promise<void> {
+    await db.delete(generatedDocuments).where(eq(generatedDocuments.id, id));
+  }
+
+  // Document Templates
+  async getDocumentTemplates(): Promise<DocumentTemplate[]> {
+    return db.select().from(documentTemplates).orderBy(documentTemplates.sortOrder);
+  }
+
+  async getDocumentTemplate(id: string): Promise<DocumentTemplate | undefined> {
+    const result = await db.select().from(documentTemplates).where(eq(documentTemplates.id, id));
+    return result[0];
+  }
+
+  async getDocumentTemplateByCode(code: string): Promise<DocumentTemplate | undefined> {
+    const result = await db.select().from(documentTemplates).where(eq(documentTemplates.code, code));
+    return result[0];
+  }
+
+  // Clause References
+  async getClauseReferences(): Promise<ClauseReference[]> {
+    return db.select().from(clauseReferences).orderBy(clauseReferences.sortOrder);
+  }
+
+  async getClauseReferencesByPhase(phase: string): Promise<ClauseReference[]> {
+    return db.select().from(clauseReferences).where(eq(clauseReferences.pdcaPhase, phase)).orderBy(clauseReferences.sortOrder);
+  }
+
   // Users
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id));
@@ -328,6 +407,9 @@ export class DatabaseStorage implements IStorage {
     const equipmentList = await db.select().from(equipment);
     const projectList = await db.select().from(projects);
     const vendorList = await db.select().from(vendors);
+    const generatedDocList = await db.select().from(generatedDocuments);
+    const managementList = await db.select().from(managementTeam);
+    const auditList = await db.select().from(auditTeam);
 
     return {
       company: company ?? null,
@@ -337,6 +419,9 @@ export class DatabaseStorage implements IStorage {
       equipment: equipmentList.length,
       projects: projectList.length,
       vendors: vendorList.length,
+      generatedDocuments: generatedDocList.length,
+      management: managementList.length,
+      audit: auditList.length,
     };
   }
 }

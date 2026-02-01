@@ -18,6 +18,7 @@ import ProjectsPage from "@/pages/projects";
 import VendorsPage from "@/pages/vendors";
 import DocumentsPage from "@/pages/documents";
 import PDCAGenerator from "@/pages/pdca-generator";
+import DocumentBuilder from "@/pages/document-builder";
 
 function Router() {
   return (
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/vendors" component={VendorsPage} />
       <Route path="/documents" component={DocumentsPage} />
       <Route path="/pdca" component={PDCAGenerator} />
+      <Route path="/document-builder" component={DocumentBuilder} />
       <Route component={NotFound} />
     </Switch>
   );

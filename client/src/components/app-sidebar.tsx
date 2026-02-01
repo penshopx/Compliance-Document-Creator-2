@@ -24,6 +24,7 @@ import {
   FileText,
   UserCheck,
   Zap,
+  FilePlus2,
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -44,6 +45,7 @@ const dataMenuItems = [
 
 const documentMenuItems = [
   { title: "Generator Dokumen", url: "/documents", icon: FileText },
+  { title: "Document Builder", url: "/document-builder", icon: FilePlus2 },
   { title: "PDCA Generator", url: "/pdca", icon: Zap },
 ];
 

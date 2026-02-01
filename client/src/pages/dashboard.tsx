@@ -20,6 +20,9 @@ import {
   FileCheck,
   Scale,
   ClipboardList,
+  FileText,
+  FilePlus2,
+  Zap,
 } from "lucide-react";
 import type { Company, Employee, Fkap, Qualification, Equipment, Project, Vendor } from "@shared/schema";
 
@@ -31,6 +34,9 @@ interface DashboardStats {
   equipment: number;
   projects: number;
   vendors: number;
+  generatedDocuments: number;
+  management: number;
+  audit: number;
 }
 
 const statsCards = [
@@ -133,7 +139,7 @@ export default function Dashboard() {
                         <Skeleton className="h-8 w-12 mt-1" />
                       ) : (
                         <p className="text-2xl font-bold" data-testid={`text-count-${card.key}`}>
-                          {stats?.[card.key as keyof DashboardStats] ?? 0}
+                          {stats?.[card.key as keyof Omit<DashboardStats, 'company'>] ?? 0}
                         </p>
                       )}
                     </div>
@@ -211,6 +217,75 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Generator Dokumen SMAP
+          </CardTitle>
+          <CardDescription>
+            Akses cepat ke alat generator dokumen SMAP
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Link href="/documents">
+              <Card className="hover-elevate cursor-pointer h-full" data-testid="card-quick-documents">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center text-center gap-3">
+                    <div className="p-3 rounded-lg bg-blue-500/10">
+                      <FileText className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Generator Dokumen</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Template dasar SMAP
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/document-builder">
+              <Card className="hover-elevate cursor-pointer h-full" data-testid="card-quick-builder">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center text-center gap-3">
+                    <div className="p-3 rounded-lg bg-green-500/10">
+                      <FilePlus2 className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Document Builder</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {stats?.generatedDocuments ?? 0} dokumen dibuat
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/pdca">
+              <Card className="hover-elevate cursor-pointer h-full" data-testid="card-quick-pdca">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center text-center gap-3">
+                    <div className="p-3 rounded-lg bg-purple-500/10">
+                      <Zap className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">PDCA Generator</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        51 klausul + 85 template
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

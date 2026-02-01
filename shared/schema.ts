@@ -213,6 +213,69 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({ id: tru
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documents.$inferSelect;
 
+// Generated Documents (SMAP)
+export const generatedDocuments = pgTable("generated_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  documentNumber: text("document_number"),
+  templateType: text("template_type").notNull(),
+  clause: text("clause"),
+  category: text("category"),
+  content: text("content").notNull(),
+  status: text("status").default("draft"),
+  version: text("version").default("1.0"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  notes: text("notes"),
+});
+
+export const insertGeneratedDocumentSchema = createInsertSchema(generatedDocuments).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+export type InsertGeneratedDocument = z.infer<typeof insertGeneratedDocumentSchema>;
+export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
+
+// Document Templates
+export const documentTemplates = pgTable("document_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: text("code").notNull().unique(),
+  title: text("title").notNull(),
+  titleEn: text("title_en"),
+  category: text("category").notNull(),
+  clause: text("clause"),
+  description: text("description"),
+  templateContent: text("template_content").notNull(),
+  requiredFields: text("required_fields"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const insertDocumentTemplateSchema = createInsertSchema(documentTemplates).omit({ id: true });
+export type InsertDocumentTemplate = z.infer<typeof insertDocumentTemplateSchema>;
+export type DocumentTemplate = typeof documentTemplates.$inferSelect;
+
+// Clause Reference Library
+export const clauseReferences = pgTable("clause_references", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clauseNumber: text("clause_number").notNull(),
+  title: text("title").notNull(),
+  titleEn: text("title_en"),
+  description: text("description"),
+  requirements: text("requirements"),
+  evidenceRequired: text("evidence_required"),
+  pdcaPhase: text("pdca_phase"),
+  parentClause: text("parent_clause"),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const insertClauseReferenceSchema = createInsertSchema(clauseReferences).omit({ id: true });
+export type InsertClauseReference = z.infer<typeof insertClauseReferenceSchema>;
+export type ClauseReference = typeof clauseReferences.$inferSelect;
+
 // Keep the users table for compatibility
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

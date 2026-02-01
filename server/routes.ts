@@ -12,6 +12,7 @@ import {
   insertProjectSchema,
   insertVendorSchema,
   insertDocumentSchema,
+  insertGeneratedDocumentSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(
@@ -413,7 +414,824 @@ export async function registerRoutes(
     }
   });
 
+  // Generated Documents Routes
+  app.get("/api/generated-documents", async (req, res) => {
+    try {
+      const docs = await storage.getGeneratedDocuments();
+      res.json(docs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch generated documents" });
+    }
+  });
+
+  app.get("/api/generated-documents/:id", async (req, res) => {
+    try {
+      const doc = await storage.getGeneratedDocument(req.params.id);
+      if (!doc) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+      res.json(doc);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch document" });
+    }
+  });
+
+  app.post("/api/generated-documents", async (req, res) => {
+    try {
+      const data = insertGeneratedDocumentSchema.parse(req.body);
+      const doc = await storage.createGeneratedDocument(data);
+      res.status(201).json(doc);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid document data" });
+    }
+  });
+
+  app.put("/api/generated-documents/:id", async (req, res) => {
+    try {
+      const doc = await storage.updateGeneratedDocument(req.params.id, req.body);
+      res.json(doc);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update document" });
+    }
+  });
+
+  app.delete("/api/generated-documents/:id", async (req, res) => {
+    try {
+      await storage.deleteGeneratedDocument(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete document" });
+    }
+  });
+
+  // Document Templates Routes
+  app.get("/api/document-templates", async (req, res) => {
+    try {
+      const templates = await storage.getDocumentTemplates();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch templates" });
+    }
+  });
+
+  // Clause References Routes
+  app.get("/api/clause-references", async (req, res) => {
+    try {
+      const phase = req.query.phase as string | undefined;
+      const refs = phase 
+        ? await storage.getClauseReferencesByPhase(phase)
+        : await storage.getClauseReferences();
+      res.json(refs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch clause references" });
+    }
+  });
+
+  // Advanced Document Generation
+  app.post("/api/generate-smap-document", async (req, res) => {
+    try {
+      const { templateCode, customData } = req.body;
+      const company = await storage.getCompany();
+      const management = await storage.getManagement();
+      const fkap = await storage.getFkapTeam();
+      const vendors = await storage.getVendors();
+      
+      const documentContent = generateAdvancedDocument(templateCode, {
+        company,
+        management,
+        fkap,
+        vendors,
+        customData,
+      });
+      
+      const doc = await storage.createGeneratedDocument({
+        title: documentContent.title,
+        documentNumber: documentContent.documentNumber,
+        templateType: templateCode,
+        clause: documentContent.clause,
+        category: documentContent.category,
+        content: documentContent.content,
+        status: "draft",
+        version: "1.0",
+      });
+      
+      res.status(201).json(doc);
+    } catch (error) {
+      console.error("Error generating document:", error);
+      res.status(400).json({ error: "Failed to generate document" });
+    }
+  });
+
   return httpServer;
+}
+
+interface DocumentGenerationContext {
+  company?: {
+    name?: string | null;
+    address?: string | null;
+    city?: string | null;
+    directorName?: string | null;
+    phone?: string | null;
+    email?: string | null;
+  };
+  management?: Array<{ name: string; position: string }>;
+  fkap?: Array<{ name: string; role: string; position: string }>;
+  vendors?: Array<{ name: string; type: string; dueDiligenceStatus?: string | null }>;
+  customData?: Record<string, string>;
+}
+
+function generateAdvancedDocument(templateCode: string, context: DocumentGenerationContext) {
+  const today = new Date().toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long", 
+    year: "numeric"
+  });
+  
+  const companyName = context.company?.name || "[NAMA PERUSAHAAN]";
+  const companyAddress = context.company?.address || "[ALAMAT PERUSAHAAN]";
+  const directorName = context.company?.directorName || "[NAMA DIREKTUR]";
+  const fkapHead = context.fkap?.[0]?.name || "[KETUA FKAP]";
+  
+  const templates: Record<string, { title: string; documentNumber: string; clause: string; category: string; content: string }> = {
+    "SK-FKAP": {
+      title: "Surat Keputusan Penetapan Tim FKAP",
+      documentNumber: `SK/FKAP/${new Date().getFullYear()}/001`,
+      clause: "5.3.2",
+      category: "Surat Keputusan",
+      content: `SURAT KEPUTUSAN
+NOMOR: SK/FKAP/${new Date().getFullYear()}/001
+
+TENTANG
+PENETAPAN TIM FUNGSI KEPATUHAN ANTI PENYUAPAN (FKAP)
+${companyName.toUpperCase()}
+
+DIREKTUR ${companyName.toUpperCase()}
+
+Menimbang:
+a. bahwa dalam rangka memenuhi persyaratan SNI ISO 37001:2016 tentang Sistem Manajemen Anti Penyuapan, perlu dibentuk Fungsi Kepatuhan Anti Penyuapan (FKAP);
+b. bahwa untuk memastikan efektivitas implementasi SMAP, diperlukan tim yang kompeten dan berdedikasi;
+c. bahwa berdasarkan pertimbangan sebagaimana dimaksud huruf a dan b, perlu menetapkan Surat Keputusan tentang Penetapan Tim FKAP.
+
+Mengingat:
+1. SNI ISO 37001:2016 tentang Sistem Manajemen Anti Penyuapan;
+2. Peraturan Menteri PUPR Nomor 08 Tahun 2022 tentang Sistem Manajemen Anti Penyuapan;
+3. Anggaran Dasar ${companyName};
+
+MEMUTUSKAN:
+
+Menetapkan:
+PERTAMA    : Membentuk Tim Fungsi Kepatuhan Anti Penyuapan (FKAP) dengan susunan sebagai berikut:
+
+${context.fkap?.map((m, i) => `             ${i + 1}. ${m.name} - ${m.role}`).join("\n") || "             [DAFTAR ANGGOTA TIM FKAP]"}
+
+KEDUA      : Tim FKAP bertugas:
+             a. Mengawasi pelaksanaan kebijakan anti penyuapan;
+             b. Memberikan saran dan rekomendasi terkait SMAP;
+             c. Menerima dan menindaklanjuti laporan pelanggaran;
+             d. Melakukan sosialisasi dan pelatihan;
+             e. Melaporkan kinerja SMAP kepada Manajemen Puncak.
+
+KETIGA     : Tim FKAP bertanggung jawab langsung kepada Direktur.
+
+KEEMPAT    : Segala biaya yang timbul akibat pelaksanaan Surat Keputusan ini dibebankan pada anggaran perusahaan.
+
+KELIMA     : Surat Keputusan ini berlaku sejak tanggal ditetapkan.
+
+                                        Ditetapkan di: ${context.company?.city || "[KOTA]"}
+                                        Pada tanggal: ${today}
+
+                                        DIREKTUR,
+
+
+
+                                        ${directorName}`,
+    },
+    
+    "KEBIJAKAN-AP": {
+      title: "Kebijakan Anti Penyuapan",
+      documentNumber: `DOC/KAP/${new Date().getFullYear()}/001`,
+      clause: "5.2",
+      category: "Kebijakan",
+      content: `KEBIJAKAN ANTI PENYUAPAN
+${companyName.toUpperCase()}
+
+NOMOR: DOC/KAP/${new Date().getFullYear()}/001
+REVISI: 00
+TANGGAL EFEKTIF: ${today}
+
+═══════════════════════════════════════════════════════════════
+
+1. PERNYATAAN KOMITMEN
+
+${companyName} berkomitmen penuh untuk menerapkan prinsip-prinsip anti penyuapan dalam seluruh aktivitas bisnis. Kami menerapkan kebijakan ZERO TOLERANCE terhadap segala bentuk penyuapan, baik yang dilakukan oleh personel internal maupun pihak eksternal yang bekerja atas nama perusahaan.
+
+2. RUANG LINGKUP
+
+Kebijakan ini berlaku untuk:
+• Seluruh Direksi dan Manajemen
+• Seluruh Karyawan tetap dan kontrak
+• Mitra Bisnis, Vendor, dan Subkontraktor
+• Agen, Konsultan, dan Penasihat
+• Seluruh pihak yang bertindak atas nama perusahaan
+
+3. DEFINISI PENYUAPAN
+
+Penyuapan adalah tindakan menawarkan, menjanjikan, memberikan, menerima, atau meminta keuntungan yang tidak semestinya (uang, hadiah, fasilitas, atau apa pun yang bernilai) dengan maksud untuk mempengaruhi keputusan atau tindakan seseorang.
+
+4. LARANGAN
+
+Perusahaan MELARANG setiap personel untuk:
+a. Memberikan atau menerima suap dalam bentuk apapun
+b. Memfasilitasi pembayaran tidak resmi (facilitation payment)
+c. Menerima hadiah/gratifikasi yang dapat mempengaruhi keputusan bisnis
+d. Memberikan donasi politik atas nama perusahaan
+e. Melakukan tindakan apapun yang dapat dikategorikan sebagai penyuapan
+
+5. KEWAJIBAN
+
+Setiap personel WAJIB:
+a. Memahami dan mematuhi kebijakan anti penyuapan
+b. Melaporkan dugaan pelanggaran melalui saluran yang tersedia
+c. Bekerja sama dalam investigasi pelanggaran
+d. Menandatangani Pakta Integritas
+e. Mengikuti pelatihan anti penyuapan secara berkala
+
+6. PELAPORAN
+
+Laporan dugaan pelanggaran dapat disampaikan melalui:
+• Email: whistleblowing@${companyName.toLowerCase().replace(/\s/g, "")}.co.id
+• Telepon: ${context.company?.phone || "[NOMOR HOTLINE]"}
+• Kotak Saran (anonim)
+• Langsung kepada Tim FKAP
+
+7. PERLINDUNGAN PELAPOR
+
+Perusahaan menjamin kerahasiaan identitas pelapor dan memberikan perlindungan dari segala bentuk pembalasan.
+
+8. SANKSI
+
+Pelanggaran terhadap kebijakan ini akan dikenakan sanksi sesuai peraturan perusahaan, termasuk namun tidak terbatas pada:
+• Teguran lisan/tertulis
+• Penurunan jabatan
+• Pemutusan hubungan kerja
+• Pelaporan kepada pihak berwenang
+
+9. TINJAUAN KEBIJAKAN
+
+Kebijakan ini akan ditinjau minimal setiap tahun untuk memastikan kesesuaian dan efektivitasnya.
+
+═══════════════════════════════════════════════════════════════
+
+Kebijakan ini telah disetujui dan ditetapkan oleh:
+
+DIREKTUR,
+
+
+
+${directorName}
+${companyName}
+${today}`,
+    },
+
+    "PAKTA-INTEGRITAS": {
+      title: "Pakta Integritas Personel",
+      documentNumber: `FORM/PI/${new Date().getFullYear()}/001`,
+      clause: "7.2.2.3",
+      category: "Formulir",
+      content: `PAKTA INTEGRITAS
+${companyName.toUpperCase()}
+
+NOMOR: FORM/PI/${new Date().getFullYear()}/001
+
+Yang bertanda tangan di bawah ini:
+
+Nama             : ________________________________
+NIK              : ________________________________
+Jabatan          : ________________________________
+Departemen       : ________________________________
+
+Dengan ini menyatakan dengan sungguh-sungguh bahwa:
+
+1. Saya telah membaca, memahami, dan berkomitmen untuk mematuhi Kebijakan Anti Penyuapan ${companyName}.
+
+2. Saya TIDAK AKAN melakukan, memfasilitasi, atau berpartisipasi dalam tindakan penyuapan dalam bentuk apapun.
+
+3. Saya AKAN melaporkan setiap dugaan pelanggaran anti penyuapan yang saya ketahui melalui saluran yang tersedia.
+
+4. Saya TIDAK AKAN menerima atau memberikan hadiah, gratifikasi, atau keuntungan lainnya yang dapat mempengaruhi keputusan bisnis atau tugas saya.
+
+5. Saya bersedia menerima sanksi sesuai peraturan yang berlaku apabila melanggar pernyataan ini.
+
+6. Pernyataan ini saya buat dengan penuh kesadaran dan tanpa paksaan dari pihak manapun.
+
+                                        ${context.company?.city || "[KOTA]"}, ${today}
+
+                                        Yang membuat pernyataan,
+
+
+
+
+                                        (___________________________)
+                                        Nama jelas dan tanda tangan
+
+
+Saksi:
+1. Nama: _________________ TTD: _________________
+2. Nama: _________________ TTD: _________________
+
+
+Mengetahui,
+Ketua FKAP
+
+
+
+${fkapHead}`,
+    },
+
+    "SOP-UJI-TUNTAS": {
+      title: "SOP Uji Tuntas Mitra Bisnis",
+      documentNumber: `SOP/UT/${new Date().getFullYear()}/001`,
+      clause: "8.2",
+      category: "SOP",
+      content: `STANDAR OPERASIONAL PROSEDUR
+UJI TUNTAS MITRA BISNIS (DUE DILIGENCE)
+
+NOMOR DOKUMEN  : SOP/UT/${new Date().getFullYear()}/001
+REVISI         : 00
+TANGGAL        : ${today}
+PERUSAHAAN     : ${companyName.toUpperCase()}
+
+═══════════════════════════════════════════════════════════════
+
+1. TUJUAN
+Menetapkan prosedur pelaksanaan uji tuntas terhadap mitra bisnis untuk mencegah keterlibatan dengan pihak yang berisiko melakukan penyuapan.
+
+2. RUANG LINGKUP
+SOP ini berlaku untuk:
+• Vendor/Supplier baru
+• Subkontraktor
+• Agen dan perantara bisnis
+• Konsultan dan penasihat
+• Joint venture partners
+
+3. REFERENSI
+• SNI ISO 37001:2016 Klausul 8.2
+• Permen PUPR No. 08 Tahun 2022
+• Kebijakan Anti Penyuapan ${companyName}
+
+4. DEFINISI
+Uji Tuntas: Proses investigasi dan penilaian terhadap calon mitra bisnis untuk mengidentifikasi risiko penyuapan.
+
+5. PROSEDUR
+
+5.1 PENILAIAN TINGKAT RISIKO
+┌─────────────┬──────────────────────────────────────┐
+│ TINGKAT     │ KRITERIA                             │
+├─────────────┼──────────────────────────────────────┤
+│ RENDAH      │ Nilai kontrak < 50 juta              │
+│             │ Tidak berhubungan dengan pemerintah  │
+│             │ Wilayah operasi rendah risiko        │
+├─────────────┼──────────────────────────────────────┤
+│ SEDANG      │ Nilai kontrak 50 - 500 juta          │
+│             │ Beberapa interaksi dengan pemerintah │
+│             │ Wilayah operasi sedang risiko        │
+├─────────────┼──────────────────────────────────────┤
+│ TINGGI      │ Nilai kontrak > 500 juta             │
+│             │ Banyak interaksi dengan pemerintah   │
+│             │ Wilayah operasi tinggi risiko        │
+└─────────────┴──────────────────────────────────────┘
+
+5.2 TAHAPAN UJI TUNTAS
+
+A. TINGKAT DASAR (Risiko Rendah)
+   □ Verifikasi dokumen legalitas
+   □ Pengecekan daftar hitam/sanksi
+   □ Verifikasi identitas pemilik
+   □ Penandatanganan Pakta Integritas Mitra
+
+B. TINGKAT MENENGAH (Risiko Sedang)
+   □ Semua poin tingkat dasar
+   □ Analisis struktur kepemilikan
+   □ Riwayat reputasi bisnis
+   □ Pengecekan media dan berita
+   □ Wawancara dengan referensi bisnis
+
+C. TINGKAT MENDALAM (Risiko Tinggi)
+   □ Semua poin tingkat menengah
+   □ Investigasi latar belakang manajemen
+   □ Audit lapangan (site visit)
+   □ Analisis laporan keuangan
+   □ Persetujuan Manajemen Puncak
+
+5.3 DOKUMENTASI
+Semua hasil uji tuntas harus didokumentasikan dalam:
+• Formulir Uji Tuntas Mitra Bisnis
+• Laporan Hasil Penilaian Risiko
+• Rekomendasi Tim FKAP
+
+6. PERSETUJUAN
+
+┌────────────────┬───────────────────────┬────────────────────┐
+│ TINGKAT RISIKO │ UNIT PENYETUJU        │ WAKTU PROSES       │
+├────────────────┼───────────────────────┼────────────────────┤
+│ RENDAH         │ Procurement Manager   │ 3 hari kerja       │
+│ SEDANG         │ Ketua FKAP            │ 7 hari kerja       │
+│ TINGGI         │ Direktur              │ 14 hari kerja      │
+└────────────────┴───────────────────────┴────────────────────┘
+
+7. PEMANTAUAN BERKELANJUTAN
+Mitra bisnis yang telah lolos uji tuntas akan dipantau secara berkala sesuai tingkat risikonya:
+• Rendah: Setiap 3 tahun
+• Sedang: Setiap 2 tahun
+• Tinggi: Setiap tahun
+
+8. DAFTAR MITRA BISNIS SAAT INI
+
+${context.vendors?.map((v, i) => `${i + 1}. ${v.name} (${v.type}) - Status: ${v.dueDiligenceStatus || "Pending"}`).join("\n") || "[DAFTAR VENDOR AKAN DITAMPILKAN DI SINI]"}
+
+═══════════════════════════════════════════════════════════════
+
+Disusun oleh:                          Disetujui oleh:
+Tim FKAP                               Direktur
+
+
+
+${fkapHead}                            ${directorName}`,
+    },
+
+    "RISK-REGISTER": {
+      title: "Register Risiko Penyuapan",
+      documentNumber: `DOC/RR/${new Date().getFullYear()}/001`,
+      clause: "4.5",
+      category: "Register",
+      content: `REGISTER RISIKO PENYUAPAN
+${companyName.toUpperCase()}
+
+NOMOR     : DOC/RR/${new Date().getFullYear()}/001
+PERIODE   : Tahun ${new Date().getFullYear()}
+STATUS    : [DRAFT/FINAL]
+
+═══════════════════════════════════════════════════════════════
+
+1. PENDAHULUAN
+
+Register ini mendokumentasikan hasil identifikasi dan penilaian risiko penyuapan ${companyName} sesuai persyaratan SNI ISO 37001:2016 klausul 4.5.
+
+2. METODOLOGI PENILAIAN
+
+SKALA KEMUNGKINAN (L - Likelihood):
+1 = Sangat Jarang  (< 1x per 5 tahun)
+2 = Jarang         (1x per 2-5 tahun)
+3 = Mungkin        (1x per tahun)
+4 = Sering         (1x per bulan)
+5 = Sangat Sering  (1x per minggu atau lebih)
+
+SKALA DAMPAK (I - Impact):
+1 = Sangat Kecil   (Kerugian < 10 juta)
+2 = Kecil          (Kerugian 10-50 juta)
+3 = Sedang         (Kerugian 50-250 juta)
+4 = Besar          (Kerugian 250 juta - 1 M)
+5 = Sangat Besar   (Kerugian > 1 M atau reputasi)
+
+TINGKAT RISIKO = L x I
+┌─────────────────┬────────────┬──────────────────────────┐
+│ SKOR            │ KATEGORI   │ TINDAKAN                 │
+├─────────────────┼────────────┼──────────────────────────┤
+│ 1-5             │ RENDAH     │ Pantau berkala           │
+│ 6-12            │ SEDANG     │ Kendalikan & pantau      │
+│ 13-19           │ TINGGI     │ Tindakan segera          │
+│ 20-25           │ EKSTREM    │ Eskalasi ke Manajemen    │
+└─────────────────┴────────────┴──────────────────────────┘
+
+3. DAFTAR RISIKO
+
+┌────┬────────────────────────────┬───┬───┬──────┬───────────────────────────┬────────────────┐
+│ NO │ AREA RISIKO                │ L │ I │ SKOR │ PENGENDALIAN              │ PIC            │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 1  │ Pengadaan Barang/Jasa      │ 4 │ 4 │ 16   │ SOP Procurement, Tender   │ Procurement    │
+│    │                            │   │   │      │ Terbuka, Due Diligence    │ Manager        │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 2  │ Perizinan & Regulasi       │ 3 │ 4 │ 12   │ Prosedur resmi, dokumentasi│ Legal         │
+│    │                            │   │   │      │ lengkap, monitoring       │                │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 3  │ Rekrutmen Karyawan         │ 2 │ 3 │ 6    │ Background check, Pakta   │ HR Manager     │
+│    │                            │   │   │      │ Integritas                │                │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 4  │ Hubungan dengan Pejabat    │ 3 │ 5 │ 15   │ Kebijakan larangan gift,  │ Direktur       │
+│    │ Pemerintah                 │   │   │      │ dokumentasi interaksi     │                │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 5  │ Sponsorship & Donasi       │ 2 │ 3 │ 6    │ Persetujuan FKAP, Due     │ FKAP           │
+│    │                            │   │   │      │ Diligence penerima        │                │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 6  │ Entertainment Bisnis       │ 3 │ 3 │ 9    │ Batasan nilai, persetujuan│ Dept. Head     │
+│    │                            │   │   │      │ atasan, pelaporan         │                │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 7  │ Penerimaan Hadiah          │ 3 │ 3 │ 9    │ Logbook gratifikasi,      │ FKAP           │
+│    │ Gratifikasi                │   │   │      │ batasan nilai, pelaporan  │                │
+├────┼────────────────────────────┼───┼───┼──────┼───────────────────────────┼────────────────┤
+│ 8  │ Subkontraktor              │ 4 │ 4 │ 16   │ Due diligence, Pakta      │ Project Manager│
+│    │                            │   │   │      │ Integritas, monitoring    │                │
+└────┴────────────────────────────┴───┴───┴──────┴───────────────────────────┴────────────────┘
+
+4. RINGKASAN PROFIL RISIKO
+
+• Risiko Ekstrem  : 0
+• Risiko Tinggi   : 3
+• Risiko Sedang   : 3
+• Risiko Rendah   : 2
+
+5. RENCANA TINDAK LANJUT
+
+Risiko dengan kategori TINGGI dan EKSTREM memerlukan:
+• Rencana mitigasi detail
+• Timeline implementasi
+• Penanggung jawab jelas
+• Pemantauan bulanan
+• Pelaporan ke Manajemen Puncak
+
+6. JADWAL TINJAUAN
+
+Register ini akan ditinjau:
+• Rutin: Setiap 6 bulan
+• Insidentil: Saat ada perubahan signifikan
+
+═══════════════════════════════════════════════════════════════
+
+Disusun oleh:                    Ditinjau oleh:           Disetujui oleh:
+Tim FKAP                         Ketua FKAP               Direktur
+
+
+
+[___________]                    ${fkapHead}              ${directorName}
+Tanggal:                         Tanggal:                 Tanggal:`,
+    },
+
+    "AUDIT-CHECKLIST": {
+      title: "Checklist Audit Internal SMAP",
+      documentNumber: `FORM/AI/${new Date().getFullYear()}/001`,
+      clause: "9.2",
+      category: "Formulir",
+      content: `CHECKLIST AUDIT INTERNAL SMAP
+${companyName.toUpperCase()}
+
+NOMOR AUDIT    : FORM/AI/${new Date().getFullYear()}/001
+TANGGAL AUDIT  : ${today}
+AUDITOR        : ________________________________
+AUDITEE        : ________________________________
+
+═══════════════════════════════════════════════════════════════
+
+Petunjuk Pengisian:
+✓ = Sesuai (Conforming)
+✗ = Tidak Sesuai (Non-Conforming)
+OB = Observasi (Observation)
+NA = Tidak Berlaku (Not Applicable)
+
+═══════════════════════════════════════════════════════════════
+
+KLAUSUL 4: KONTEKS ORGANISASI
+
+4.1 Memahami Organisasi dan Konteksnya
+[ ] Organisasi telah mengidentifikasi isu internal dan eksternal yang relevan
+[ ] Analisis konteks didokumentasikan dan ditinjau secara berkala
+Temuan: _______________________________________________________________
+
+4.2 Memahami Kebutuhan dan Harapan Pihak Berkepentingan
+[ ] Pihak berkepentingan telah diidentifikasi
+[ ] Kebutuhan dan harapan mereka terkait SMAP telah ditentukan
+Temuan: _______________________________________________________________
+
+4.5 Penilaian Risiko Penyuapan
+[ ] Register risiko penyuapan tersedia dan terkini
+[ ] Penilaian risiko dilakukan secara berkala
+[ ] Kriteria penilaian risiko telah ditetapkan
+[ ] Tindakan untuk mengatasi risiko telah diimplementasikan
+Temuan: _______________________________________________________________
+
+KLAUSUL 5: KEPEMIMPINAN
+
+5.1 Kepemimpinan dan Komitmen
+[ ] Manajemen puncak menunjukkan komitmen terhadap SMAP
+[ ] Sumber daya yang diperlukan tersedia
+[ ] Budaya anti penyuapan dipromosikan
+Temuan: _______________________________________________________________
+
+5.2 Kebijakan Anti Penyuapan
+[ ] Kebijakan anti penyuapan tersedia dan terdokumentasi
+[ ] Kebijakan dikomunikasikan ke seluruh personel
+[ ] Kebijakan ditinjau secara berkala
+Temuan: _______________________________________________________________
+
+5.3 Peran, Tanggung Jawab, dan Wewenang
+[ ] Peran dan tanggung jawab SMAP telah ditetapkan
+[ ] Tim FKAP telah ditunjuk dan beroperasi efektif
+[ ] Sumber daya untuk FKAP memadai
+Temuan: _______________________________________________________________
+
+KLAUSUL 7: DUKUNGAN
+
+7.2 Kompetensi
+[ ] Pelatihan anti penyuapan dilaksanakan secara berkala
+[ ] Catatan pelatihan tersedia dan lengkap
+[ ] Evaluasi pemahaman dilakukan
+Temuan: _______________________________________________________________
+
+7.4 Komunikasi
+[ ] Mekanisme pelaporan (whistleblowing) tersedia
+[ ] Prosedur komunikasi internal dan eksternal ditetapkan
+[ ] Informasi SMAP dapat diakses personel
+Temuan: _______________________________________________________________
+
+7.5 Informasi Terdokumentasi
+[ ] Dokumen SMAP terkendali dan terkini
+[ ] Rekaman terpelihara dengan baik
+[ ] Akses terhadap dokumen terkontrol
+Temuan: _______________________________________________________________
+
+KLAUSUL 8: OPERASI
+
+8.1 Perencanaan dan Pengendalian Operasional
+[ ] Prosedur operasional ditetapkan
+[ ] Pengendalian terhadap proses berisiko diterapkan
+Temuan: _______________________________________________________________
+
+8.2 Uji Tuntas
+[ ] Prosedur uji tuntas tersedia
+[ ] Uji tuntas dilaksanakan sebelum kerja sama
+[ ] Dokumentasi uji tuntas lengkap
+Temuan: _______________________________________________________________
+
+8.9 Mengangkat Kekhawatiran
+[ ] Sistem whistleblowing beroperasi efektif
+[ ] Laporan ditindaklanjuti tepat waktu
+[ ] Perlindungan pelapor dijamin
+Temuan: _______________________________________________________________
+
+KLAUSUL 9: EVALUASI KINERJA
+
+9.1 Pemantauan, Pengukuran, Analisis, dan Evaluasi
+[ ] Kinerja SMAP dipantau dan diukur
+[ ] Sasaran anti penyuapan dipantau pencapaiannya
+Temuan: _______________________________________________________________
+
+9.2 Audit Internal
+[ ] Program audit internal ditetapkan
+[ ] Audit dilaksanakan sesuai jadwal
+[ ] Temuan audit ditindaklanjuti
+Temuan: _______________________________________________________________
+
+9.3 Tinjauan Manajemen
+[ ] Tinjauan manajemen dilaksanakan secara berkala
+[ ] Hasil tinjauan didokumentasikan
+[ ] Tindak lanjut dari tinjauan diimplementasikan
+Temuan: _______________________________________________________________
+
+KLAUSUL 10: PENINGKATAN
+
+10.1 Ketidaksesuaian dan Tindakan Korektif
+[ ] Ketidaksesuaian diidentifikasi dan ditangani
+[ ] Tindakan korektif diimplementasikan
+[ ] Efektivitas tindakan korektif dievaluasi
+Temuan: _______________________________________________________________
+
+10.2 Peningkatan Berkelanjutan
+[ ] Peluang peningkatan diidentifikasi
+[ ] Tindakan peningkatan diimplementasikan
+Temuan: _______________________________________________________________
+
+═══════════════════════════════════════════════════════════════
+
+RINGKASAN TEMUAN:
+
+Jumlah Sesuai (✓)      : ____
+Jumlah Tidak Sesuai (✗) : ____
+Jumlah Observasi (OB)   : ____
+
+KESIMPULAN AUDIT:
+[ ] Memenuhi persyaratan SMAP
+[ ] Memenuhi dengan catatan minor
+[ ] Tidak memenuhi - perlu perbaikan signifikan
+
+CATATAN AUDITOR:
+________________________________________________________________
+________________________________________________________________
+________________________________________________________________
+
+Auditor,                              Auditee,
+
+
+
+_______________                       _______________
+Tanggal:                              Tanggal:`,
+    },
+
+    "BERITA-ACARA-RTM": {
+      title: "Berita Acara Rapat Tinjauan Manajemen",
+      documentNumber: `BA/RTM/${new Date().getFullYear()}/001`,
+      clause: "9.3",
+      category: "Berita Acara",
+      content: `BERITA ACARA
+RAPAT TINJAUAN MANAJEMEN (RTM) SMAP
+${companyName.toUpperCase()}
+
+NOMOR         : BA/RTM/${new Date().getFullYear()}/001
+HARI/TANGGAL  : ${today}
+WAKTU         : __________ s.d. __________
+TEMPAT        : ${companyAddress}
+
+═══════════════════════════════════════════════════════════════
+
+I. PESERTA RAPAT
+
+Hadir:
+${context.management?.map((m, i) => `${i + 1}. ${m.name} - ${m.position}`).join("\n") || "1. [NAMA] - [JABATAN]\n2. [NAMA] - [JABATAN]"}
+
+II. AGENDA RAPAT
+
+1. Pembukaan
+2. Laporan Status Implementasi SMAP
+3. Hasil Audit Internal
+4. Status Tindakan Korektif
+5. Evaluasi Kinerja SMAP
+6. Pembahasan Peluang Peningkatan
+7. Penutup
+
+III. PEMBAHASAN
+
+A. Status Implementasi SMAP
+   • Kebijakan Anti Penyuapan telah dikomunikasikan ke: ___% personel
+   • Pakta Integritas telah ditandatangani oleh: ___% personel
+   • Pelatihan SMAP telah diikuti oleh: ___% personel
+   
+B. Hasil Audit Internal
+   • Periode audit: ___________
+   • Jumlah temuan mayor: ___
+   • Jumlah temuan minor: ___
+   • Jumlah observasi: ___
+   
+C. Status Tindakan Korektif
+   • Total tindakan korektif: ___
+   • Sudah selesai: ___
+   • Dalam proses: ___
+   • Belum ditindaklanjuti: ___
+   
+D. Evaluasi Kinerja SMAP
+   • Target sasaran tercapai: ___% 
+   • Insiden penyuapan terkonfirmasi: ___
+   • Laporan whistleblowing diterima: ___
+   • Laporan whistleblowing ditindaklanjuti: ___
+
+E. Pembahasan Peluang Peningkatan
+   1. ________________________________________________________________
+   2. ________________________________________________________________
+   3. ________________________________________________________________
+
+IV. KEPUTUSAN RAPAT
+
+1. ________________________________________________________________
+2. ________________________________________________________________
+3. ________________________________________________________________
+
+V. TINDAK LANJUT
+
+┌────┬────────────────────────────────┬────────────────┬───────────────┐
+│ NO │ TINDAKAN                       │ PENANGGUNG JAWAB │ TARGET WAKTU  │
+├────┼────────────────────────────────┼────────────────┼───────────────┤
+│ 1  │                                │                │               │
+├────┼────────────────────────────────┼────────────────┼───────────────┤
+│ 2  │                                │                │               │
+├────┼────────────────────────────────┼────────────────┼───────────────┤
+│ 3  │                                │                │               │
+└────┴────────────────────────────────┴────────────────┴───────────────┘
+
+VI. PENUTUP
+
+Demikian Berita Acara ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
+
+═══════════════════════════════════════════════════════════════
+
+Notulis,                              Pimpinan Rapat,
+
+
+
+_______________                       ${directorName}
+                                      Direktur`,
+    },
+  };
+
+  const template = templates[templateCode];
+  
+  if (!template) {
+    return {
+      title: `Dokumen ${templateCode}`,
+      documentNumber: `DOC/${new Date().getFullYear()}/XXX`,
+      clause: "-",
+      category: "Lainnya",
+      content: `[Template '${templateCode}' belum tersedia]\n\nSilakan hubungi administrator untuk menambahkan template ini.`,
+    };
+  }
+
+  return template;
 }
 
 function generateDocumentContent(type: string, title: string): string {
