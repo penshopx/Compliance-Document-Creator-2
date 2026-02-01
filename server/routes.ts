@@ -405,11 +405,6 @@ export async function registerRoutes(
   app.post("/api/mentor/chat", async (req, res) => {
     try {
       const { message, history } = mentorChatSchema.parse(req.body);
-      const apiKey = process.env.GEMINI_API_KEY;
-      
-      if (!apiKey) {
-        return res.status(500).json({ error: "GEMINI_API_KEY tidak dikonfigurasi" });
-      }
       
       const SYSTEM_PROMPT = `Anda adalah SMAP Mentor, asisten AI yang ahli dalam Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016 dan Panduan Cegah Korupsi (Pancek) dari KPK Indonesia.
 
@@ -434,30 +429,37 @@ Gaya komunikasi:
 - Memberikan langkah-langkah yang actionable
 - Di akhir respons, tawarkan untuk membantu lebih lanjut atau tanyakan apakah ada aspek lain yang ingin dipelajari`;
 
-      const contents = [
-        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
-        { role: "model", parts: [{ text: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." }] },
+      const messages = [
+        { role: "user", content: SYSTEM_PROMPT },
+        { role: "assistant", content: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." },
         ...(history || []).map(m => ({
-          role: m.role === "user" ? "user" : "model",
-          parts: [{ text: m.content }]
+          role: m.role === "user" ? "user" : "assistant",
+          content: m.content
         })),
-        { role: "user", parts: [{ text: message }] }
+        { role: "user", content: message }
       ];
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 2048,
-            }
-          })
-        }
-      );
+      // Use Replit AI Integration (Gemini via OpenAI-compatible API)
+      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+      const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
+      
+      if (!apiKey || !baseUrl) {
+        return res.status(500).json({ error: "AI Integration tidak dikonfigurasi" });
+      }
+
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gemini-2.5-flash",
+          messages,
+          temperature: 0.7,
+          max_tokens: 2048,
+        })
+      });
 
       if (!response.ok) {
         const error = await response.json();
@@ -465,13 +467,14 @@ Gaya komunikasi:
       }
 
       const data = await response.json();
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak dapat memproses permintaan Anda.";
+      const content = data.choices?.[0]?.message?.content || "Maaf, saya tidak dapat memproses permintaan Anda.";
 
       res.json({ content });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid request data" });
       }
+      console.error("Chat error:", error);
       res.status(500).json({ error: "Failed to process chat request" });
     }
   });
