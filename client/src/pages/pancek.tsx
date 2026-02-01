@@ -178,7 +178,7 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
 
       <Card className={`border-2 ${isVerified ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-verification-status">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               {isVerified ? (
                 <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50">

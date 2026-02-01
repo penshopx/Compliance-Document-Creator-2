@@ -44,15 +44,18 @@ export default function ProdukSiap() {
   // Calculate checklist progress
   const checklistProgress = useMemo(() => {
     if (!produk) return 0;
+    const total = produk.checklistItems.length;
+    if (total === 0) return 0;
     const checked = produk.checklistItems.filter(item => checkedItems[item.id]).length;
-    return Math.round((checked / produk.checklistItems.length) * 100);
+    return Math.round((checked / total) * 100);
   }, [produk, checkedItems]);
 
   // Calculate progress for all 4 phases
   const allPhasesProgress = useMemo(() => {
     return PRODUK_SIAP.reduce((acc, p) => {
+      const total = p.checklistItems.length;
       const checked = p.checklistItems.filter(item => checkedItems[item.id]).length;
-      const progress = Math.round((checked / p.checklistItems.length) * 100);
+      const progress = total > 0 ? Math.round((checked / total) * 100) : 0;
       acc[p.id] = {
         progress,
         isVerified: progress >= VERIFICATION_THRESHOLD,
@@ -130,7 +133,7 @@ export default function ProdukSiap() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {PRODUK_SIAP.map((p) => {
                 const phaseData = allPhasesProgress[p.id] || { progress: 0, isVerified: false };
                 const pColors = PRODUK_COLORS[p.color];
@@ -341,7 +344,7 @@ export default function ProdukSiap() {
       {/* Verification Status Card */}
       <Card className={`border-2 ${isCurrentPhaseVerified ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-phase-verification">
         <CardContent className="py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               {isCurrentPhaseVerified ? (
                 <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50">
