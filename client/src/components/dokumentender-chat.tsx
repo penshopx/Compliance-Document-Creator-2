@@ -9,15 +9,18 @@ export default function DokumentenderChat() {
 
   if (!isOpen) {
     return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 rounded-full shadow-lg bg-green-600"
-        style={{ zIndex: 9999 }}
-        size="icon"
-        data-testid="button-open-dokumentender-chat"
+      <div 
+        className="fixed shadow-lg"
+        style={{ zIndex: 9999, bottom: '16px', right: '16px' }}
       >
-        <FileText className="h-5 w-5" />
-      </Button>
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="rounded-full bg-green-600 h-14 w-14"
+          data-testid="button-open-dokumentender-chat"
+        >
+          <FileText className="h-6 w-6" />
+        </Button>
+      </div>
     );
   }
 

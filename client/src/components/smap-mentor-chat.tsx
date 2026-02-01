@@ -156,15 +156,18 @@ export default function SMAPMentorChat() {
 
   if (!isOpen) {
     return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 rounded-full shadow-lg bg-blue-600"
-        style={{ zIndex: 9999 }}
-        size="icon"
-        data-testid="button-open-mentor-chat"
+      <div 
+        className="fixed shadow-lg"
+        style={{ zIndex: 9999, bottom: '16px', left: '16px' }}
       >
-        <Bot className="h-5 w-5" />
-      </Button>
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="rounded-full bg-blue-600 h-14 w-14"
+          data-testid="button-open-mentor-chat"
+        >
+          <Bot className="h-6 w-6" />
+        </Button>
+      </div>
     );
   }
 
