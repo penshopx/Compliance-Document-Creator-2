@@ -28,6 +28,7 @@ import {
   BookOpen,
   Library,
   ListChecks,
+  Package,
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -47,6 +48,7 @@ const dataMenuItems = [
 ];
 
 const documentMenuItems = [
+  { title: "Produk Siap SMAP", url: "/produk-siap", icon: Package },
   { title: "Checklist SMAP", url: "/smap-checklist", icon: ListChecks },
   { title: "Template Repository", url: "/template-repository", icon: Library },
   { title: "Referensi Dokumen", url: "/smap-reference", icon: BookOpen },
