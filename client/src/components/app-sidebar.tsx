@@ -29,10 +29,13 @@ import {
   Library,
   ListChecks,
   Package,
+  Home,
+  Globe,
 } from "lucide-react";
 
 const mainMenuItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Beranda", url: "/", icon: Home },
+  { title: "Dashboard SMAP", url: "/dashboard", icon: LayoutDashboard },
   { title: "Profil Perusahaan", url: "/company", icon: Building2 },
   { title: "Manajemen Perusahaan", url: "/management", icon: Users },
   { title: "Tim FKAP", url: "/fkap", icon: Shield },
@@ -72,7 +75,7 @@ export function AppSidebar() {
               Compliance Hub
             </span>
             <span className="text-xs text-sidebar-foreground/70">
-              SMAP Document Builder
+              SMAP & Pancek
             </span>
           </div>
         </div>

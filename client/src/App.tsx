@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import NotFound from "@/pages/not-found";
+import WelcomePage from "@/pages/welcome";
 import Dashboard from "@/pages/dashboard";
 import CompanyPage from "@/pages/company";
 import ManagementPage from "@/pages/management";
@@ -23,11 +24,14 @@ import SMAPReferencePage from "@/pages/smap-reference";
 import TemplateRepository from "@/pages/template-repository";
 import SMAPChecklist from "@/pages/smap-checklist";
 import ProdukSiap from "@/pages/produk-siap";
+import PancekPage from "@/pages/pancek";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={WelcomePage} />
+      <Route path="/pancek" component={PancekPage} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/company" component={CompanyPage} />
       <Route path="/management" component={ManagementPage} />
       <Route path="/fkap" component={FkapPage} />
@@ -52,6 +56,15 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
   const isFullWidthPage = location === "/pdca";
+  const isStandalonePage = location === "/" || location === "/pancek";
+
+  if (isStandalonePage) {
+    return (
+      <div className="min-h-screen w-full">
+        <Router />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-full">
