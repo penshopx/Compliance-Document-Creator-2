@@ -41,7 +41,7 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
   - 51 clause items across PDCA phases
   - Document draft generation with company context
   - AI Prompt Master for ChatGPT/Gemini integration
-  - Mega Repository with 85+ document templates
+  - Mega Repository with document templates
 - **AI Integration**: Gemini AI integration via Replit AI Integrations
   - Uses gemini-2.5-flash and gemini-2.5-pro models
   - No API key required (uses Replit credits)
@@ -161,28 +161,29 @@ The application includes a comprehensive reference table with 46 documents:
 - **Register** (5): Daftar pemantauan (Risiko, Hadiah, WBS, Rekan Bisnis, Pelatihan)
 - **Instruksi** (3): Panduan teknis pelaksanaan tugas
 
-## Template Repository (NEW)
-Comprehensive SMAP template/toolbox collection with 120+ document templates:
+## Template Repository
+Comprehensive SMAP template/toolbox collection with 200 document templates covering all ISO 37001:2016 clauses:
 
 ### Template Categories (12 types):
-- **Pedoman** (1): Dokumen induk SMAP
-- **Kebijakan** (7): Anti Penyuapan, Hadiah, Donasi, Konflik Kepentingan, Kontribusi Politik
+- **Pedoman** (5): Dokumen induk SMAP, manual, struktur organisasi
+- **Kebijakan** (11): Anti Penyuapan, Hadiah, Donasi, Konflik Kepentingan, Kontribusi Politik, WBS, Investigasi, Sanksi
+- **SK** (4): Surat Keputusan Direktur (Komitmen, FKAP, Audit)
 - **SOP** (27): Prosedur operasional dari klausul 4.5 - 10.2
-- **Formulir** (30): Template pencatatan dan dokumentasi
-- **Register** (17): Daftar pemantauan (Risiko, Hadiah, WBS, Rekan Bisnis, dll)
-- **Instruksi** (6): Panduan teknis pelaksanaan tugas
-- **SK** (3): Surat Keputusan Direktur
+- **Instruksi Kerja** (12): Panduan teknis pelaksanaan tugas
+- **Formulir** (42): Template pencatatan dan dokumentasi
+- **Register** (24): Daftar pemantauan (Risiko, Hadiah, WBS, Mitra Bisnis, Pelatihan, dll)
+- **Laporan** (19): Laporan analisis, kinerja, investigasi
 - **Berita Acara** (3): Notulen rapat dan tinjauan
-- **Laporan** (12): Laporan analisis dan kinerja
-- **Matriks** (7): Matriks tanggung jawab, risiko, sanksi
-- **Program** (5): Program kerja tahunan
+- **Matriks** (14): Matriks tanggung jawab, risiko, sanksi, otorisasi
+- **Program** (8): Program kerja tahunan
+- **Checklist** (11): Checklist audit, uji tuntas, penilaian
 
 ### Template Structure:
 Each template includes:
-- Kode Dokumen (unique identifier)
+- Kode Dokumen (unique identifier, e.g., SOP-RIS-001, FOR-UTU-001)
 - Nama (Indonesian) and English name
 - Kategori (document type)
-- Klausul ISO 37001 (4.1 - 10.2)
+- Klausul ISO 37001 (4.1 - 10.2) with sub-clauses
 - Deskripsi (description)
 - Penanggung Jawab (responsible person)
 - Frekuensi (frequency)
@@ -194,21 +195,25 @@ Each template includes:
 - Advanced search by name, code, description, clause
 - Multi-level filtering (category, clause, business area, criticality)
 - Grid and List view modes
-- AI Prompt generation with company context
+- AI Prompt generation with placeholder company context
 - Export to CSV functionality
 - Integration with dokumenttender.com or other AI models
 
-### ISO 37001 Clause Coverage:
-- Klausul 4: Konteks Organisasi (11 templates)
-- Klausul 5: Kepemimpinan (11 templates)
-- Klausul 6: Perencanaan (4 templates)
-- Klausul 7: Pendukung (17 templates)
-- Klausul 8: Operasi (32 templates)
-- Klausul 9: Evaluasi Kinerja (17 templates)
-- Klausul 10: Perbaikan (8 templates)
-- Additional Supporting Documents (20 templates)
+### ISO 37001 Clause Coverage (200 templates):
+- Klausul 4: Konteks Organisasi (25 templates) - Context analysis, stakeholders, scope, risk assessment
+- Klausul 5: Kepemimpinan (30 templates) - Leadership commitment, policies, FKAP, delegation
+- Klausul 6: Perencanaan (15 templates) - Objectives, programs, risk treatment
+- Klausul 7: Dukungan (40 templates) - Resources, competency, training, communication, documentation
+- Klausul 8: Operasi (50 templates) - Due diligence, controls, gifts, WBS, investigation
+- Klausul 9: Evaluasi Kinerja (25 templates) - Monitoring, audit, management review
+- Klausul 10: Perbaikan (15 templates) - Nonconformity, corrective action, continual improvement
 
 ## Recent Changes
+- 2026-02-01: Expanded Template Repository to 200 SMAP templates
+  - Complete coverage of all ISO 37001:2016 clauses and sub-clauses
+  - Detailed templates for each document type
+  - Enhanced filtering by clause, category, area bisnis, tingkat kritis
+  - Data stored in client/src/data/smap-templates-full.ts
 - 2026-02-01: Added Template Repository with 120+ SMAP templates
   - Comprehensive document templates covering all ISO 37001:2016 clauses
   - Advanced filtering by category, clause, business area, criticality level

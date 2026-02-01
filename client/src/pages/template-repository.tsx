@@ -448,9 +448,9 @@ FORMAT OUTPUT:
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua Kategori</SelectItem>
-                    {TEMPLATE_CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.label}
+                    {KATEGORI_DOKUMEN.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
                       </SelectItem>
                     ))}
                   </SelectContent>

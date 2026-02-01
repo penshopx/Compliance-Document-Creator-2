@@ -303,7 +303,7 @@ FORMAT OUTPUT:
   const handleShowRepository = () => {
     setShowRepository(true);
     setGeneratedContent(null);
-    toast({ title: "85+ Dokumen Repository berhasil dimuat" });
+    toast({ title: "Dokumen Repository berhasil dimuat" });
   };
 
   const groupedRepository = MEGA_REPOSITORY.reduce((acc, doc) => {
@@ -481,7 +481,7 @@ FORMAT OUTPUT:
             data-testid="button-mega-repository"
           >
             <BookOpen className="w-5 h-5 mr-3" />
-            Mega Repositori (85+ Lampiran)
+            Mega Repositori
           </Button>
         </div>
       </div>
