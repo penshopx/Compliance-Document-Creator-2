@@ -26,6 +26,7 @@ import {
   Zap,
   FilePlus2,
   BookOpen,
+  Library,
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -45,6 +46,7 @@ const dataMenuItems = [
 ];
 
 const documentMenuItems = [
+  { title: "Template Repository", url: "/template-repository", icon: Library },
   { title: "Referensi Dokumen", url: "/smap-reference", icon: BookOpen },
   { title: "Generator Dokumen", url: "/documents", icon: FileText },
   { title: "Document Builder", url: "/document-builder", icon: FilePlus2 },
