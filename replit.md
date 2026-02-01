@@ -16,6 +16,12 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 - **Projects**: Project portfolio management
 - **Vendors**: Vendor management with due diligence status
 - **Document Generator**: Pre-built templates for ISO 37001 SMAP documents
+- **PDCA Generator** (NEW): Advanced document generator with PDCA methodology
+  - Plan, Do, Check, Act navigation tabs
+  - 51 clause items across PDCA phases
+  - Document draft generation with company context
+  - AI Prompt Master for ChatGPT integration
+  - Mega Repository with 85+ document templates
 
 ## Tech Stack
 - **Frontend**: React + Vite + TypeScript
@@ -40,7 +46,8 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 │   │   ├── equipment.tsx
 │   │   ├── projects.tsx
 │   │   ├── vendors.tsx
-│   │   └── documents.tsx
+│   │   ├── documents.tsx
+│   │   └── pdca-generator.tsx  # PDCA Generator with three-panel layout
 │   ├── components/
 │   │   ├── app-sidebar.tsx   # Main navigation sidebar
 │   │   └── ui/               # Shadcn components
@@ -67,6 +74,12 @@ The application includes pre-built templates for key SMAP documents:
 5. Program Pelatihan SMAP (Training Program) - Clause 7.2
 6. Prosedur Pelaporan Whistleblowing (Whistleblowing Procedure) - Clause 8.9
 
+## PDCA Generator Clauses
+- **Plan** (16 clauses): Policies, risks, objectives, resources, training, documentation
+- **Do** (6 clauses): Leadership, commitment, risk assessment, monitoring
+- **Check** (23 clauses): Compliance checklist items (C.01 - C.23)
+- **Act** (6 clauses): Corrective actions, continuous improvement, lessons learned
+
 ## API Endpoints
 - `GET/POST/PUT /api/company` - Company profile CRUD
 - `GET/POST/PUT/DELETE /api/management` - Management team
@@ -82,6 +95,13 @@ The application includes pre-built templates for key SMAP documents:
 - `GET /api/dashboard/stats` - Dashboard statistics
 
 ## Recent Changes
+- 2026-02-01: Added PDCA Generator feature
+  - Three-panel layout with PDCA navigation
+  - 51 clause items across Plan, Do, Check, Act phases
+  - Document draft generation with narasi input
+  - AI Prompt Master for ChatGPT integration
+  - Mega Repository with 22 document templates organized by category
+  - Fixed Tailwind dynamic class issue
 - 2026-02-01: Initial implementation complete
   - Full database schema with PostgreSQL
   - All CRUD operations working

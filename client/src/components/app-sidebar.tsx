@@ -23,6 +23,7 @@ import {
   Handshake,
   FileText,
   UserCheck,
+  Zap,
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -43,6 +44,7 @@ const dataMenuItems = [
 
 const documentMenuItems = [
   { title: "Generator Dokumen", url: "/documents", icon: FileText },
+  { title: "PDCA Generator", url: "/pdca", icon: Zap },
 ];
 
 export function AppSidebar() {

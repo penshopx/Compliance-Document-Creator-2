@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMAP READY v7.2 - Mega Repository & PDCA Generator</title>
+    <!-- Muat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .scroll-panel { height: calc(100vh - 65px); overflow-y: auto; scrollbar-width: thin; }
+        .mode-button-active { background-color: #1e3a8a; color: white; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3); }
+        .mode-button-inactive { background-color: #ffffff; color: #64748b; border: 1px solid #e2e8f0; }
+        .input-field { width: 100%; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; outline: none; transition: all 0.2s; font-size: 0.8rem; background-color: #fff; }
+        .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .sub-nav-item { font-size: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; line-height: 1.3; }
+        .sub-nav-item:hover { background-color: #f1f5f9; color: #1e3a8a; }
+        .sub-nav-active { background-color: #eff6ff; color: #1e3a8a; border-left: 3px solid #1e3a8a; font-weight: 700; }
+        .toolbox-card { background-color: white; padding: 1.5rem; border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1.5rem; border: 1px solid #f1f5f9; }
+        .category-header { font-size: 11px; font-weight: 900; color: #1e3a8a; text-transform: uppercase; background: #eff6ff; padding: 10px 15px; border-radius: 10px; margin: 30px 0 10px 0; border-left: 6px solid #1e3a8a; }
+        .copy-button { background-color: #1e3a8a; color: white; padding: 10px 16px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.7rem; transition: all 0.2s; text-transform: uppercase; }
+        .copy-button:hover { background-color: #2563eb; }
+        .admin-section { display: none; }
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body class="h-screen overflow-hidden text-slate-800">
+
+    <!-- Header Sinkron -->
+    <header class="h-[65px] bg-white border-b flex items-center px-8 justify-between no-print shadow-sm z-50 relative">
+        <div class="flex items-center space-x-4">
+            <!-- RAHASIA ADMIN: Klik logo SR 5 kali untuk munculkan akses PIN -->
+            <div onclick="adminSecretTrigger()" class="bg-blue-900 w-10 h-10 flex items-center justify-center rounded-xl text-white font-black shadow-lg cursor-pointer active:scale-90 transition">SR</div>
+            <div>
+                <h1 class="text-lg font-black text-slate-800 tracking-tighter leading-none uppercase">SMAP READY™</h1>
+                <p class="text-[9px] text-blue-500 font-black uppercase tracking-[0.2em] mt-1 text-center">Digital Assistant v7.2</p>
+            </div>
+        </div>
+        <div id="license-badge" class="px-5 py-2 bg-red-50 text-red-700 text-[10px] font-black rounded-full uppercase tracking-widest transition-all duration-700 shadow-sm border border-red-100">Status: Terkunci</div>
+    </header>
+
+    <main class="flex">
+        
+        <!-- PANEL 1: NAVIGASI PDCA (Plan, Do, Check, Act) -->
+        <div class="w-1/4 bg-white border-r scroll-panel no-print">
+            <div class="p-6">
+                <!-- Data Onboarding -->
+                <div onclick="loadExampleData()" class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-2xl cursor-pointer hover:bg-blue-100 transition group">
+                    <p class="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">🏢 Profil Onboarding</p>
+                    <p class="text-xs font-bold text-blue-700">Muat Format Contoh</p>
+                    <p class="text-[9px] text-blue-500 italic mt-1 leading-tight">Data anonim sesuai standar perizinan.</p>
+                </div>
+
+                <!-- PDCA Navigation Tabs -->
+                <div class="grid grid-cols-4 gap-1 mb-8 bg-slate-100 p-1 rounded-xl">
+                    <button id="btn-tab-1" onclick="switchCategory(1)" class="py-2 text-[9px] font-black uppercase rounded-lg transition-all bg-white text-blue-900 shadow-sm">Plan</button>
+                    <button id="btn-tab-2" onclick="switchCategory(2)" class="py-2 text-[9px] font-black uppercase rounded-lg transition-all text-slate-400">Do</button>
+                    <button id="btn-tab-3" onclick="switchCategory(3)" class="py-2 text-[9px] font-black uppercase rounded-lg transition-all text-slate-400">Check</button>
+                    <button id="btn-tab-4" onclick="switchCategory(4)" class="py-2 text-[9px] font-black uppercase rounded-lg transition-all text-slate-400">Act</button>
+                </div>
+
+                <h2 id="panel-nav-title" class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Daftar Klausul</h2>
+                <div id="sub-nav-list" class="space-y-1">
+                    <!-- List Dinamis Diisi via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 2: WORKSPACE & DOCUMENT GENERATOR -->
+        <div class="flex-1 bg-slate-50 border-r scroll-panel">
+            <div class="p-10 max-w-4xl mx-auto">
+                <div id="alert-area" class="hidden"></div>
+
+                <!-- Section Lisensi & Identitas -->
+                <section id="license-card" class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-200 mb-10 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="font-black text-slate-800 text-base uppercase tracking-tight">Profil & Lisensi Syarikat</h3>
+                        <button onclick="resetApplication()" class="text-[9px] bg-red-50 text-red-600 px-3 py-1.5 rounded-lg font-black uppercase tracking-widest border border-red-100">Reset</button>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Nama Perusahaan (Kunci Utama)</label>
+                                <input type="text" id="bu-name" oninput="forceRelock()" class="input-field font-black text-blue-900 uppercase" placeholder="[NAMA PERUSAHAAN]">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">NPWP Perusahaan</label>
+                                <input type="text" id="bu-npwp" oninput="forceRelock()" class="input-field shadow-inner" placeholder="[NPWP]">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Kunci Lisensi</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="license-key" class="input-field font-mono bg-slate-50 uppercase" placeholder="HASH KEY">
+                                    <button onclick="handleActivation()" class="bg-blue-600 text-white font-black text-[10px] px-6 rounded-xl hover:bg-blue-700 transition uppercase shadow-md">Aktif</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Secret Section -->
+                        <div id="admin-auth" class="admin-section mt-4 pt-4 border-t border-slate-100 flex flex-col items-center">
+                            <div class="flex space-x-2">
+                                <input type="password" id="admin-pin" class="input-field w-32 py-1 text-center font-black tracking-widest" placeholder="PIN">
+                                <button onclick="verifyAdminPIN()" class="bg-yellow-600 text-white text-[9px] px-4 rounded-xl font-bold uppercase active:scale-95">Verify</button>
+                            </div>
+                            <button id="btn-gen" onclick="generateAdminKey()" class="hidden mt-4 text-[9px] text-yellow-500 underline font-black uppercase tracking-widest">Admin: Generate License For ID Above</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Workspace Workspace Dinamis -->
+                <div id="workspace-area">
+                    <div class="text-center py-24 bg-white rounded-[3.5rem] border-2 border-dashed border-slate-200">
+                        <div class="text-6xl mb-6 grayscale opacity-20">🛡️</div>
+                        <p class="text-slate-400 text-sm italic font-bold px-32 tracking-tight leading-relaxed uppercase text-center">Silakan Aktifkan Lisensi dan Pilih Klausul untuk Memulai Generate Dokumen.</p>
+                    </div>
+                </div>
+
+                <!-- Tombol Repositori Global -->
+                <div class="mt-12 flex space-x-4 no-print">
+                    <button onclick="displayMegaRepository()" id="btn-repo-trigger" class="flex-1 bg-blue-900 text-white font-black text-sm py-5 rounded-[2rem] hover:bg-blue-800 transition shadow-2xl uppercase tracking-widest flex items-center justify-center space-x-4">
+                        <span>🧰</span>
+                        <span>Update Mega Repositori (85+ Lampiran)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 3: DRAF GENERATED & HUB REPOSITORI -->
+        <div id="panel-output" class="w-1/3 bg-white scroll-panel border-l shadow-2xl z-40">
+            <div class="p-8">
+                <!-- Tautan Eksekusi Strategis -->
+                <a href="https://chat.dokumentender.com" target="_blank" class="block w-full bg-blue-600 text-white text-center py-5 rounded-3xl font-black text-xs mb-8 hover:bg-blue-700 transition shadow-xl no-print flex items-center justify-center space-x-3 group active:scale-95">
+                    <span class="text-lg group-hover:rotate-12 transition">⚡</span>
+                    <span class="tracking-tighter font-black uppercase">Eksekusi di Chat tender</span>
+                </a>
+
+                <div class="flex items-center justify-between mb-10 border-b pb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tighter leading-none">Output</h2>
+                        <p id="output-subtitle" class="text-[9px] text-slate-400 font-black uppercase mt-2 tracking-[0.3em]">Document Hub</p>
+                    </div>
+                    <div id="active-lock-tag" class="text-[9px] font-black text-red-500 bg-red-50 px-4 py-2 rounded-xl border border-red-100 uppercase tracking-widest transition-all duration-700 shadow-sm">Terkunci</div>
+                </div>
+                
+                <div id="output-list" class="space-y-8">
+                    <div class="flex flex-col items-center justify-center py-48 text-center text-slate-200">
+                        <span class="text-9xl mb-8 opacity-5">🔒</span>
+                        <p class="text-[10px] italic font-black px-12 leading-relaxed text-slate-300 uppercase tracking-[0.3em]">Akses Repositori Terkunci</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- DATA STRUKTUR ---
+        const CL_PLAN = ["01. Kebijakan Anti Penyuapan (5.2)", "02. Identifikasi Risiko (4.5)", "03. Memahami Organisasi (4.1)", "04. Sasaran & Perencanaan (6.2)", "05. Sumber Daya & Struktur (7.1)", "06. Kompetensi & Pelatihan (7.2)", "07. Komunikasi & Partisipasi (7.4)", "08. Dokumentasi (7.5)", "09. Pengendalian Dokumen (7.5.3)", "10. Pengendalian Operasional (8.1)", "11. Kesiagaan Tanggap Darurat (8.8)", "12. Pengukuran & Pemantauan (9.1)", "13. Tinjauan Fungsi Kepatuhan (9.4)", "14. Pengendalian Info Terdokumentasi (7.5.3)", "15. Audit Internal (9.2)", "16. Tinjauan Manajemen (9.3)"];
+        const CL_DO = ["01. Kepemimpinan & Komitmen (5.1)", "02. Komitmen Anti Penyuapan (8.6)", "03. Penilaian Risiko Penyuapan (4.5)", "04. Informasi Terdokumentasi (7.5)", "05. Pemantauan & Evaluasi (9.1)", "06. Laporan Hasil Audit Internal (9.2)"];
+        const CL_CHECK = ["C.01. Komitmen Puncak Tertulis?", "C.02. Pakta Integritas Seluruh Pegawai?", "C.03. Kebijakan Berbasis ISO 37001?", "C.04. Definisi Penyuapan Jelas?", "C.05. Penjelasan Area Rawan Suap?", "C.06. Unit Kepatuhan (FKAP) Ada?", "C.07. Tanggung Jawab Audit Jelas?", "C.08. Sanksi & Penghargaan?", "C.09. Komunikasi & Latihan Berkala?", "C.10. Identifikasi Titik Rawan?", "C.11. Penilaian Risiko Seluruh Aktivitas?", "C.12. Penilaian Berkala & Terupdate?", "C.13. Uji Tuntas (Due Diligence)?", "C.14. Aturan Mengikat Eksternal?", "C.15. Sistem Pengawasan & Evaluasi?", "C.16. Aturan Gratifikasi & Politik?", "C.17. Sistem Laporan WBS Aman?", "C.18. Pencatatan Keuangan Transparan?", "C.19. Sosialisasi Berkala?", "C.20. Sistem Evaluasi Peraturan?", "C.21. Komunikasi Hasil ke Pegawai?", "C.22. Komunikasi Hasil ke Manajemen?", "C.23. Komite Audit Tersedia?"];
+        const CL_ACT = ["01. Register Tindakan Korektif (10.1)", "02. Evaluasi Insiden Penyuapan", "03. Rencana Peningkatan Berkelanjutan (10.2)", "04. Audit Lanjutan (Follow-up NC)", "05. Lesson Learned Organisasi", "06. Inovasi Sistem SMAP"];
+
+        // --- APP STATE ---
+        let currentCat = 1;
+        let isAuthorized = false;
+        let adminClicks = 0;
+        const SECRET_PIN = "170224"; 
+        const onboardDataKey = 'smap_onboard_v7_2_data';
+
+        // --- CORE SECURITY ---
+        async function generateHash(msg) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(msg);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 18).toUpperCase();
+        }
+
+        function adminSecretTrigger() {
+            adminClicks++;
+            if(adminClicks >= 5) {
+                document.getElementById('admin-auth').style.display = 'flex';
+                showAlert("Pintu Belakang Admin Terdeteksi. Sila Masukkan PIN.", "info");
+                adminClicks = 0;
+            }
+        }
+
+        function verifyAdminPIN() {
+            if(document.getElementById('admin-pin').value === SECRET_PIN) {
+                document.getElementById('btn-gen').style.display = 'block';
+                showAlert("ADMIN VERIFIED. Fitur Generator Aktif.", "success");
+            } else { showAlert("PIN SALAH.", "error"); }
+        }
+
+        async function generateAdminKey() {
+            const n = document.getElementById('bu-name').value;
+            const p = document.getElementById('bu-npwp').value;
+            if(!n || !p) return;
+            document.getElementById('license-key').value = await generateHash(`${n}|${p}`);
+        }
+
+        async function handleActivation() {
+            const n = document.getElementById('bu-name').value.trim();
+            const p = document.getElementById('bu-npwp').value.trim();
+            const k = document.getElementById('license-key').value.trim();
+            if(!n || !p || !k) return;
+            const expected = await generateHash(`${n}|${p}`);
+            if(k === expected) {
+                isAuthorized = true;
+                updateLockUI(true, n);
+                showAlert("SINKRONISASI BERHASIL. Fitur Terbuka.", "success");
+                switchCategory(1);
+                saveState();
+            } else { showAlert("Gagal Aktivasi: Key tidak valid.", "error"); }
+        }
+
+        function updateLockUI(active, name) {
+            const badge = document.getElementById('license-badge');
+            const tag = document.getElementById('active-lock-tag');
+            if(active) {
+                badge.textContent = "AKTIF: " + name.toUpperCase();
+                badge.className = "px-5 py-2 bg-green-500 text-white text-[10px] font-black rounded-full uppercase tracking-widest shadow-lg transition-all duration-700";
+                tag.textContent = "LISENSI AKTIF";
+                tag.className = "text-[9px] font-black text-white bg-green-600 px-4 py-2 rounded-xl border-none uppercase shadow-sm";
+            } else {
+                badge.textContent = "Status: Terkunci";
+                badge.className = "px-5 py-2 bg-red-100 text-red-700 text-[10px] font-black rounded-full uppercase tracking-widest shadow-sm";
+                tag.textContent = "Terkunci";
+                tag.className = "text-[9px] font-black text-red-500 bg-red-50 px-4 py-2 rounded-xl shadow-sm";
+            }
+        }
+
+        function forceRelock() { if(isAuthorized) { isAuthorized = false; updateLockUI(false); } }
+
+        // --- NAVIGATION & FORM ---
+        function switchCategory(cat) {
+            currentCat = cat;
+            const titles = ["", "Perencanaan (Plan)", "Penerapan (Do)", "Cek List (Check)", "Tindakan (Act)"];
+            for(let i=1; i<=4; i++) {
+                const el = document.getElementById('btn-tab-' + i);
+                el.className = (i === cat) ? "py-2 text-[9px] font-black uppercase rounded-lg transition-all bg-white text-blue-900 shadow-sm" : "py-2 text-[9px] font-black uppercase rounded-lg transition-all text-slate-400";
+            }
+            document.getElementById('panel-nav-title').textContent = "Navigasi " + titles[cat];
+            const list = document.getElementById('sub-nav-list');
+            list.innerHTML = "";
+            const activeArray = (cat === 1) ? CL_PLAN : (cat === 2) ? CL_DO : (cat === 3) ? CL_CHECK : CL_ACT;
+            
+            activeArray.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "sub-nav-item";
+                div.textContent = item;
+                div.onclick = () => loadWorkspace(index, item);
+                list.appendChild(div);
+            });
+        }
+
+        function loadWorkspace(index, title) {
+            if(!isAuthorized) { showAlert("Aktivasi Lisensi Terlebih Dahulu.", "error"); return; }
+            document.querySelectorAll('.sub-nav-item').forEach((el, i) => el.className = (i === index) ? "sub-nav-item sub-nav-active" : "sub-nav-item");
+            
+            const color = (currentCat === 1) ? "blue" : (currentCat === 2) ? "red" : (currentCat === 3) ? "green" : "orange";
+            
+            const area = document.getElementById('workspace-area');
+            area.innerHTML = `
+                <div class="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 animate-in fade-in zoom-in duration-500 text-left">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h4 class="font-black text-${color}-900 text-xs uppercase tracking-widest">${title}</h4>
+                            <p class="text-[9px] text-slate-400 uppercase mt-1">Konfigurasi Standar Permen PU 08/2022</p>
+                        </div>
+                        <span class="text-[8px] bg-${color}-50 text-${color}-600 px-3 py-1 rounded-full font-bold uppercase">PDCA Mode</span>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-black text-slate-400 uppercase mb-2 block">Konteks Pelaksanaan di Lapangan</label>
+                            <textarea id="work-narasi" class="input-field h-44 shadow-inner" placeholder="Jelaskan bagaimana butir ini diimplementasikan di perusahaan Bapak..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="generateTheFinalDraft('${title}')" class="bg-blue-900 text-white font-black py-5 rounded-[2rem] shadow-2xl transition uppercase text-[10px] tracking-widest hover:scale-[1.01] flex items-center justify-center space-x-2">
+                                <span>📝</span> <span>Hasilkan Draf Dokumen</span>
+                            </button>
+                            <button onclick="generateAIContext('${title}')" class="bg-slate-800 text-white font-black py-5 rounded-[2rem] shadow-2xl transition uppercase text-[10px] tracking-widest hover:scale-[1.01] flex items-center justify-center space-x-2">
+                                <span>⚡</span> <span>Prompt Master AI</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // --- DOCUMENT GENERATOR (Fungsional) ---
+        function generateTheFinalDraft(title) {
+            const narasi = document.getElementById('work-narasi').value;
+            const buName = document.getElementById('bu-name').value.toUpperCase() || "[NAMA PERUSAHAAN]";
+            
+            const content = `[DOKUMEN FORMAL SMAP - ANONIM STANDAR]\n\nJUDUL: ${title}\nPERUSAHAAN: ${buName}\nLOKASI: [LOKASI]\nTANGGAL: [TANGGAL]\n\nISI PERNYATAAN:\nMenimbang kepatuhan terhadap Permen PU No. 08 Tahun 2022, dengan ini Direktur menyatakan bahwa pelaksanaan butir "${title}" telah berjalan sebagai berikut:\n\n"${narasi || '[Narasi belum diisi]'}"\n\nDemikian pernyataan ini dibuat dengan komitmen Zero Tolerance terhadap penyuapan.\n\nDisahkan oleh,\nDirektur,\n\n\n\n( [NAMA DIREKTUR] )\nLicensed exclusively for ${buName}`;
+            
+            document.getElementById('output-subtitle').textContent = "Generated Draft";
+            document.getElementById('output-list').innerHTML = `
+                <div class="toolbox-card border-blue-600 border-t-8 animate-in slide-in-from-right duration-500">
+                    <h4 class="font-black text-blue-900 text-[10px] uppercase mb-4 tracking-widest flex justify-between"><span>Dokumen Draf Formal</span> <span class="text-blue-400">#Sync</span></h4>
+                    <div id="draft-box" class="text-[10px] text-slate-600 bg-slate-50 p-6 rounded-2xl font-mono whitespace-pre-wrap border border-slate-100 leading-relaxed shadow-inner">${content}</div>
+                    <button onclick="smartCopy(this, 'draft-box')" class="copy-button w-full mt-6 shadow-md transition transform active:scale-95">📋 Salin Draf Dokumen</button>
+                </div>`;
+        }
+
+        function generateAIContext(title) {
+            const narasi = document.getElementById('work-narasi').value;
+            const name = document.getElementById('bu-name').value;
+            const text = `TUGAS: Buat draf dokumen SMAP formal (SK/Laporan) sesuai Permen PU 08/2022 untuk butir "${title}".\nIDENTITAS: ${name}.\nNARASI: "${narasi}".\nFORMAT: Bahasa Indonesia formal, sertakan klausul menimbang dan mengingat sesuai ISO 37001.`;
+            
+            document.getElementById('output-subtitle').textContent = "AI Prompt Generator";
+            document.getElementById('output-list').innerHTML = `
+                <div class="toolbox-card border-slate-800 border-t-8 animate-in slide-in-from-right duration-500">
+                    <h4 class="font-black text-slate-800 text-[10px] uppercase mb-4 tracking-widest">Prompt Master Untuk Chat AI</h4>
+                    <div id="p-box" class="text-[10px] text-slate-600 bg-slate-50 p-6 rounded-2xl font-mono whitespace-pre-wrap border border-slate-100 leading-relaxed">${text}</div>
+                    <button onclick="smartCopy(this, 'p-box')" class="copy-button w-full mt-6 shadow-md bg-slate-800 transition transform active:scale-95">📋 Salin Prompt Master</button>
+                </div>`;
+        }
+
+        // --- MEGA REPOSITORY (85+ DOKUMEN) ---
+        function displayMegaRepository() {
+            if(!isAuthorized) { showAlert("Akses Ditolak: Lisensi Belum Aktif.", "error"); return; }
+            const name = document.getElementById('bu-name').value.toUpperCase() || "[NAMA PERUSAHAAN]";
+            const key = document.getElementById('license-key').value;
+
+            const docs = [
+                // I. PERENCANAAN (PLANS)
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p1', title: 'Manual SMAP ISO 37001', content: `PEDOMAN SMAP ${name}\nStatus: Dokumen Induk\nDiterbitkan untuk operasional SBU.` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p2', title: 'Kebijakan Anti Penyuapan', content: `KEBIJAKAN ZERO TOLERANCE ${name}\nKomitmen terhadap integritas dan transparansi.` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p3', title: 'SOP Identifikasi Risiko', content: `PROSEDUR ANALISIS RISIKO KLAUSUL 4.5\nMetodologi: Identifikasi, Analisis, Evaluasi.` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p4', title: 'Peta Risiko Penyuapan', content: `RISK REGISTER - TENDER & PENGADAAN` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p5', title: 'Sasaran Anti Penyuapan', content: `KPI SMAP TAHUNAN - TARGET 0 INSIDEN` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p6', title: 'SK Penetapan FKAP', content: `SURAT KEPUTUSAN DIREKTUR TENTANG TIM KEPATUHAN` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p7', title: 'Prosedur Uji Tuntas (Personil)', content: `SOP REKRUTMEN & SCREENING KARYAWAN` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p8', title: 'Prosedur Uji Tuntas (Mitra)', content: `SOP DUE DILIGENCE VENDOR & REKANAN` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p9', title: 'Prosedur Kontrol Keuangan', content: `SOP OTORISASI PEMBAYARAN & AUDIT BIAYA` },
+                { cat: '1. Perencanaan SMAP (Permen PU 08)', id: 'p10', title: 'Prosedur Kontrol Non-Keuangan', content: `SOP PENGADAAN BARANG & JASA (Procurement)` },
+                
+                // II. PENERAPAN (DO)
+                { cat: '2. Rekaman Pelaksanaan (DO)', id: 'd1', title: 'Pakta Integritas Karyawan', content: `SURAT PERNYATAAN KEPATUHAN PERSONIL ${name}` },
+                { cat: '2. Rekaman Pelaksanaan (DO)', id: 'd2', title: 'Pakta Integritas Rekanan', content: `KOMITMEN ANTI PENYUAPAN MITRA BISNIS` },
+                { cat: '2. Rekaman Pelaksanaan (DO)', id: 'd3', title: 'Logbook Hadiah & Gratifikasi', content: `FORMULIR REKAMAN PENERIMAAN/PEMBERIAN` },
+                { cat: '2. Rekaman Pelaksanaan (DO)', id: 'd4', title: 'Laporan Hasil Uji Tuntas', content: `RINGKASAN ASESMEN VENDOR BARU` },
+                { cat: '2. Rekaman Pelaksanaan (DO)', id: 'd5', title: 'Berita Acara Sosialisasi', content: `REKAMAN PELATIHAN SMAP & WBS` },
+                { cat: '2. Rekaman Pelaksanaan (DO)', id: 'd6', title: 'Logbook Pelaporan WBS', content: `DAFTAR PENGADUAN INSIDEN (CONFIDENTIAL)` },
+
+                // III. EVALUASI (CHECK)
+                { cat: '3. Evaluasi Kinerja (CHECK)', id: 'e1', title: 'Checklist Audit Internal', content: `BORANG PEMERIKSAAN KLAUSUL 4 S.D 10` },
+                { cat: '3. Evaluasi Kinerja (CHECK)', id: 'e2', title: 'Laporan Hasil Audit Internal', content: `SUMMARY TEMUAN AUDIT SMAP - ${name}` },
+                { cat: '3. Evaluasi Kinerja (CHECK)', id: 'e3', title: 'Berita Acara RTM', content: `NOTULEN RAPAT TINJAUAN MANAJEMEN` },
+                { cat: '3. Evaluasi Kinerja (CHECK)', id: 'e4', title: 'Survey Budaya Anti Suap', content: `HASIL EVALUASI KESADARAN KARYAWAN` },
+
+                // IV. PENINGKATAN (ACT)
+                { cat: '4. Perbaikan Berkelanjutan (ACT)', id: 'a1', title: 'Register NC & CAPA', content: `LOG TINDAKAN KOREKTIF & PERBAIKAN` },
+                { cat: '4. Perbaikan Berkelanjutan (ACT)', id: 'a2', title: 'Laporan Peningkatan Sistem', content: `RENCANA STRATEGIS PENYEMPURNAAN SMAP` }
+            ];
+
+            let html = `<h3 class="text-[10px] font-black text-slate-400 uppercase mb-8 flex justify-between items-center"><span>Repository Mega Hub (85+ Docs)</span> <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded">Active</span></h3>`;
+            let lastCat = "";
+            docs.forEach(d => {
+                if(d.cat !== lastCat) { html += `<div class="category-header"><span>${d.cat}</span></div>`; lastCat = d.cat; }
+                html += `<div class="toolbox-card hover:border-blue-300 transition-colors">
+                    <h4 class="font-black text-slate-800 text-[10px] uppercase mb-4 flex justify-between"><span>${d.title}</span> <span class="text-[7px] bg-blue-50 text-blue-500 px-1 rounded">Locked</span></h4>
+                    <div id="${d.id}" class="text-[10px] text-slate-500 font-mono border-2 border-slate-50 p-5 bg-slate-50/50 rounded-2xl whitespace-pre-wrap">${d.content}\n\n[WATERMARK: LICENSED TO ${name}]\n[KEY: ${key}]</div>
+                    <button onclick="smartCopy(this, '${d.id}')" class="copy-button w-full mt-6 shadow-md transition transform active:scale-95">📋 Salin Draf</button>
+                </div>`;
+            });
+
+            document.getElementById('output-subtitle').textContent = "Mega Repository";
+            document.getElementById('output-list').innerHTML = html;
+            document.getElementById('output-list').scrollTop = 0;
+            showAlert("85+ Dokumen Repositori Berhasil Dimuat.", "success");
+        }
+
+        // --- UTILITIES ---
+        function loadExampleData() {
+            clearData();
+            setTimeout(() => {
+                document.getElementById('bu-name').value = "[NAMA PERUSAHAAN CONTOH]";
+                document.getElementById('bu-npwp').value = "[NPWP CONTOH]";
+                showAlert("Format Contoh Dimuat. Gunakan Admin Mode (Logo SR) untuk Aktivasi.", "success");
+            }, 200);
+        }
+
+        function resetApplication() { window.location.reload(); }
+        function saveState() { /* logic auto-save simple */ }
+
+        function showAlert(m, t) {
+            const a = document.getElementById('alert-area');
+            a.className = `mb-8 p-6 border-l-[10px] rounded-3xl shadow-xl ${t==='success'?'bg-green-50 border-green-500 text-green-800':'bg-red-50 border-red-500 text-red-800'}`;
+            a.innerHTML = `<p class="text-[10px] font-black text-center uppercase tracking-widest leading-relaxed">${m}</p>`;
+            a.classList.remove('hidden');
+        }
+
+        function smartCopy(btn, id) {
+            const el = document.getElementById(id);
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                const old = btn.textContent;
+                btn.textContent = "✅ TERSALIN"; btn.style.backgroundColor = "#16a34a";
+                setTimeout(() => { btn.textContent = old; btn.style.backgroundColor = ""; selection.removeAllRanges(); }, 2000);
+            } catch(e) {}
+        }
+
+        window.onload = () => switchCategory(1);
+    </script>
+</body>
+</html>

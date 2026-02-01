@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -17,6 +17,7 @@ import EquipmentPage from "@/pages/equipment";
 import ProjectsPage from "@/pages/projects";
 import VendorsPage from "@/pages/vendors";
 import DocumentsPage from "@/pages/documents";
+import PDCAGenerator from "@/pages/pdca-generator";
 
 function Router() {
   return (
@@ -32,8 +33,29 @@ function Router() {
       <Route path="/projects" component={ProjectsPage} />
       <Route path="/vendors" component={VendorsPage} />
       <Route path="/documents" component={DocumentsPage} />
+      <Route path="/pdca" component={PDCAGenerator} />
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+function AppContent() {
+  const [location] = useLocation();
+  const isFullWidthPage = location === "/pdca";
+
+  return (
+    <div className="flex h-screen w-full">
+      <AppSidebar />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <header className="flex items-center gap-4 h-14 px-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+          <SidebarTrigger data-testid="button-sidebar-toggle" />
+          <div className="flex-1" />
+        </header>
+        <main className={`flex-1 overflow-auto ${isFullWidthPage ? "" : "p-6"}`}>
+          <Router />
+        </main>
+      </div>
+    </div>
   );
 }
 
@@ -47,18 +69,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <SidebarProvider style={style as React.CSSProperties}>
-          <div className="flex h-screen w-full">
-            <AppSidebar />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <header className="flex items-center gap-4 h-14 px-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-                <SidebarTrigger data-testid="button-sidebar-toggle" />
-                <div className="flex-1" />
-              </header>
-              <main className="flex-1 overflow-auto p-6">
-                <Router />
-              </main>
-            </div>
-          </div>
+          <AppContent />
         </SidebarProvider>
         <Toaster />
       </TooltipProvider>
