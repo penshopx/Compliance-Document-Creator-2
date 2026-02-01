@@ -78,6 +78,7 @@ export default function LandingPage() {
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">Fitur</a>
+              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Harga</a>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" asChild data-testid="button-login">
@@ -203,6 +204,134 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="pricing" className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-pricing-title">Pilih Paket yang Sesuai</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Mulai gratis dan upgrade sesuai kebutuhan perusahaan Anda
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="relative" data-testid="card-pricing-starter">
+              <CardContent className="p-6 pt-8">
+                <h3 className="font-bold text-xl mb-2">Starter</h3>
+                <p className="text-muted-foreground text-sm mb-4">Untuk memulai perjalanan compliance</p>
+                <div className="mb-6">
+                  <span className="text-3xl font-bold">Gratis</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  {["1 Profil Perusahaan", "Akses Pancek Basic", "5 Template Dokumen", "SMAP Mentor AI (terbatas)"].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full" variant="outline" asChild>
+                  <a href="/api/login">Mulai Gratis</a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="relative border-primary shadow-lg scale-105" data-testid="card-pricing-professional">
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Paling Populer</Badge>
+              <CardContent className="p-6 pt-8">
+                <h3 className="font-bold text-xl mb-2">Professional</h3>
+                <p className="text-muted-foreground text-sm mb-4">Untuk perusahaan yang serius</p>
+                <div className="mb-6">
+                  <span className="text-3xl font-bold">Rp 499.000</span>
+                  <span className="text-muted-foreground">/bulan</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  {["Unlimited Perusahaan", "Akses SMAP + Pancek", "270+ Template Dokumen", "SMAP Mentor AI Unlimited", "Export PDF & Word", "Tracking Sertifikasi"].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full" asChild>
+                  <a href="/api/login">Mulai Trial 14 Hari</a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="relative" data-testid="card-pricing-enterprise">
+              <CardContent className="p-6 pt-8">
+                <h3 className="font-bold text-xl mb-2">Enterprise</h3>
+                <p className="text-muted-foreground text-sm mb-4">Untuk grup perusahaan besar</p>
+                <div className="mb-6">
+                  <span className="text-3xl font-bold">Custom</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  {["Semua fitur Professional", "Multi-User Access", "Dedicated Account Manager", "Training & Konsultasi", "Integrasi API", "SLA Support 24/7"].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full" variant="outline" asChild>
+                  <a href="/api/login">Hubungi Sales</a>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="mt-12 max-w-4xl mx-auto">
+            <CardContent className="p-6">
+              <h3 className="font-bold text-lg mb-6 text-center">Metode Pembayaran Indonesia</h3>
+              <div className="grid sm:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="font-medium flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    Transfer Bank
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { name: "BCA", account: "1234567890" },
+                      { name: "Mandiri", account: "1234567890123" },
+                      { name: "BRI", account: "123456789012345" },
+                      { name: "BNI", account: "1234567890" }
+                    ].map((bank) => (
+                      <div key={bank.name} className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className="font-semibold text-sm">{bank.name}</div>
+                        <div className="text-xs text-muted-foreground">{bank.account}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">a.n. PT Compliance Hub Indonesia</p>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    E-Wallet & QRIS
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {["GoPay", "OVO", "Dana", "ShopeePay"].map((wallet) => (
+                      <div key={wallet} className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className="font-semibold text-sm">{wallet}</div>
+                        <div className="text-xs text-muted-foreground">Via QRIS</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Scan QRIS setelah checkout</p>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t text-center">
+                <p className="text-sm text-muted-foreground mb-3">Konfirmasi pembayaran via WhatsApp:</p>
+                <Button variant="outline" asChild>
+                  <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer">
+                    WhatsApp: 0812-3456-7890
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

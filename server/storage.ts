@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "./db";
 import {
   companies,
@@ -14,6 +14,9 @@ import {
   generatedDocuments,
   documentTemplates,
   clauseReferences,
+  subscriptionPlans,
+  paymentOrders,
+  userSubscriptions,
   type Company,
   type InsertCompany,
   type Management,
@@ -40,6 +43,12 @@ import {
   type InsertDocumentTemplate,
   type ClauseReference,
   type InsertClauseReference,
+  type SubscriptionPlan,
+  type InsertSubscriptionPlan,
+  type PaymentOrder,
+  type InsertPaymentOrder,
+  type UserSubscription,
+  type InsertUserSubscription,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -130,6 +139,24 @@ export interface IStorage {
     management: number;
     audit: number;
   }>;
+
+  // Subscription Plans
+  getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlan(id: string): Promise<SubscriptionPlan | undefined>;
+  createSubscriptionPlan(data: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
+
+  // Payment Orders
+  getPaymentOrders(): Promise<PaymentOrder[]>;
+  getPaymentOrdersByUser(userId: string): Promise<PaymentOrder[]>;
+  getPaymentOrder(id: string): Promise<PaymentOrder | undefined>;
+  getPaymentOrderByNumber(orderNumber: string): Promise<PaymentOrder | undefined>;
+  createPaymentOrder(data: InsertPaymentOrder): Promise<PaymentOrder>;
+  updatePaymentOrder(id: string, data: Partial<InsertPaymentOrder>): Promise<PaymentOrder>;
+
+  // User Subscriptions
+  getUserSubscription(userId: string): Promise<UserSubscription | undefined>;
+  createUserSubscription(data: InsertUserSubscription): Promise<UserSubscription>;
+  updateUserSubscription(id: string, data: Partial<InsertUserSubscription>): Promise<UserSubscription>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -391,6 +418,66 @@ export class DatabaseStorage implements IStorage {
       management: managementList.length,
       audit: auditList.length,
     };
+  }
+
+  // Subscription Plans
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return db.select().from(subscriptionPlans).orderBy(subscriptionPlans.sortOrder);
+  }
+
+  async getSubscriptionPlan(id: string): Promise<SubscriptionPlan | undefined> {
+    const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return plan;
+  }
+
+  async createSubscriptionPlan(data: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const [plan] = await db.insert(subscriptionPlans).values(data).returning();
+    return plan;
+  }
+
+  // Payment Orders
+  async getPaymentOrders(): Promise<PaymentOrder[]> {
+    return db.select().from(paymentOrders).orderBy(desc(paymentOrders.createdAt));
+  }
+
+  async getPaymentOrdersByUser(userId: string): Promise<PaymentOrder[]> {
+    return db.select().from(paymentOrders).where(eq(paymentOrders.userId, userId)).orderBy(desc(paymentOrders.createdAt));
+  }
+
+  async getPaymentOrder(id: string): Promise<PaymentOrder | undefined> {
+    const [order] = await db.select().from(paymentOrders).where(eq(paymentOrders.id, id));
+    return order;
+  }
+
+  async getPaymentOrderByNumber(orderNumber: string): Promise<PaymentOrder | undefined> {
+    const [order] = await db.select().from(paymentOrders).where(eq(paymentOrders.orderNumber, orderNumber));
+    return order;
+  }
+
+  async createPaymentOrder(data: InsertPaymentOrder): Promise<PaymentOrder> {
+    const [order] = await db.insert(paymentOrders).values(data).returning();
+    return order;
+  }
+
+  async updatePaymentOrder(id: string, data: Partial<InsertPaymentOrder>): Promise<PaymentOrder> {
+    const [order] = await db.update(paymentOrders).set(data).where(eq(paymentOrders.id, id)).returning();
+    return order;
+  }
+
+  // User Subscriptions
+  async getUserSubscription(userId: string): Promise<UserSubscription | undefined> {
+    const [sub] = await db.select().from(userSubscriptions).where(eq(userSubscriptions.userId, userId));
+    return sub;
+  }
+
+  async createUserSubscription(data: InsertUserSubscription): Promise<UserSubscription> {
+    const [sub] = await db.insert(userSubscriptions).values(data).returning();
+    return sub;
+  }
+
+  async updateUserSubscription(id: string, data: Partial<InsertUserSubscription>): Promise<UserSubscription> {
+    const [sub] = await db.update(userSubscriptions).set(data).where(eq(userSubscriptions.id, id)).returning();
+    return sub;
   }
 }
 

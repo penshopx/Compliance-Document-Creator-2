@@ -276,5 +276,63 @@ export const insertClauseReferenceSchema = createInsertSchema(clauseReferences).
 export type InsertClauseReference = z.infer<typeof insertClauseReferenceSchema>;
 export type ClauseReference = typeof clauseReferences.$inferSelect;
 
+// Subscription Plans
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  currency: text("currency").default("IDR"),
+  interval: text("interval").default("monthly"),
+  features: text("features"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({ id: true });
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+
+// Payment Orders
+export const paymentOrders = pgTable("payment_orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderNumber: text("order_number").notNull(),
+  userId: text("user_id").notNull(),
+  userEmail: text("user_email"),
+  userName: text("user_name"),
+  planId: varchar("plan_id").references(() => subscriptionPlans.id),
+  planName: text("plan_name"),
+  amount: integer("amount").notNull(),
+  paymentMethod: text("payment_method"),
+  bankName: text("bank_name"),
+  status: text("status").default("pending"),
+  proofUrl: text("proof_url"),
+  notes: text("notes"),
+  expiresAt: timestamp("expires_at"),
+  paidAt: timestamp("paid_at"),
+  confirmedAt: timestamp("confirmed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPaymentOrderSchema = createInsertSchema(paymentOrders).omit({ id: true, createdAt: true });
+export type InsertPaymentOrder = z.infer<typeof insertPaymentOrderSchema>;
+export type PaymentOrder = typeof paymentOrders.$inferSelect;
+
+// User Subscriptions
+export const userSubscriptions = pgTable("user_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: text("user_id").notNull(),
+  planId: varchar("plan_id").references(() => subscriptionPlans.id),
+  planName: text("plan_name"),
+  status: text("status").default("active"),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions).omit({ id: true, createdAt: true });
+export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+
 // Export auth models
 export * from "./models/auth";
