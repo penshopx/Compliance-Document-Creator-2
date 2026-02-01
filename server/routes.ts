@@ -429,17 +429,9 @@ Gaya komunikasi:
 - Memberikan langkah-langkah yang actionable
 - Di akhir respons, tawarkan untuk membantu lebih lanjut atau tanyakan apakah ada aspek lain yang ingin dipelajari`;
 
-      const messages = [
-        { role: "user", content: SYSTEM_PROMPT },
-        { role: "assistant", content: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." },
-        ...(history || []).map(m => ({
-          role: m.role === "user" ? "user" : "assistant",
-          content: m.content
-        })),
-        { role: "user", content: message }
-      ];
-
-      // Use Replit AI Integration (Gemini via OpenAI-compatible API)
+      // Use Replit AI Integration (Gemini via Google GenAI SDK)
+      const { GoogleGenAI } = await import("@google/genai");
+      
       const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
       const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
       
@@ -447,27 +439,30 @@ Gaya komunikasi:
         return res.status(500).json({ error: "AI Integration tidak dikonfigurasi" });
       }
 
-      const response = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          apiVersion: "",
+          baseUrl,
         },
-        body: JSON.stringify({
-          model: "gemini-2.5-flash",
-          messages,
-          temperature: 0.7,
-          max_tokens: 2048,
-        })
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        return res.status(response.status).json({ error: error.error?.message || "API request failed" });
-      }
+      const contents = [
+        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+        { role: "model", parts: [{ text: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." }] },
+        ...(history || []).map(m => ({
+          role: m.role === "user" ? "user" : "model",
+          parts: [{ text: m.content }]
+        })),
+        { role: "user", parts: [{ text: message }] }
+      ];
 
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content || "Maaf, saya tidak dapat memproses permintaan Anda.";
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents,
+      });
+
+      const content = response.text || "Maaf, saya tidak dapat memproses permintaan Anda.";
 
       res.json({ content });
     } catch (error) {
@@ -475,7 +470,7 @@ Gaya komunikasi:
         return res.status(400).json({ error: "Invalid request data" });
       }
       console.error("Chat error:", error);
-      res.status(500).json({ error: "Failed to process chat request" });
+      res.status(500).json({ error: "Gagal memproses permintaan chat" });
     }
   });
 
