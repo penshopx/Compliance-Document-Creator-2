@@ -39,8 +39,7 @@ const mentorChatSchema = z.object({
   history: z.array(z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string()
-  })).optional(),
-  apiKey: z.string().min(1)
+  })).optional()
 });
 
 export async function registerRoutes(
@@ -405,7 +404,12 @@ export async function registerRoutes(
   // SMAP Mentor Chat Route
   app.post("/api/mentor/chat", async (req, res) => {
     try {
-      const { message, history, apiKey } = mentorChatSchema.parse(req.body);
+      const { message, history } = mentorChatSchema.parse(req.body);
+      const apiKey = process.env.GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "GEMINI_API_KEY tidak dikonfigurasi" });
+      }
       
       const SYSTEM_PROMPT = `Anda adalah SMAP Mentor, asisten AI yang ahli dalam Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016 dan Panduan Cegah Korupsi (Pancek) dari KPK Indonesia.
 
