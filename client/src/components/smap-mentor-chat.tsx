@@ -158,7 +158,8 @@ export default function SMAPMentorChat() {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 rounded-full shadow-lg z-50 bg-blue-600"
+        className="fixed bottom-4 left-4 rounded-full shadow-lg bg-blue-600"
+        style={{ zIndex: 9999 }}
         size="icon"
         data-testid="button-open-mentor-chat"
       >
@@ -168,7 +169,7 @@ export default function SMAPMentorChat() {
   }
 
   return (
-    <Card className="fixed bottom-4 left-4 w-96 h-[500px] shadow-xl z-50 flex flex-col" data-testid="card-mentor-chat">
+    <Card className="fixed bottom-4 left-4 w-96 h-[500px] shadow-xl flex flex-col" style={{ zIndex: 9999 }} data-testid="card-mentor-chat">
       <CardHeader className="pb-2 border-b bg-blue-600 text-white rounded-t-lg">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">

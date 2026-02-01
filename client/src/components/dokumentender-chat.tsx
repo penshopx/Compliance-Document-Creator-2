@@ -11,7 +11,8 @@ export default function DokumentenderChat() {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 bg-green-600"
+        className="fixed bottom-4 right-4 rounded-full shadow-lg bg-green-600"
+        style={{ zIndex: 9999 }}
         size="icon"
         data-testid="button-open-dokumentender-chat"
       >
@@ -21,7 +22,7 @@ export default function DokumentenderChat() {
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-96 h-[500px] shadow-xl z-50 flex flex-col" data-testid="card-dokumentender-chat">
+    <Card className="fixed bottom-4 right-4 w-96 h-[500px] shadow-xl flex flex-col" style={{ zIndex: 9999 }} data-testid="card-dokumentender-chat">
       <CardHeader className="pb-2 border-b bg-green-600 text-white rounded-t-lg">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
