@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { 
   Shield, ClipboardList, Settings, ClipboardCheck, RefreshCw, MessageSquare,
   ChevronRight, CheckCircle2, Circle, ExternalLink, FileText, Copy, Search,
-  Flag, ArrowLeft, BookOpen, Download
+  Flag, ArrowLeft, BookOpen, Download, Award, AlertTriangle, TrendingUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -59,12 +59,17 @@ export default function PancekPage() {
   const stats = getPancekStats();
   const currentPhase = PANCEK_PHASES.find(p => p.id === selectedPhase);
 
+  const VERIFICATION_THRESHOLD = 70;
+
   const overallProgress = useMemo(() => {
     const totalRequired = PANCEK_PHASES.flatMap(p => p.checklistItems).filter(i => i.required).length;
     const completedRequired = PANCEK_PHASES.flatMap(p => p.checklistItems)
       .filter(i => i.required && checkedItems[i.id]).length;
     return totalRequired > 0 ? Math.round((completedRequired / totalRequired) * 100) : 0;
   }, [checkedItems]);
+
+  const isVerified = overallProgress >= VERIFICATION_THRESHOLD;
+  const remainingForVerification = Math.max(0, VERIFICATION_THRESHOLD - overallProgress);
 
   const phaseProgress = useMemo(() => {
     return PANCEK_PHASES.reduce((acc, phase) => {
@@ -171,6 +176,58 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
         </div>
       </div>
 
+      <Card className={`border-2 ${isVerified ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-verification-status">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {isVerified ? (
+                <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50">
+                  <Award className="h-8 w-8 text-green-600" />
+                </div>
+              ) : (
+                <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/50">
+                  <AlertTriangle className="h-8 w-8 text-orange-600" />
+                </div>
+              )}
+              <div>
+                <h3 className="text-lg font-bold" data-testid="text-verification-status">
+                  {isVerified ? "PANCEK TERVERIFIKASI" : "BELUM TERVERIFIKASI"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isVerified 
+                    ? "Selamat! Kesesuaian dan kecukupan telah mencapai threshold 70%"
+                    : `Diperlukan ${remainingForVerification}% lagi untuk mencapai status Terverifikasi`
+                  }
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="flex items-center gap-2">
+                <TrendingUp className={`h-5 w-5 ${isVerified ? 'text-green-600' : 'text-orange-600'}`} />
+                <span className={`text-3xl font-bold ${isVerified ? 'text-green-600' : 'text-orange-600'}`}>
+                  {overallProgress}%
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground">Target: {VERIFICATION_THRESHOLD}%</div>
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span>Progress Kesesuaian</span>
+              <span className="font-medium">{overallProgress}% / {VERIFICATION_THRESHOLD}%</span>
+            </div>
+            <div className="relative">
+              <Progress value={overallProgress} className="h-3" />
+              <div 
+                className="absolute top-0 h-3 w-0.5 bg-red-500" 
+                style={{ left: `${VERIFICATION_THRESHOLD}%` }}
+                title="Threshold 70%"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -194,7 +251,7 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-2xl font-bold text-blue-600">{overallProgress}%</span>
-              <span className="text-sm text-muted-foreground">Selesai</span>
+              <span className="text-sm text-muted-foreground">Kesesuaian</span>
             </div>
             <Progress value={overallProgress} className="h-2" />
           </CardContent>
