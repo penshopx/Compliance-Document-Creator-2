@@ -27,7 +27,6 @@ import {
   Wand2,
   Info,
 } from "lucide-react";
-import type { Company, ManagementTeam, FkapMember } from "@shared/schema";
 
 const DOCUMENT_TEMPLATES = [
   {
@@ -502,60 +501,55 @@ export default function DocumentBuilder() {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [additionalContext, setAdditionalContext] = useState("");
 
-  const { data: company } = useQuery<Company>({
-    queryKey: ["/api/company"],
-  });
-
-  const { data: management = [] } = useQuery<ManagementTeam[]>({
-    queryKey: ["/api/management"],
-  });
-
-  const { data: fkap = [] } = useQuery<FkapMember[]>({
-    queryKey: ["/api/fkap"],
-  });
+  // Use placeholders only - no internal company data
+  const companyName = "[NAMA PERUSAHAAN]";
+  const companyCode = "[KODE]";
+  const companyAddress = "[ALAMAT PERUSAHAAN]";
+  const director = "[NAMA DIREKTUR]";
+  const ketuaFKAP = "[KETUA FKAP]";
 
   const filteredTemplates = activeCategory === "all"
     ? DOCUMENT_TEMPLATES
     : DOCUMENT_TEMPLATES.filter(t => t.category === activeCategory);
-
-  const companyCode = company?.name?.split(" ").map(w => w[0]).join("").toUpperCase() || "XXX";
-  const director = management.find(m => m.position?.toLowerCase().includes("direktur"))?.name || company?.directorName || "[NAMA DIREKTUR]";
-  const ketuaFKAP = fkap.find(f => f.role === "Ketua FKAP")?.name || "[NAMA KETUA FKAP]";
   const currentDate = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
   const currentYear = new Date().getFullYear().toString();
 
   const generatePrompt = useCallback((template: typeof DOCUMENT_TEMPLATES[0]) => {
     let prompt = template.promptTemplate;
     
-    // Replace placeholders with actual data
+    // Replace placeholders with placeholder values
     prompt = prompt.replace(/\{\{companyCode\}\}/g, companyCode);
-    prompt = prompt.replace(/\{\{companyName\}\}/g, company?.name || "[NAMA PERUSAHAAN]");
+    prompt = prompt.replace(/\{\{companyName\}\}/g, companyName);
     prompt = prompt.replace(/\{\{director\}\}/g, director);
     prompt = prompt.replace(/\{\{ketuaFKAP\}\}/g, ketuaFKAP);
     prompt = prompt.replace(/\{\{currentDate\}\}/g, currentDate);
     prompt = prompt.replace(/\{\{year\}\}/g, currentYear);
-    prompt = prompt.replace(/\{\{address\}\}/g, company?.address || "[ALAMAT PERUSAHAAN]");
+    prompt = prompt.replace(/\{\{address\}\}/g, companyAddress);
 
-    // Build complete prompt with company context
+    // Build complete prompt with placeholder company context
     const fullPrompt = `=== PROMPT GENERATOR DOKUMEN SMAP ===
 Gunakan prompt ini di AI model (ChatGPT, Gemini, Claude) atau dokumenttender.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 KONTEKS PERUSAHAAN:
-- Nama Perusahaan: ${company?.name || "[NAMA PERUSAHAAN]"}
-- Alamat: ${company?.address || "[ALAMAT]"}
+- Nama Perusahaan: ${companyName}
+- Alamat: ${companyAddress}
 - Direktur: ${director}
 - Ketua FKAP: ${ketuaFKAP}
 - Bidang Usaha: Jasa Konstruksi
 - Standar: SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
 
-${fkap.length > 0 ? `TIM FKAP:
-${fkap.map((f, i) => `${i + 1}. ${f.name} - ${f.role}`).join("\n")}
-` : ""}
-${management.length > 0 ? `MANAJEMEN:
-${management.map((m, i) => `${i + 1}. ${m.name} - ${m.position}`).join("\n")}
-` : ""}
+TIM FKAP:
+1. [KETUA FKAP] - Ketua
+2. [ANGGOTA FKAP 1] - Anggota
+3. [ANGGOTA FKAP 2] - Anggota
+
+MANAJEMEN:
+1. [DIREKTUR UTAMA] - Direktur Utama
+2. [DIREKTUR OPERASIONAL] - Direktur Operasional
+3. [DIREKTUR KEUANGAN] - Direktur Keuangan
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 INSTRUKSI PEMBUATAN DOKUMEN:
@@ -580,7 +574,7 @@ CATATAN PENTING:
     setGeneratedPrompt(fullPrompt);
     setSelectedTemplate(template);
     toast({ title: "Prompt berhasil dibuat!", description: "Salin dan gunakan di dokumenttender.com" });
-  }, [company, director, ketuaFKAP, fkap, management, companyCode, currentDate, currentYear, additionalContext, toast]);
+  }, [companyName, director, ketuaFKAP, companyCode, companyAddress, currentDate, currentYear, additionalContext, toast]);
 
   const handleCopyPrompt = useCallback(async () => {
     try {
@@ -629,14 +623,12 @@ CATATAN PENTING:
             </CardContent>
           </Card>
 
-          {company && (
-            <div className="flex items-center gap-2 mt-3 p-3 bg-muted/50 rounded-lg">
-              <Building2 className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm">
-                Konteks perusahaan: <strong>{company.name}</strong>
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 mt-3 p-3 bg-muted/50 rounded-lg">
+            <Building2 className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm">
+              Template menggunakan placeholder (ganti sesuai data perusahaan Anda)
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

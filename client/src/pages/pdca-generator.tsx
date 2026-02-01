@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileText,
   Copy,
@@ -18,10 +17,8 @@ import {
   ClipboardList,
   RotateCcw,
   Lock,
-  Unlock,
   BookOpen,
 } from "lucide-react";
-import type { Company } from "@shared/schema";
 
 const CL_PLAN = [
   "01. Kebijakan Anti Penyuapan (5.2)",
@@ -120,11 +117,9 @@ export default function PDCAGenerator() {
   const [showRepository, setShowRepository] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const { data: company } = useQuery<Company>({
-    queryKey: ["/api/company"],
-  });
-
-  const companyName = company?.name || "[NAMA PERUSAHAAN]";
+  // Use placeholders only - no internal company data
+  const companyName = "[NAMA PERUSAHAAN]";
+  const companyAddress = "[ALAMAT PERUSAHAAN]";
 
   const getClauseList = useCallback(() => {
     switch (activeTab) {
@@ -156,6 +151,52 @@ export default function PDCAGenerator() {
     }
   }, [activeTab]);
 
+  const generateDraft = () => {
+    if (!selectedClause) {
+      toast({ title: "Pilih klausul terlebih dahulu", variant: "destructive" });
+      return;
+    }
+
+    const phaseLabel = activeTab === "plan" ? "PLAN" : activeTab === "do" ? "DO" : activeTab === "check" ? "CHECK" : "ACT";
+    
+    const content = `=== DRAF DOKUMEN SMAP ===
+
+HEADER DOKUMEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nama Perusahaan: ${companyName}
+Alamat: ${companyAddress}
+Bidang Usaha: Jasa Konstruksi
+Standar: SNI ISO 37001:2016
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DOKUMEN: ${selectedClause}
+FASE PDCA: ${phaseLabel}
+TANGGAL: ${new Date().toLocaleDateString("id-ID")}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ISI DOKUMEN:
+
+${narasi ? `KONTEKS PELAKSANAAN:\n${narasi}\n\n` : "[Lengkapi dengan narasi pelaksanaan di lapangan]"}
+
+REFERENSI:
+- UU No. 31 Tahun 1999 jo. UU No. 20 Tahun 2001
+- UU No. 2 Tahun 2017 tentang Jasa Konstruksi
+- Permen PUPR No. 8 Tahun 2022
+- SNI ISO 37001:2016
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Catatan: Gunakan prompt AI untuk menghasilkan dokumen lengkap.`;
+
+    setGeneratedContent({ type: "draft", content });
+    setShowRepository(false);
+    toast({ 
+      title: "Draf dokumen berhasil dibuat",
+      description: "Gunakan sebagai kerangka dokumen Anda"
+    });
+  };
+
   const generateQuickPrompt = () => {
     if (!selectedClause) {
       toast({ title: "Pilih klausul terlebih dahulu", variant: "destructive" });
@@ -167,7 +208,7 @@ export default function PDCAGenerator() {
 Buatkan dokumen formal untuk klausul "${selectedClause}" SNI ISO 37001:2016.
 
 PERUSAHAAN: ${companyName}
-ALAMAT: ${company?.address || "[ALAMAT]"}
+ALAMAT: ${companyAddress}
 TANGGAL: ${new Date().toLocaleDateString("id-ID")}
 
 ${narasi ? `KONTEKS PELAKSANAAN:\n"${narasi}"\n\n` : ""}INSTRUKSI:
@@ -201,8 +242,8 @@ Gunakan prompt ini di dokumenttender.com atau AI model lainnya
 
 KONTEKS PERUSAHAAN:
 - Nama Perusahaan: ${companyName}
-- NPWP: ${company?.npwp || "[NPWP]"}
-- Alamat: ${company?.address || "[ALAMAT]"}
+- NPWP: [NPWP PERUSAHAAN]
+- Alamat: ${companyAddress}
 - Bidang Usaha: Jasa Konstruksi
 - Standar: SNI ISO 37001:2016
 
@@ -288,25 +329,14 @@ FORMAT OUTPUT:
             </div>
           </div>
 
-          {company ? (
-            <div className="p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl">
-              <div className="flex items-center gap-2">
-                <Unlock className="w-4 h-4 text-green-600" />
-                <span className="text-[10px] font-bold text-green-700 dark:text-green-400 uppercase">
-                  Aktif: {company.name}
-                </span>
-              </div>
+          <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-blue-600" />
+              <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase">
+                Template Mode (Placeholder)
+              </span>
             </div>
-          ) : (
-            <div className="p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl">
-              <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-red-600" />
-                <span className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase">
-                  Belum ada profil perusahaan
-                </span>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
 
         <div className="p-4">
@@ -353,11 +383,9 @@ FORMAT OUTPUT:
                 <Building2 className="w-5 h-5 text-primary" />
                 <CardTitle className="text-sm uppercase tracking-tight">Profil Perusahaan</CardTitle>
               </div>
-              {company && (
-                <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200">
-                  Terhubung
-                </Badge>
-              )}
+              <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
+                Placeholder Mode
+              </Badge>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
@@ -377,7 +405,7 @@ FORMAT OUTPUT:
                     NPWP
                   </label>
                   <Input
-                    value={company?.npwp || "[NPWP]"}
+                    value="[NPWP PERUSAHAAN]"
                     disabled
                     data-testid="input-npwp-display"
                   />
@@ -468,11 +496,7 @@ FORMAT OUTPUT:
                 {showRepository ? "Mega Repository" : generatedContent ? "Generated Draft" : "Document Hub"}
               </p>
             </div>
-            {company ? (
-              <Badge className="text-[9px] uppercase bg-green-600">Aktif</Badge>
-            ) : (
-              <Badge variant="destructive" className="text-[9px] uppercase">Terkunci</Badge>
-            )}
+            <Badge className="text-[9px] uppercase bg-blue-600">Template Mode</Badge>
           </div>
         </div>
 

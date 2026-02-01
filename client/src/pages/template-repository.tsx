@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +43,6 @@ import {
   TINGKAT_KRITIS,
   type SMAPTemplate,
 } from "@/data/smap-templates";
-import type { Company, FkapMember } from "@shared/schema";
 
 const kategoriIcons: Record<string, typeof FileText> = {
   Pedoman: BookOpen,
@@ -94,18 +92,12 @@ export default function TemplateRepository() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: company } = useQuery<Company>({
-    queryKey: ["/api/company"],
-  });
-
-  const { data: fkapMembers } = useQuery<FkapMember[]>({
-    queryKey: ["/api/fkap"],
-  });
-
-  const ketuaFKAP = fkapMembers?.find((m) => m.role === "Ketua FKAP")?.name || "[Ketua FKAP]";
-  const companyName = company?.name || "[NAMA PERUSAHAAN]";
-  const companyCode = company?.name?.split(" ").map(w => w[0]).join("").toUpperCase() || "XYZ";
-  const director = company?.directorName || "[Direktur]";
+  // Use placeholders only - no internal company data
+  const companyName = "[NAMA PERUSAHAAN]";
+  const companyCode = "[KODE]";
+  const director = "[NAMA DIREKTUR]";
+  const companyAddress = "[ALAMAT PERUSAHAAN]";
+  const ketuaFKAP = "[KETUA FKAP]";
 
   const filteredTemplates = useMemo(() => {
     return SMAP_TEMPLATES.filter((template) => {
@@ -165,7 +157,7 @@ KONTEKS PERUSAHAAN:
 - Nama Perusahaan: ${companyName}
 - Kode Perusahaan: ${companyCode}
 - Direktur: ${director}
-- Alamat: ${company?.address || "[ALAMAT]"}
+- Alamat: ${companyAddress}
 - Ketua FKAP: ${ketuaFKAP}
 - Bidang Usaha: Jasa Konstruksi
 - Standar: SNI ISO 37001:2016
