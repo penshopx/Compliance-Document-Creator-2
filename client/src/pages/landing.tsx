@@ -25,12 +25,12 @@ export default function LandingPage() {
   
   const [pricingTab, setPricingTab] = useState<"smap" | "pancek">("smap");
   
-  const { data: plans } = useQuery<(SubscriptionPlan & { category?: string; materials?: string })[]>({
+  const { data: plans } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/subscription-plans"],
   });
   
-  const smapPlans = plans?.filter(p => (p as any).category === "smap") || [];
-  const pancekPlans = plans?.filter(p => (p as any).category === "pancek") || [];
+  const smapPlans = plans?.filter(p => p.category === "smap") || [];
+  const pancekPlans = plans?.filter(p => p.category === "pancek") || [];
   
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -254,6 +254,12 @@ export default function LandingPage() {
                 <p className="text-muted-foreground">4 Fase Produk Siap SMAP - Dari Dokumen hingga Perpanjangan Sertifikat</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {smapPlans.length === 0 && (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                    <p>Memuat paket SMAP...</p>
+                  </div>
+                )}
                 {smapPlans.map((plan, index) => (
                   <Card key={plan.id} className={`relative ${index === 2 ? "border-primary shadow-lg" : ""}`} data-testid={`card-smap-${index}`}>
                     {index === 2 && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Terlengkap</Badge>}
@@ -312,6 +318,12 @@ export default function LandingPage() {
                 <p className="text-muted-foreground">3 Fase Kesiapan Pancek - Dari Kuesioner hingga Surveilance</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {pancekPlans.length === 0 && (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                    <p>Memuat paket Pancek...</p>
+                  </div>
+                )}
                 {pancekPlans.map((plan, index) => (
                   <Card key={plan.id} className={`relative ${index === 1 ? "border-primary shadow-lg" : ""}`} data-testid={`card-pancek-${index}`}>
                     {index === 1 && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Populer</Badge>}

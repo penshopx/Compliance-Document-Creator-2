@@ -176,7 +176,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <Badge variant="outline" className="mb-2">
-                      {(selectedPlan as any).category === "pancek" ? "Pancek" : "SMAP"}
+                      {selectedPlan.category === "pancek" ? "Pancek" : "SMAP"}
                     </Badge>
                     <CardTitle data-testid="text-plan-name">{selectedPlan.name}</CardTitle>
                     <CardDescription>{selectedPlan.description}</CardDescription>
@@ -197,11 +197,11 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                 </div>
-                {(selectedPlan as any).materials && (
+                {selectedPlan.materials && (
                   <div>
                     <p className="text-sm font-medium mb-2">Materi yang diperoleh:</p>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-1">
-                      {(selectedPlan as any).materials.split(",").map((material: string, idx: number) => (
+                      {selectedPlan.materials.split(",").map((material: string, idx: number) => (
                         <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                           {material.trim()}
