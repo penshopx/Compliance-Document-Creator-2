@@ -67,55 +67,6 @@ export default function LandingPage() {
     }
   ];
 
-  const pricingPlans = [
-    {
-      name: "Starter",
-      price: "Gratis",
-      period: "",
-      description: "Untuk memulai perjalanan compliance",
-      features: [
-        "1 Profil Perusahaan",
-        "Akses Pancek Basic",
-        "5 Template Dokumen",
-        "SMAP Mentor AI (terbatas)"
-      ],
-      cta: "Mulai Gratis",
-      popular: false
-    },
-    {
-      name: "Professional",
-      price: "Rp 499.000",
-      period: "/bulan",
-      description: "Untuk perusahaan yang serius",
-      features: [
-        "Unlimited Perusahaan",
-        "Akses SMAP + Pancek",
-        "270+ Template Dokumen",
-        "SMAP Mentor AI Unlimited",
-        "Export PDF & Word",
-        "Tracking Sertifikasi"
-      ],
-      cta: "Mulai Trial 14 Hari",
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      description: "Untuk grup perusahaan besar",
-      features: [
-        "Semua fitur Professional",
-        "Multi-User Access",
-        "Dedicated Account Manager",
-        "Training & Konsultasi",
-        "Integrasi API",
-        "SLA Support 24/7"
-      ],
-      cta: "Hubungi Sales",
-      popular: false
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b">
@@ -127,7 +78,6 @@ export default function LandingPage() {
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">Fitur</a>
-              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Harga</a>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" asChild data-testid="button-login">
@@ -253,85 +203,6 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section id="pricing" className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-pricing-title">Pilih Paket yang Sesuai</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Mulai gratis dan upgrade sesuai kebutuhan perusahaan Anda
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <Card 
-                key={index} 
-                className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : ''}`}
-                data-testid={`card-pricing-${index}`}
-              >
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    Paling Populer
-                  </Badge>
-                )}
-                <CardContent className="p-6 pt-8">
-                  <h3 className="font-bold text-xl mb-2">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
-                  <div className="mb-6">
-                    <span className="text-3xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                  <ul className="space-y-3 mb-6">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button 
-                    className="w-full" 
-                    variant={plan.popular ? "default" : "outline"}
-                    asChild
-                    data-testid={`button-pricing-${index}`}
-                  >
-                    <a href="/api/login">{plan.cta}</a>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <Card className="mt-12 max-w-3xl mx-auto">
-            <CardContent className="p-6">
-              <h3 className="font-bold text-lg mb-4 text-center">Pembayaran via Transfer Bank</h3>
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Rekening Pembayaran:</p>
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-1">
-                    <p className="text-sm"><span className="text-muted-foreground">Bank:</span> BCA</p>
-                    <p className="text-sm"><span className="text-muted-foreground">No. Rekening:</span> 1234567890</p>
-                    <p className="text-sm"><span className="text-muted-foreground">Atas Nama:</span> PT Compliance Hub Indonesia</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Cara Pembayaran:</p>
-                  <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                    <li>Transfer sesuai nominal paket</li>
-                    <li>Kirim bukti transfer ke WhatsApp</li>
-                    <li>Aktivasi dalam 1x24 jam kerja</li>
-                  </ol>
-                  <Button variant="outline" size="sm" className="mt-2" asChild>
-                    <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer">
-                      Konfirmasi WhatsApp
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
