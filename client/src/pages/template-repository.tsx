@@ -37,39 +37,42 @@ import {
 } from "lucide-react";
 import {
   SMAP_TEMPLATES,
-  TEMPLATE_CATEGORIES,
-  KLAUSUL_GROUPS,
+  KATEGORI_DOKUMEN,
+  KLAUSUL_ISO,
   AREA_BISNIS,
-  TINGKAT_KRITIS,
   type SMAPTemplate,
-} from "@/data/smap-templates";
+} from "@/data/smap-templates-full";
+
+const TINGKAT_KRITIS = ["Wajib", "Penting", "Pendukung"] as const;
 
 const kategoriIcons: Record<string, typeof FileText> = {
   Pedoman: BookOpen,
   Kebijakan: Shield,
+  SK: Users,
   SOP: ClipboardList,
+  "Instruksi Kerja": FileText,
   Formulir: FileCheck,
   Register: FileWarning,
-  Instruksi: FileText,
-  SK: Users,
-  "Berita Acara": Briefcase,
   Laporan: FileText,
+  "Berita Acara": Briefcase,
   Matriks: LayoutGrid,
   Program: Scale,
+  Checklist: ClipboardList,
 };
 
 const kategoriColors: Record<string, string> = {
   Pedoman: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   Kebijakan: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  SK: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
   SOP: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  "Instruksi Kerja": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
   Formulir: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
   Register: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  Instruksi: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
-  SK: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
-  "Berita Acara": "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300",
   Laporan: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+  "Berita Acara": "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300",
   Matriks: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
   Program: "bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-300",
+  Checklist: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
 };
 
 const kritisColors: Record<string, string> = {
@@ -111,7 +114,7 @@ export default function TemplateRepository() {
       
       const matchesKlausul = selectedKlausul === "all" || template.klausul.startsWith(selectedKlausul);
       
-      const matchesArea = selectedArea === "all" || template.areaBisnis === selectedArea;
+      const matchesArea = selectedArea === "all" || template.areaBisnis.includes(selectedArea);
       
       const matchesKritis = selectedKritis === "all" || template.tingkatKritis === selectedKritis;
 
@@ -121,11 +124,13 @@ export default function TemplateRepository() {
 
   const stats = useMemo(() => {
     const result: Record<string, number> = { total: SMAP_TEMPLATES.length };
-    TEMPLATE_CATEGORIES.forEach((cat) => {
-      if (cat.id !== "all") {
-        result[cat.id] = SMAP_TEMPLATES.filter((t) => t.kategori === cat.id).length;
-      }
+    KATEGORI_DOKUMEN.forEach((cat) => {
+      result[cat] = SMAP_TEMPLATES.filter((t) => t.kategori === cat).length;
     });
+    // Count by tingkat kritis
+    result["Wajib"] = SMAP_TEMPLATES.filter((t) => t.tingkatKritis === "Wajib").length;
+    result["Penting"] = SMAP_TEMPLATES.filter((t) => t.tingkatKritis === "Penting").length;
+    result["Pendukung"] = SMAP_TEMPLATES.filter((t) => t.tingkatKritis === "Pendukung").length;
     return result;
   }, []);
 
@@ -300,7 +305,7 @@ FORMAT OUTPUT:
               Template Repository SMAP
             </h1>
             <p className="text-muted-foreground">
-              120+ template dokumen Sistem Manajemen Anti Penyuapan berdasarkan SNI ISO 37001:2016
+              200 template dokumen Sistem Manajemen Anti Penyuapan berdasarkan SNI ISO 37001:2016
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -331,17 +336,17 @@ FORMAT OUTPUT:
             <p className="text-[10px] text-muted-foreground">Total</p>
           </CardContent>
         </Card>
-        {TEMPLATE_CATEGORIES.filter((c) => c.id !== "all").map((cat) => {
-          const Icon = kategoriIcons[cat.id] || FileText;
+        {KATEGORI_DOKUMEN.map((cat) => {
+          const Icon = kategoriIcons[cat] || FileText;
           return (
             <Card
-              key={cat.id}
-              className={`hover-elevate cursor-pointer col-span-1 ${selectedKategori === cat.id ? "ring-2 ring-primary" : ""}`}
-              onClick={() => setSelectedKategori(cat.id)}
+              key={cat}
+              className={`hover-elevate cursor-pointer col-span-1 ${selectedKategori === cat ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setSelectedKategori(cat)}
             >
               <CardContent className="p-2 text-center">
-                <p className="text-xl font-bold">{stats[cat.id] || 0}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{cat.label}</p>
+                <p className="text-xl font-bold">{stats[cat] || 0}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{cat}</p>
               </CardContent>
             </Card>
           );
@@ -395,9 +400,9 @@ FORMAT OUTPUT:
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua Klausul</SelectItem>
-                    {KLAUSUL_GROUPS.map((k) => (
-                      <SelectItem key={k.id} value={k.klausul}>
-                        {k.label}
+                    {KLAUSUL_ISO.filter(k => !k.kode.includes(".")).map((k) => (
+                      <SelectItem key={k.kode} value={k.kode}>
+                        {k.kode} - {k.nama}
                       </SelectItem>
                     ))}
                   </SelectContent>
