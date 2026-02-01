@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { 
-  MessageCircle, X, Send, Bot, User, Key, Loader2, 
-  BookOpen, CheckCircle, Lightbulb, HelpCircle, Sparkles
+  X, Send, Bot, User, Key, Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,28 +28,6 @@ const SUGGESTED_TOPICS = [
   "Bagaimana implementasi SMAP?",
   "Apa saja dokumen wajib SMAP?"
 ];
-
-const SYSTEM_PROMPT = `Anda adalah SMAP Mentor, asisten AI yang ahli dalam Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016 dan Panduan Cegah Korupsi (Pancek) dari KPK Indonesia.
-
-Tugas Anda:
-1. Menjelaskan konsep textbook dan praktis dari SMAP dan Pancek
-2. Memberikan panduan implementasi yang jelas
-3. Menjawab pertanyaan dengan bahasa Indonesia yang mudah dipahami
-4. Proaktif memberikan saran dan rekomendasi
-5. Siap menerima dan menyelesaikan tugas terkait compliance
-
-Pengetahuan Anda mencakup:
-- SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
-- Pancek (Panduan Cegah Korupsi) KPK dengan 6 fase PDCAR
-- Permen PUPR 08/2022 tentang SMAP di sektor konstruksi
-- Implementasi praktis di perusahaan konstruksi Indonesia
-- Template dokumen dan checklist compliance
-
-Gaya komunikasi:
-- Ramah dan supportif
-- Proaktif memberikan informasi tambahan yang relevan
-- Menggunakan contoh praktis untuk menjelaskan konsep
-- Memberikan langkah-langkah yang actionable`;
 
 export default function SMAPMentorChat() {
   const { toast } = useToast();
@@ -130,37 +107,31 @@ export default function SMAPMentorChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey, {
+      const history = messages
+        .filter(m => m.id !== "greeting")
+        .map(m => ({ role: m.role, content: m.content }));
+
+      const response = await fetch("/api/mentor/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
-            { role: "model", parts: [{ text: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." }] },
-            ...messages.filter(m => m.id !== "greeting").map(m => ({
-              role: m.role === "user" ? "user" : "model",
-              parts: [{ text: m.content }]
-            })),
-            { role: "user", parts: [{ text: content }] }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          }
+          message: content,
+          history,
+          apiKey
         })
       });
 
       if (!response.ok) {
-        throw new Error("API request failed");
+        const error = await response.json();
+        throw new Error(error.error || "API request failed");
       }
 
       const data = await response.json();
-      const assistantContent = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak dapat memproses permintaan Anda.";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: assistantContent,
+        content: data.content,
         timestamp: new Date()
       };
 
@@ -168,7 +139,7 @@ export default function SMAPMentorChat() {
     } catch (error) {
       toast({ 
         title: "Error", 
-        description: "Gagal menghubungi AI. Periksa API Key Anda.",
+        description: error instanceof Error ? error.message : "Gagal menghubungi AI. Periksa API Key Anda.",
         variant: "destructive"
       });
     } finally {
@@ -187,11 +158,11 @@ export default function SMAPMentorChat() {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 h-14 w-14 rounded-full shadow-lg z-50 bg-blue-600 hover:bg-blue-700"
+        className="fixed bottom-4 left-4 rounded-full shadow-lg z-50 bg-blue-600"
         size="icon"
         data-testid="button-open-mentor-chat"
       >
-        <Bot className="h-6 w-6" />
+        <Bot className="h-5 w-5" />
       </Button>
     );
   }
@@ -199,17 +170,16 @@ export default function SMAPMentorChat() {
   return (
     <Card className="fixed bottom-4 left-4 w-96 h-[500px] shadow-xl z-50 flex flex-col" data-testid="card-mentor-chat">
       <CardHeader className="pb-2 border-b bg-blue-600 text-white rounded-t-lg">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5" />
-            <CardTitle className="text-base">SMAP Mentor</CardTitle>
-            <Badge variant="secondary" className="text-xs bg-blue-500">AI</Badge>
+            <CardTitle className="text-base" data-testid="text-mentor-title">SMAP Mentor</CardTitle>
+            <Badge variant="secondary" className="text-xs" data-testid="badge-ai">AI</Badge>
           </div>
           <div className="flex items-center gap-1">
             <Button 
               variant="ghost" 
-              size="icon" 
-              className="h-7 w-7 text-white hover:bg-blue-500"
+              size="icon"
               onClick={() => setShowApiKeyInput(!showApiKeyInput)}
               data-testid="button-api-key-toggle"
             >
@@ -217,8 +187,7 @@ export default function SMAPMentorChat() {
             </Button>
             <Button 
               variant="ghost" 
-              size="icon" 
-              className="h-7 w-7 text-white hover:bg-blue-500"
+              size="icon"
               onClick={() => setIsOpen(false)}
               data-testid="button-close-mentor-chat"
             >
@@ -231,17 +200,17 @@ export default function SMAPMentorChat() {
       {showApiKeyInput && (
         <div className="p-3 bg-muted border-b">
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium">Gemini API Key</label>
+            <label className="text-xs font-medium" data-testid="label-api-key">Gemini API Key</label>
             <div className="flex gap-2">
               <Input
                 type="password"
                 placeholder="Masukkan API Key..."
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                className="text-xs h-8"
+                className="text-xs"
                 data-testid="input-api-key"
               />
-              <Button size="sm" onClick={saveApiKey} className="h-8" data-testid="button-save-api-key">
+              <Button size="sm" onClick={saveApiKey} data-testid="button-save-api-key">
                 Simpan
               </Button>
             </div>
@@ -250,6 +219,7 @@ export default function SMAPMentorChat() {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-xs text-blue-600 hover:underline"
+              data-testid="link-get-api-key"
             >
               Dapatkan API Key dari Google AI Studio
             </a>
@@ -261,8 +231,8 @@ export default function SMAPMentorChat() {
         {!apiKey ? (
           <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
             <Key className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-medium mb-2">API Key Diperlukan</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <h3 className="font-medium mb-2" data-testid="text-api-key-required">API Key Diperlukan</h3>
+            <p className="text-sm text-muted-foreground mb-4" data-testid="text-api-key-description">
               Masukkan Gemini API Key untuk memulai mentoring SMAP
             </p>
             <Button onClick={() => setShowApiKeyInput(true)} data-testid="button-setup-api-key">
@@ -278,6 +248,7 @@ export default function SMAPMentorChat() {
                   <div
                     key={msg.id}
                     className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                    data-testid={`message-${msg.role}-${msg.id}`}
                   >
                     {msg.role === "assistant" && (
                       <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
@@ -301,7 +272,7 @@ export default function SMAPMentorChat() {
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="flex gap-2 justify-start">
+                  <div className="flex gap-2 justify-start" data-testid="loading-indicator">
                     <div className="h-7 w-7 rounded-full bg-blue-100 flex items-center justify-center">
                       <Bot className="h-4 w-4 text-blue-600" />
                     </div>
@@ -315,14 +286,13 @@ export default function SMAPMentorChat() {
 
             {messages.length <= 1 && (
               <div className="px-3 py-2 border-t">
-                <p className="text-xs text-muted-foreground mb-2">Topik yang disarankan:</p>
+                <p className="text-xs text-muted-foreground mb-2" data-testid="text-suggested-topics">Topik yang disarankan:</p>
                 <div className="flex flex-wrap gap-1">
                   {SUGGESTED_TOPICS.map((topic, idx) => (
                     <Button
                       key={idx}
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7"
                       onClick={() => sendMessage(topic)}
                       data-testid={`button-topic-${idx}`}
                     >

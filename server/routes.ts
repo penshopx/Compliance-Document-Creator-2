@@ -34,6 +34,15 @@ const smapGenerateSchema = z.object({
   }).optional(),
 });
 
+const mentorChatSchema = z.object({
+  message: z.string().min(1).max(5000),
+  history: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string()
+  })).optional(),
+  apiKey: z.string().min(1)
+});
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -390,6 +399,76 @@ export async function registerRoutes(
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete vendor" });
+    }
+  });
+
+  // SMAP Mentor Chat Route
+  app.post("/api/mentor/chat", async (req, res) => {
+    try {
+      const { message, history, apiKey } = mentorChatSchema.parse(req.body);
+      
+      const SYSTEM_PROMPT = `Anda adalah SMAP Mentor, asisten AI yang ahli dalam Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016 dan Panduan Cegah Korupsi (Pancek) dari KPK Indonesia.
+
+Tugas Anda:
+1. Menjelaskan konsep textbook dan praktis dari SMAP dan Pancek
+2. Memberikan panduan implementasi yang jelas
+3. Menjawab pertanyaan dengan bahasa Indonesia yang mudah dipahami
+4. Proaktif memberikan saran dan rekomendasi
+5. Siap menerima dan menyelesaikan tugas terkait compliance
+
+Pengetahuan Anda mencakup:
+- SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
+- Pancek (Panduan Cegah Korupsi) KPK dengan 6 fase PDCAR
+- Permen PUPR 08/2022 tentang SMAP di sektor konstruksi
+- Implementasi praktis di perusahaan konstruksi Indonesia
+- Template dokumen dan checklist compliance
+
+Gaya komunikasi:
+- Ramah dan supportif
+- Proaktif memberikan informasi tambahan yang relevan
+- Menggunakan contoh praktis untuk menjelaskan konsep
+- Memberikan langkah-langkah yang actionable
+- Di akhir respons, tawarkan untuk membantu lebih lanjut atau tanyakan apakah ada aspek lain yang ingin dipelajari`;
+
+      const contents = [
+        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+        { role: "model", parts: [{ text: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." }] },
+        ...(history || []).map(m => ({
+          role: m.role === "user" ? "user" : "model",
+          parts: [{ text: m.content }]
+        })),
+        { role: "user", parts: [{ text: message }] }
+      ];
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 2048,
+            }
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        return res.status(response.status).json({ error: error.error?.message || "API request failed" });
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak dapat memproses permintaan Anda.";
+
+      res.json({ content });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request data" });
+      }
+      res.status(500).json({ error: "Failed to process chat request" });
     }
   });
 

@@ -11,11 +11,11 @@ export default function DokumentenderChat() {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 h-14 w-14 rounded-full shadow-lg z-50 bg-green-600 hover:bg-green-700"
+        className="fixed bottom-4 right-4 rounded-full shadow-lg z-50 bg-green-600"
         size="icon"
         data-testid="button-open-dokumentender-chat"
       >
-        <FileText className="h-6 w-6" />
+        <FileText className="h-5 w-5" />
       </Button>
     );
   }
@@ -23,16 +23,15 @@ export default function DokumentenderChat() {
   return (
     <Card className="fixed bottom-4 right-4 w-96 h-[500px] shadow-xl z-50 flex flex-col" data-testid="card-dokumentender-chat">
       <CardHeader className="pb-2 border-b bg-green-600 text-white rounded-t-lg">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            <CardTitle className="text-base">Dokumentender AI</CardTitle>
-            <Badge variant="secondary" className="text-xs bg-green-500">Chat</Badge>
+            <CardTitle className="text-base" data-testid="text-dokumentender-title">Dokumentender AI</CardTitle>
+            <Badge variant="secondary" className="text-xs" data-testid="badge-chat">Chat</Badge>
           </div>
           <Button 
             variant="ghost" 
-            size="icon" 
-            className="h-7 w-7 text-white hover:bg-green-500"
+            size="icon"
             onClick={() => setIsOpen(false)}
             data-testid="button-close-dokumentender-chat"
           >
@@ -46,18 +45,18 @@ export default function DokumentenderChat() {
           <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
             <MessageSquare className="h-8 w-8 text-green-600" />
           </div>
-          <h3 className="font-semibold text-lg mb-2">Dokumentender AI Chat</h3>
-          <p className="text-sm text-muted-foreground mb-4">
+          <h3 className="font-semibold text-lg mb-2" data-testid="text-dokumentender-heading">Dokumentender AI Chat</h3>
+          <p className="text-sm text-muted-foreground mb-4" data-testid="text-dokumentender-description">
             Platform AI untuk pembuatan dokumen tender dan pengetahuan tentang:
           </p>
           <div className="flex flex-wrap justify-center gap-2 mb-6">
-            <Badge variant="outline">SMAP</Badge>
-            <Badge variant="outline">Pancek</Badge>
-            <Badge variant="outline">Konstruksi</Badge>
-            <Badge variant="outline">Keteknikan</Badge>
-            <Badge variant="outline">Pengadaan</Badge>
+            <Badge variant="outline" data-testid="badge-smap">SMAP</Badge>
+            <Badge variant="outline" data-testid="badge-pancek">Pancek</Badge>
+            <Badge variant="outline" data-testid="badge-konstruksi">Konstruksi</Badge>
+            <Badge variant="outline" data-testid="badge-keteknikan">Keteknikan</Badge>
+            <Badge variant="outline" data-testid="badge-pengadaan">Pengadaan</Badge>
           </div>
-          <p className="text-xs text-muted-foreground mb-4">
+          <p className="text-xs text-muted-foreground mb-4" data-testid="text-open-instruction">
             Klik tombol di bawah untuk membuka chat di tab baru
           </p>
           <a 
@@ -65,8 +64,9 @@ export default function DokumentenderChat() {
             target="_blank" 
             rel="noopener noreferrer"
             className="w-full"
+            data-testid="link-dokumentender"
           >
-            <Button className="w-full bg-green-600 hover:bg-green-700" data-testid="button-open-dokumentender">
+            <Button className="w-full bg-green-600" data-testid="button-open-dokumentender">
               <ExternalLink className="h-4 w-4 mr-2" />
               Buka Dokumentender Chat
             </Button>
@@ -74,21 +74,21 @@ export default function DokumentenderChat() {
         </div>
 
         <div className="p-4 border-t bg-muted/50">
-          <h4 className="text-xs font-medium mb-2">Fitur Dokumentender:</h4>
+          <h4 className="text-xs font-medium mb-2" data-testid="text-features-heading">Fitur Dokumentender:</h4>
           <ul className="text-xs text-muted-foreground space-y-1">
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2" data-testid="feature-1">
               <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
               Pembuatan dokumen tender otomatis
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2" data-testid="feature-2">
               <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
               Konsultasi SMAP & Pancek
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2" data-testid="feature-3">
               <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
               Template dokumen konstruksi
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2" data-testid="feature-4">
               <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
               Pengetahuan pengadaan barang/jasa
             </li>
