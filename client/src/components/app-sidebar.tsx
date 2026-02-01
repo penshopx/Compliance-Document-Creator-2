@@ -25,6 +25,7 @@ import {
   UserCheck,
   Zap,
   FilePlus2,
+  BookOpen,
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -44,6 +45,7 @@ const dataMenuItems = [
 ];
 
 const documentMenuItems = [
+  { title: "Referensi Dokumen", url: "/smap-reference", icon: BookOpen },
   { title: "Generator Dokumen", url: "/documents", icon: FileText },
   { title: "Document Builder", url: "/document-builder", icon: FilePlus2 },
   { title: "PDCA Generator", url: "/pdca", icon: Zap },

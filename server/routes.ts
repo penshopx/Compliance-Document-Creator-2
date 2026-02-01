@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { generateDocumentContent, generateSMAPDocument } from "./replit_integrations/gemini";
+import { z } from "zod";
 import {
   insertCompanySchema,
   insertManagementSchema,
@@ -14,6 +16,23 @@ import {
   insertDocumentSchema,
   insertGeneratedDocumentSchema,
 } from "@shared/schema";
+
+// AI Request Validation Schemas
+const aiGenerateSchema = z.object({
+  prompt: z.string().min(1).max(10000),
+  model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro"]).default("gemini-2.5-flash"),
+});
+
+const smapGenerateSchema = z.object({
+  templateType: z.string().min(1).max(200),
+  context: z.object({
+    companyName: z.string().optional(),
+    director: z.string().optional(),
+    address: z.string().optional(),
+    ketuaFKAP: z.string().optional(),
+    additionalInfo: z.string().optional(),
+  }).optional(),
+});
 
 export async function registerRoutes(
   httpServer: Server,
@@ -519,6 +538,61 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error generating document:", error);
       res.status(400).json({ error: "Failed to generate document" });
+    }
+  });
+
+  // Gemini AI Document Generation
+  app.post("/api/ai/generate", async (req, res) => {
+    try {
+      const validated = aiGenerateSchema.parse(req.body);
+      const content = await generateDocumentContent(validated.prompt, validated.model);
+      res.json({ content });
+    } catch (error) {
+      console.error("AI generation error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", details: error.errors });
+      }
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to generate content" 
+      });
+    }
+  });
+
+  app.post("/api/ai/generate-smap", async (req, res) => {
+    try {
+      const validated = smapGenerateSchema.parse(req.body);
+      
+      // Get company data for context if not provided
+      let enrichedContext = validated.context || {};
+      if (!enrichedContext.companyName) {
+        try {
+          const company = await storage.getCompany();
+          if (company) {
+            enrichedContext.companyName = company.name;
+            enrichedContext.director = company.directorName || undefined;
+            enrichedContext.address = company.address || undefined;
+          }
+          
+          const fkap = await storage.getFkapMembers();
+          const ketua = fkap.find(f => f.role === "Ketua FKAP");
+          if (ketua) {
+            enrichedContext.ketuaFKAP = ketua.name;
+          }
+        } catch (storageError) {
+          console.warn("Failed to fetch company context:", storageError);
+        }
+      }
+      
+      const content = await generateSMAPDocument(validated.templateType, enrichedContext);
+      res.json({ content, templateType: validated.templateType });
+    } catch (error) {
+      console.error("SMAP AI generation error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", details: error.errors });
+      }
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to generate SMAP document" 
+      });
     }
   });
 

@@ -19,6 +19,7 @@ import VendorsPage from "@/pages/vendors";
 import DocumentsPage from "@/pages/documents";
 import PDCAGenerator from "@/pages/pdca-generator";
 import DocumentBuilder from "@/pages/document-builder";
+import SMAPReferencePage from "@/pages/smap-reference";
 
 function Router() {
   return (
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/documents" component={DocumentsPage} />
       <Route path="/pdca" component={PDCAGenerator} />
       <Route path="/document-builder" component={DocumentBuilder} />
+      <Route path="/smap-reference" component={SMAPReferencePage} />
       <Route component={NotFound} />
     </Switch>
   );

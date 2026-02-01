@@ -22,12 +22,21 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
   - Auto-population with company, management, FKAP, and vendor data
   - Preview, copy, and download functionality
   - Document history tracking
+- **SMAP Reference** (NEW): Comprehensive document reference table
+  - 46 document references organized by category (Pedoman, Kebijakan, SOP, Formulir, Register, Instruksi)
+  - Quick stats cards for document counts by category
+  - Search and filter functionality
+  - Expandable rows for document descriptions
+  - Copy document info and Export to CSV
 - **PDCA Generator**: Advanced document generator with PDCA methodology
   - Plan, Do, Check, Act navigation tabs
   - 51 clause items across PDCA phases
   - Document draft generation with company context
-  - AI Prompt Master for ChatGPT integration
+  - AI Prompt Master for ChatGPT/Gemini integration
   - Mega Repository with 85+ document templates
+- **AI Integration**: Gemini AI integration via Replit AI Integrations
+  - Uses gemini-2.5-flash and gemini-2.5-pro models
+  - No API key required (uses Replit credits)
 
 ## Tech Stack
 - **Frontend**: React + Vite + TypeScript
@@ -54,7 +63,8 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 │   │   ├── vendors.tsx           # Vendor management
 │   │   ├── documents.tsx         # Basic document generator
 │   │   ├── document-builder.tsx  # Advanced SMAP document builder
-│   │   └── pdca-generator.tsx    # PDCA Generator with three-panel layout
+│   │   ├── pdca-generator.tsx    # PDCA Generator with three-panel layout
+│   │   └── smap-reference.tsx    # SMAP document reference table
 │   ├── components/
 │   │   ├── app-sidebar.tsx       # Main navigation sidebar
 │   │   └── ui/                   # Shadcn components
@@ -128,7 +138,25 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 ### Dashboard
 - `GET /api/dashboard/stats` - Dashboard statistics including document count
 
+### AI Generation (Gemini)
+- `POST /api/ai/generate` - Generate content with custom prompt
+- `POST /api/ai/generate-smap` - Generate SMAP document with company context
+
+## SMAP Document Reference
+The application includes a comprehensive reference table with 46 documents:
+- **Pedoman** (1): Pedoman SMAP utama
+- **Kebijakan** (4): Anti Penyuapan, Hadiah, Donasi, Konflik Kepentingan
+- **SOP** (16): Prosedur operasional dari pasal 4.5 - 10.2
+- **Formulir** (17): Template pencatatan dan dokumentasi
+- **Register** (5): Daftar pemantauan (Risiko, Hadiah, WBS, Rekan Bisnis, Pelatihan)
+- **Instruksi** (3): Panduan teknis pelaksanaan tugas
+
 ## Recent Changes
+- 2026-02-01: Added SMAP Reference page
+  - 46 document references with search and filter
+  - Stats cards for category counts
+  - Export to CSV functionality
+  - Gemini AI integration for future document generation
 - 2026-02-01: Added Document Builder feature
   - 7 professional SMAP document templates
   - Auto-population with company data
