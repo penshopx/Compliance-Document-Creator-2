@@ -154,7 +154,60 @@ The application includes a comprehensive reference table with 46 documents:
 - **Register** (5): Daftar pemantauan (Risiko, Hadiah, WBS, Rekan Bisnis, Pelatihan)
 - **Instruksi** (3): Panduan teknis pelaksanaan tugas
 
+## Template Repository (NEW)
+Comprehensive SMAP template/toolbox collection with 120+ document templates:
+
+### Template Categories (12 types):
+- **Pedoman** (1): Dokumen induk SMAP
+- **Kebijakan** (7): Anti Penyuapan, Hadiah, Donasi, Konflik Kepentingan, Kontribusi Politik
+- **SOP** (27): Prosedur operasional dari klausul 4.5 - 10.2
+- **Formulir** (30): Template pencatatan dan dokumentasi
+- **Register** (17): Daftar pemantauan (Risiko, Hadiah, WBS, Rekan Bisnis, dll)
+- **Instruksi** (6): Panduan teknis pelaksanaan tugas
+- **SK** (3): Surat Keputusan Direktur
+- **Berita Acara** (3): Notulen rapat dan tinjauan
+- **Laporan** (12): Laporan analisis dan kinerja
+- **Matriks** (7): Matriks tanggung jawab, risiko, sanksi
+- **Program** (5): Program kerja tahunan
+
+### Template Structure:
+Each template includes:
+- Kode Dokumen (unique identifier)
+- Nama (Indonesian) and English name
+- Kategori (document type)
+- Klausul ISO 37001 (4.1 - 10.2)
+- Deskripsi (description)
+- Penanggung Jawab (responsible person)
+- Frekuensi (frequency)
+- Tingkat Kritis (Wajib/Penting/Pendukung)
+- Area Bisnis (16 business areas)
+- Prompt Template for AI generation
+
+### Features:
+- Advanced search by name, code, description, clause
+- Multi-level filtering (category, clause, business area, criticality)
+- Grid and List view modes
+- AI Prompt generation with company context
+- Export to CSV functionality
+- Integration with dokumenttender.com or other AI models
+
+### ISO 37001 Clause Coverage:
+- Klausul 4: Konteks Organisasi (11 templates)
+- Klausul 5: Kepemimpinan (11 templates)
+- Klausul 6: Perencanaan (4 templates)
+- Klausul 7: Pendukung (17 templates)
+- Klausul 8: Operasi (32 templates)
+- Klausul 9: Evaluasi Kinerja (17 templates)
+- Klausul 10: Perbaikan (8 templates)
+- Additional Supporting Documents (20 templates)
+
 ## Recent Changes
+- 2026-02-01: Added Template Repository with 120+ SMAP templates
+  - Comprehensive document templates covering all ISO 37001:2016 clauses
+  - Advanced filtering by category, clause, business area, criticality level
+  - AI prompt generation integrated with company context
+  - Grid/List view modes with CSV export
+  - Data stored in client/src/data/smap-templates.ts
 - 2026-02-01: Converted Document Builder to AI Prompt Generator
   - Output is now AI prompts (not full documents) to avoid token limitations
   - Designed for use with dokumenttender.com AI aggregator
