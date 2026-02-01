@@ -9,13 +9,26 @@ import { GoogleGenAI } from "@google/genai";
  * - gemini-2.5-pro: Advanced reasoning for complex tasks
  */
 
-export const ai = new GoogleGenAI({
-  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY || "",
-  httpOptions: {
-    apiVersion: "",
-    baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-  },
-});
+let _ai: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI {
+  if (!_ai) {
+    const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Gemini API key not configured. Please set up the AI integration.");
+    }
+    _ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        apiVersion: "",
+        baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
+      },
+    });
+  }
+  return _ai;
+}
+
+export const ai = { get instance() { return getAI(); } };
 
 /**
  * Generate document content using Gemini AI
@@ -28,7 +41,7 @@ export async function generateDocumentContent(
   model: "gemini-2.5-flash" | "gemini-2.5-pro" = "gemini-2.5-flash"
 ): Promise<string> {
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
