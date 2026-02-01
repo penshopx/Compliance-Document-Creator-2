@@ -10,7 +10,7 @@ I prefer detailed explanations and clear communication. I want iterative develop
 The application is built with a **React + Vite + TypeScript** frontend utilizing **Shadcn/UI** and **Tailwind CSS** for a professional UI/UX, characterized by a blue color scheme (220° hue) to convey trust. State management is handled by **TanStack Query** and routing by **Wouter**. The backend is implemented with **Express.js**, connecting to a **PostgreSQL** database managed with **Drizzle ORM**. **Zod** is used for data validation.
 
 The system supports two primary compliance pathways:
-- **Pancek**: Features 6 PDCAR phases, 30+ checklist items, 25+ document templates, AI prompt generation, and integration references to Platform Jaga.id.
+- **Pancek**: Features 6 PDCAR phases (Plan, Do, Check, Act, Respon), 30+ checklist items, 25+ document templates, AI prompt generation, and integration references to Platform Jaga.id.
 - **SMAP**: Offers a comprehensive dashboard, company/personnel/asset/project/vendor management, an interactive SMAP Checklist (based on Permen PU 08/2022), and advanced document generation tools. Key features include an **AI Prompt Generator** with 9 professional SMAP templates (e.g., Pedoman, Kebijakan, SOP) that auto-populate with company data, a **SMAP Reference** table with 46 documents, a **PDCA Generator** supporting 51 clauses across Plan, Do, Check, Act phases for document drafting, and **Produk Siap SMAP** which guides companies through 4 phases of SMAP implementation readiness (Dokumen, Audit Internal, Sertifikasi, Surveilance & Perpanjangan).
 
 The core architecture includes:
