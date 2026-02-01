@@ -5,7 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { useAuth } from "@/hooks/use-auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import NotFound from "@/pages/not-found";
+import LandingPage from "@/pages/landing";
 import WelcomePage from "@/pages/welcome";
 import Dashboard from "@/pages/dashboard";
 import CompanyPage from "@/pages/company";
@@ -31,7 +36,8 @@ import DokumentenderChat from "@/components/dokumentender-chat";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={WelcomePage} />
+      <Route path="/" component={LandingPage} />
+      <Route path="/welcome" component={WelcomePage} />
       <Route path="/pancek" component={PancekPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/company" component={CompanyPage} />
@@ -57,8 +63,9 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const isFullWidthPage = location === "/pdca";
-  const isStandalonePage = location === "/" || location === "/pancek";
+  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek";
 
   if (isStandalonePage) {
     return (
@@ -75,6 +82,22 @@ function AppContent() {
         <header className="flex items-center gap-4 h-14 px-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
           <SidebarTrigger data-testid="button-sidebar-toggle" />
           <div className="flex-1" />
+          {isAuthenticated && user && (
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-right hidden sm:block">
+                <div className="font-medium" data-testid="text-user-name">{user.firstName || user.email}</div>
+              </div>
+              <Avatar className="h-8 w-8" data-testid="avatar-user">
+                <AvatarImage src={user.profileImageUrl || undefined} alt={user.firstName || 'User'} />
+                <AvatarFallback>{(user.firstName?.[0] || user.email?.[0] || 'U').toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <Button variant="ghost" size="icon" asChild data-testid="button-logout">
+                <a href="/api/logout" title="Keluar">
+                  <LogOut className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          )}
         </header>
         <main className={`flex-1 overflow-auto ${isFullWidthPage ? "" : "p-6"}`}>
           <Router />

@@ -1,7 +1,5 @@
-import { drizzle } from "drizzle-orm/node-postgres";
 import { eq } from "drizzle-orm";
-import pkg from "pg";
-const { Pool } = pkg;
+import { db } from "./db";
 import {
   companies,
   managementTeam,
@@ -16,7 +14,6 @@ import {
   generatedDocuments,
   documentTemplates,
   clauseReferences,
-  users,
   type Company,
   type InsertCompany,
   type Management,
@@ -43,15 +40,7 @@ import {
   type InsertDocumentTemplate,
   type ClauseReference,
   type InsertClauseReference,
-  type User,
-  type InsertUser,
 } from "@shared/schema";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-export const db = drizzle(pool);
 
 export interface IStorage {
   // Company
@@ -127,11 +116,6 @@ export interface IStorage {
   // Clause References
   getClauseReferences(): Promise<ClauseReference[]>;
   getClauseReferencesByPhase(phase: string): Promise<ClauseReference[]>;
-
-  // Users (keeping for compatibility)
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
 
   // Dashboard
   getDashboardStats(): Promise<{
@@ -380,22 +364,6 @@ export class DatabaseStorage implements IStorage {
 
   async getClauseReferencesByPhase(phase: string): Promise<ClauseReference[]> {
     return db.select().from(clauseReferences).where(eq(clauseReferences.pdcaPhase, phase)).orderBy(clauseReferences.sortOrder);
-  }
-
-  // Users
-  async getUser(id: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id));
-    return result[0];
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username));
-    return result[0];
-  }
-
-  async createUser(user: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(user).returning();
-    return result[0];
   }
 
   // Dashboard Stats

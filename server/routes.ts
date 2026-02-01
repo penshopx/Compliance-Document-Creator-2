@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateDocumentContent, generateSMAPDocument } from "./replit_integrations/gemini";
+import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { z } from "zod";
 import {
   insertCompanySchema,
@@ -46,6 +47,10 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Setup authentication BEFORE other routes
+  await setupAuth(app);
+  registerAuthRoutes(app);
+
   // Dashboard Stats
   app.get("/api/dashboard/stats", async (req, res) => {
     try {

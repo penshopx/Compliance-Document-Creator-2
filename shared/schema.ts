@@ -276,17 +276,5 @@ export const insertClauseReferenceSchema = createInsertSchema(clauseReferences).
 export type InsertClauseReference = z.infer<typeof insertClauseReferenceSchema>;
 export type ClauseReference = typeof clauseReferences.$inferSelect;
 
-// Keep the users table for compatibility
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// Export auth models
+export * from "./models/auth";
