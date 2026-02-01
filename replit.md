@@ -15,6 +15,13 @@ A comprehensive Compliance Hub application - SMAP (Sistem Manajemen Anti Penyuap
 - **Qualifications**: SBU (Sertifikat Badan Usaha) classifications
 - **Projects**: Project portfolio management
 - **Vendors**: Vendor management with due diligence status
+- **SMAP Checklist** (Permen PU 08/2022): Compliance verification tool
+  - 23 pertanyaan dalam 4 bagian (Komitmen, Perencanaan, Pelaksanaan, Evaluasi)
+  - Interactive status tracking (Ada/Tidak/Pending)
+  - Compliance percentage calculation with progress bars
+  - Dokumen Perencanaan SMAP (16 item)
+  - Dokumen Rekaman Pelaksanaan SMAP (6 item)
+  - Export to CSV functionality
 - **Document Generator**: Pre-built templates for ISO 37001 SMAP documents
 - **AI Prompt Generator** (Document Builder): AI prompt generator for SMAP documents
   - 9 professional SMAP templates (Pedoman, SK, Kebijakan, SOP, Formulir, Register, Berita Acara)
