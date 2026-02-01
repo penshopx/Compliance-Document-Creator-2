@@ -25,10 +25,18 @@ The application uses Indonesian payment methods with manual verification:
 - **Transfer Bank**: BCA, Mandiri, BRI, BNI with manual confirmation
 - **E-Wallet & QRIS**: GoPay, OVO, Dana, ShopeePay via QRIS
 
-### Pricing Tiers
-- **Starter**: Free - 1 Company Profile, Basic Pancek, 5 Templates, Limited AI
-- **Professional**: Rp 499.000/month - Unlimited Companies, Full SMAP+Pancek, 270+ Templates, Unlimited AI
-- **Enterprise**: Custom pricing - Multi-User, Dedicated Account Manager, API Access, 24/7 Support
+### Pricing Tiers (Phase-Based)
+
+**SMAP Packages (4 Phases):**
+- **Siap Dokumen SMAP**: Rp 2.500.000/month - Complete documentation preparation for SNI ISO 37001:2016
+- **Siap Audit Internal**: Rp 3.500.000/month - Internal audit preparation and compliance evaluation
+- **Siap Audit Eksternal**: Rp 5.000.000/month - External audit/certification preparation
+- **Siap Surveilance**: Rp 3.000.000/month - Certificate maintenance and renewal
+
+**Pancek Packages (3 Phases):**
+- **Siap Pengisian Kuesioner**: Rp 1.500.000/month - Platform Jaga.id questionnaire preparation
+- **Siap Terverifikasi**: Rp 2.500.000/month - KPK/Jaga.id verification preparation
+- **Siap Surveilance Pancek**: Rp 2.000.000/month - Verified status maintenance
 
 ### Payment Flow
 1. User selects plan and payment method on `/checkout` page

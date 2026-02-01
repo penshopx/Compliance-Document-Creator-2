@@ -15,16 +15,18 @@ interface Message {
 }
 
 const PROACTIVE_GREETINGS = [
-  "Selamat datang di SMAP Mentor! Saya siap membantu Anda memahami SNI ISO 37001:2016 dan Pancek. Ada yang ingin Anda pelajari hari ini?",
-  "Halo! Saya adalah asisten AI untuk pembelajaran SMAP. Apakah Anda ingin memulai dengan pengenalan dasar atau langsung ke topik spesifik?",
-  "Selamat datang! Saya dapat membantu Anda memahami implementasi Sistem Manajemen Anti Penyuapan. Apa yang ingin Anda ketahui?"
+  "Selamat datang di Compliance Hub Mentor! Saya siap membantu Anda memahami 4 fase SMAP (ISO 37001) dan 3 fase Pancek (KPK). Fase mana yang ingin Anda pelajari?",
+  "Halo! Saya adalah asisten AI untuk SMAP dan Pancek. Apakah Anda sudah menentukan di fase mana perusahaan Anda? Saya bisa membantu dari Siap Dokumen hingga Siap Surveilance.",
+  "Selamat datang! Saya dapat membantu Anda memilih paket yang sesuai: SMAP (4 fase) atau Pancek (3 fase). Apa tujuan compliance perusahaan Anda?"
 ];
 
 const SUGGESTED_TOPICS = [
-  "Apa itu SNI ISO 37001?",
-  "Jelaskan 6 fase PDCAR Pancek",
-  "Bagaimana implementasi SMAP?",
-  "Apa saja dokumen wajib SMAP?"
+  "Apa itu 4 Fase Produk Siap SMAP?",
+  "Jelaskan 3 fase kesiapan Pancek",
+  "Apa saja materi di Siap Dokumen SMAP?",
+  "Bagaimana proses Siap Audit Eksternal?",
+  "Apa itu Platform Jaga.id?",
+  "Perbedaan SMAP dan Pancek?"
 ];
 
 function stripMarkdown(text: string): string {

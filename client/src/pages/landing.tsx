@@ -57,33 +57,33 @@ export default function LandingPage() {
   const features = [
     {
       icon: Shield,
-      title: "Sistem Anti Penyuapan",
-      description: "Implementasi SNI ISO 37001:2016 dan Pancek KPK dengan panduan lengkap"
+      title: "4 Fase Produk Siap SMAP",
+      description: "Siap Dokumen → Siap Audit Internal → Siap Audit Eksternal → Siap Surveilance untuk sertifikasi SNI ISO 37001:2016"
+    },
+    {
+      icon: Award,
+      title: "3 Fase Kesiapan Pancek",
+      description: "Siap Pengisian Kuesioner → Siap Terverifikasi → Siap Surveilance untuk Platform Jaga.id KPK"
     },
     {
       icon: FileCheck,
       title: "270+ Template Dokumen",
-      description: "Template siap pakai untuk SMAP dan Pancek, langsung generate dengan AI"
+      description: "Template siap pakai untuk setiap fase SMAP dan Pancek, dilengkapi AI Prompt Generator"
     },
     {
       icon: Users,
-      title: "Manajemen Tim",
-      description: "Kelola tim FKAP, Audit Internal, dan struktur organisasi compliance"
+      title: "Manajemen Tim Lengkap",
+      description: "Kelola Tim FKAP, Tim Audit Internal, Manajemen, dan Pegawai untuk kepatuhan"
     },
     {
       icon: Building2,
-      title: "Data Perusahaan",
-      description: "Simpan profil perusahaan, proyek, vendor, dan kualifikasi SBU"
+      title: "Data Perusahaan Terintegrasi",
+      description: "Profil perusahaan, proyek, vendor, peralatan, dan kualifikasi SBU dalam satu sistem"
     },
     {
       icon: BookOpen,
-      title: "AI Mentor",
-      description: "Asisten AI yang siap membantu implementasi SMAP dan Pancek"
-    },
-    {
-      icon: Award,
-      title: "Tracking Sertifikasi",
-      description: "Pantau progres menuju sertifikasi ISO 37001 dengan status real-time"
+      title: "Dual AI Mentor",
+      description: "SMAP Mentor untuk ISO 37001 dan Pancek Mentor untuk Panduan Cegah Korupsi KPK"
     }
   ];
 
