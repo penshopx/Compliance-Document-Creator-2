@@ -13,12 +13,22 @@ import {
   Award,
   Loader2
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { SubscriptionPlan } from "@shared/schema";
 
 export default function LandingPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  
+  const { data: plans } = useQuery<SubscriptionPlan[]>({
+    queryKey: ["/api/subscription-plans"],
+  });
+  
+  const starterPlan = plans?.find(p => p.name === "Starter");
+  const professionalPlan = plans?.find(p => p.name === "Professional");
+  const enterprisePlan = plans?.find(p => p.name === "Enterprise");
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -231,7 +241,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full" variant="outline" asChild>
+                <Button className="w-full" variant="outline" asChild data-testid="button-starter-subscribe">
                   <a href="/api/login">Mulai Gratis</a>
                 </Button>
               </CardContent>
@@ -254,9 +264,15 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full" asChild>
-                  <a href="/api/login">Mulai Trial 14 Hari</a>
-                </Button>
+                {professionalPlan ? (
+                  <Button className="w-full" asChild data-testid="button-professional-subscribe">
+                    <Link href={`/checkout?plan=${professionalPlan.id}`}>Mulai Trial 14 Hari</Link>
+                  </Button>
+                ) : (
+                  <Button className="w-full" asChild data-testid="button-professional-subscribe">
+                    <a href="/api/login">Mulai Trial 14 Hari</a>
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -275,8 +291,8 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full" variant="outline" asChild>
-                  <a href="/api/login">Hubungi Sales</a>
+                <Button className="w-full" variant="outline" asChild data-testid="button-enterprise-contact">
+                  <a href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20dengan%20paket%20Enterprise%20Compliance%20Hub" target="_blank" rel="noopener noreferrer">Hubungi Sales</a>
                 </Button>
               </CardContent>
             </Card>

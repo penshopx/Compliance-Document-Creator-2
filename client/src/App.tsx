@@ -32,12 +32,14 @@ import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
 import SMAPMentorChat from "@/components/smap-mentor-chat";
 import DokumentenderChat from "@/components/dokumentender-chat";
+import CheckoutPage from "@/pages/checkout";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/welcome" component={WelcomePage} />
+      <Route path="/checkout" component={CheckoutPage} />
       <Route path="/pancek" component={PancekPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/company" component={CompanyPage} />
@@ -65,7 +67,7 @@ function AppContent() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const isFullWidthPage = location === "/pdca";
-  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek";
+  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek" || location.startsWith("/checkout");
 
   if (isStandalonePage) {
     return (

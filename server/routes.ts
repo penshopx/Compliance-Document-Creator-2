@@ -688,6 +688,291 @@ Gaya komunikasi:
     }
   });
 
+  // ============ PAYMENT ROUTES ============
+
+  // Get all subscription plans
+  app.get("/api/subscription-plans", async (req, res) => {
+    try {
+      let plans = await storage.getSubscriptionPlans();
+      
+      // Seed default plans if none exist
+      if (plans.length === 0) {
+        const defaultPlans = [
+          {
+            name: "Starter",
+            description: "Untuk memulai perjalanan compliance",
+            price: 0,
+            features: "1 Profil Perusahaan,Akses Pancek Basic,5 Template Dokumen,SMAP Mentor AI (terbatas)",
+            sortOrder: 1,
+          },
+          {
+            name: "Professional",
+            description: "Untuk perusahaan yang serius",
+            price: 499000,
+            features: "Unlimited Perusahaan,Akses SMAP + Pancek,270+ Template Dokumen,SMAP Mentor AI Unlimited,Export PDF & Word,Tracking Sertifikasi",
+            sortOrder: 2,
+          },
+          {
+            name: "Enterprise",
+            description: "Untuk grup perusahaan besar",
+            price: 0,
+            features: "Semua fitur Professional,Multi-User Access,Dedicated Account Manager,Training & Konsultasi,Integrasi API,SLA Support 24/7",
+            sortOrder: 3,
+          },
+        ];
+        
+        for (const plan of defaultPlans) {
+          await storage.createSubscriptionPlan(plan);
+        }
+        plans = await storage.getSubscriptionPlans();
+      }
+      
+      res.json(plans);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subscription plans" });
+    }
+  });
+
+  // Get single subscription plan
+  app.get("/api/subscription-plans/:id", async (req, res) => {
+    try {
+      const plan = await storage.getSubscriptionPlan(req.params.id);
+      if (!plan) {
+        return res.status(404).json({ error: "Plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subscription plan" });
+    }
+  });
+
+  // Payment order validation schema
+  const createPaymentOrderSchema = z.object({
+    planId: z.string().min(1, "Plan ID is required"),
+    paymentMethod: z.enum(["bank_transfer", "ewallet"], { 
+      errorMap: () => ({ message: "Payment method must be 'bank_transfer' or 'ewallet'" })
+    }),
+    paymentBank: z.enum(["bca", "mandiri", "bri", "bni"]).optional().nullable(),
+    ewalletProvider: z.enum(["gopay", "ovo", "dana", "shopeepay"]).optional().nullable(),
+  });
+
+  // Admin user IDs - In production, use a proper role-based system
+  const ADMIN_USER_IDS = process.env.ADMIN_USER_IDS?.split(",") || [];
+
+  // Create payment order (authenticated)
+  app.post("/api/payment-orders", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as { id: string; email?: string; username?: string };
+      
+      const validated = createPaymentOrderSchema.parse(req.body);
+      
+      const plan = await storage.getSubscriptionPlan(validated.planId);
+      if (!plan) {
+        return res.status(404).json({ error: "Plan not found" });
+      }
+
+      // Validate bank is required for bank_transfer
+      if (validated.paymentMethod === "bank_transfer" && !validated.paymentBank) {
+        return res.status(400).json({ error: "Bank selection is required for bank transfer" });
+      }
+
+      // Validate e-wallet provider is required for ewallet
+      if (validated.paymentMethod === "ewallet" && !validated.ewalletProvider) {
+        return res.status(400).json({ error: "E-wallet provider selection is required" });
+      }
+
+      // Generate unique order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+      // Store either bank name or e-wallet provider in bankName field
+      const paymentProvider = validated.paymentMethod === "bank_transfer" 
+        ? validated.paymentBank 
+        : validated.ewalletProvider;
+
+      const order = await storage.createPaymentOrder({
+        orderNumber,
+        userId: user.id,
+        userEmail: user.email || null,
+        userName: user.username || null,
+        planId: validated.planId,
+        planName: plan.name,
+        amount: plan.price,
+        paymentMethod: validated.paymentMethod,
+        bankName: paymentProvider || null,
+        status: "pending",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      });
+
+      res.status(201).json(order);
+    } catch (error) {
+      console.error("Payment order error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create payment order" });
+    }
+  });
+
+  // Get user's payment orders (authenticated)
+  app.get("/api/payment-orders", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as { id: string };
+      const orders = await storage.getPaymentOrdersByUser(user.id);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch payment orders" });
+    }
+  });
+
+  // Get single payment order
+  app.get("/api/payment-orders/:id", isAuthenticated, async (req, res) => {
+    try {
+      const orderId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const order = await storage.getPaymentOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch payment order" });
+    }
+  });
+
+  // Confirm payment (user submits confirmation)
+  app.post("/api/payment-orders/:id/confirm", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as { id: string };
+      const orderId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const order = await storage.getPaymentOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      if (order.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+
+      // Only allow confirming pending orders
+      if (order.status !== "pending") {
+        return res.status(400).json({ error: "Order cannot be confirmed in current status" });
+      }
+
+      // Check if order has expired
+      if (order.expiresAt && new Date(order.expiresAt) < new Date()) {
+        return res.status(400).json({ error: "Order has expired" });
+      }
+
+      const { notes } = req.body;
+
+      const updatedOrder = await storage.updatePaymentOrder(orderId, {
+        status: "pending_confirmation",
+        confirmedAt: new Date(),
+        notes: notes || null,
+      });
+
+      res.json(updatedOrder);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  // Get user's subscription status (authenticated)
+  app.get("/api/subscription", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as { id: string };
+      const subscription = await storage.getUserSubscription(user.id);
+      res.json(subscription || null);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subscription" });
+    }
+  });
+
+  // Admin authorization middleware
+  const isAdmin = (req: any, res: any, next: any) => {
+    const user = req.user as { id: string } | undefined;
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    // In production (NODE_ENV=production), require ADMIN_USER_IDS to be set
+    // In development, allow if ADMIN_USER_IDS is empty for testing
+    const isDevelopment = process.env.NODE_ENV !== "production";
+    if (isDevelopment && ADMIN_USER_IDS.length === 0) {
+      return next();
+    }
+    if (ADMIN_USER_IDS.includes(user.id)) {
+      return next();
+    }
+    return res.status(403).json({ error: "Admin access required" });
+  };
+
+  // Admin: Verify payment and activate subscription
+  app.post("/api/admin/payment-orders/:id/verify", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const orderId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const order = await storage.getPaymentOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      if (order.status === "paid") {
+        return res.status(400).json({ error: "Order already verified" });
+      }
+
+      // Only allow verifying pending_confirmation orders
+      if (order.status !== "pending_confirmation") {
+        return res.status(400).json({ error: "Order must be in pending_confirmation status to verify" });
+      }
+
+      // Update order status to paid
+      const updatedOrder = await storage.updatePaymentOrder(orderId, {
+        status: "paid",
+        paidAt: new Date(),
+      });
+
+      // Create or update user subscription
+      const existingSubscription = await storage.getUserSubscription(order.userId);
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
+
+      if (existingSubscription) {
+        await storage.updateUserSubscription(existingSubscription.id, {
+          planId: order.planId,
+          planName: order.planName,
+          status: "active",
+          startDate: startDate,
+          endDate: endDate,
+        });
+      } else {
+        await storage.createUserSubscription({
+          userId: order.userId,
+          planId: order.planId,
+          planName: order.planName,
+          status: "active",
+          startDate: startDate,
+          endDate: endDate,
+        });
+      }
+
+      res.json({ message: "Payment verified and subscription activated", order: updatedOrder });
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      res.status(500).json({ error: "Failed to verify payment" });
+    }
+  });
+
+  // Admin: Get all payment orders
+  app.get("/api/admin/payment-orders", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const orders = await storage.getPaymentOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch payment orders" });
+    }
+  });
+
   return httpServer;
 }
 

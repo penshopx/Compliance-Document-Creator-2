@@ -19,12 +19,32 @@ The core architecture includes:
 - **AI Integration**: AI prompt generation for documents, designed to be used with external AI models like those from dokumenttender.com, using context from the application.
 
 ## Payment System
-The application uses Indonesian payment methods:
+The application uses Indonesian payment methods with manual verification:
+
+### Payment Methods
 - **Transfer Bank**: BCA, Mandiri, BRI, BNI with manual confirmation
 - **E-Wallet & QRIS**: GoPay, OVO, Dana, ShopeePay via QRIS
-- **Confirmation**: WhatsApp-based payment confirmation flow
-- **Pricing Tiers**: Starter (Free), Professional (Rp 499.000/month), Enterprise (Custom)
-- **Database Tables**: subscription_plans, payment_orders, user_subscriptions
+
+### Pricing Tiers
+- **Starter**: Free - 1 Company Profile, Basic Pancek, 5 Templates, Limited AI
+- **Professional**: Rp 499.000/month - Unlimited Companies, Full SMAP+Pancek, 270+ Templates, Unlimited AI
+- **Enterprise**: Custom pricing - Multi-User, Dedicated Account Manager, API Access, 24/7 Support
+
+### Payment Flow
+1. User selects plan and payment method on `/checkout` page
+2. System creates payment order with unique order number (24-hour expiry)
+3. User transfers to designated bank account or scans QRIS
+4. User confirms payment via app or WhatsApp (0812-3456-7890)
+5. Admin verifies payment via `/api/admin/payment-orders/:id/verify`
+6. System activates subscription for 1 month
+
+### Database Tables
+- `subscription_plans`: Plan definitions with features and pricing
+- `payment_orders`: Order tracking with status (pending, pending_confirmation, paid)
+- `user_subscriptions`: Active user subscriptions with period dates
+
+### Admin Configuration
+Set `ADMIN_USER_IDS` environment variable (comma-separated user IDs) to restrict admin endpoints. If not set, all authenticated users have admin access (development mode).
 
 ## External Dependencies
 - **PostgreSQL**: Primary database for all application data.
