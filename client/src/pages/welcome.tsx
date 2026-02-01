@@ -1,12 +1,57 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Flag, Shield, FileCheck, CheckCircle2, ArrowRight, Building2, Scale, Award } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Globe, Flag, Shield, FileCheck, CheckCircle2, ArrowRight, Building2, Scale, Award, LogOut, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 export default function WelcomePage() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      setLocation("/");
+    }
+  }, [isLoading, isAuthenticated, setLocation]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <nav className="border-b bg-background/95 backdrop-blur">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="h-6 w-6 text-primary" />
+            <span className="font-bold">Compliance Hub</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-right hidden sm:block">
+              <div className="font-medium" data-testid="text-welcome-user">{user?.firstName || user?.email || 'User'}</div>
+            </div>
+            <Avatar className="h-8 w-8" data-testid="avatar-welcome-user">
+              <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || 'User'} />
+              <AvatarFallback>{(user?.firstName?.[0] || user?.email?.[0] || 'U').toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <Button variant="ghost" size="icon" asChild data-testid="button-welcome-logout">
+              <a href="/api/logout" title="Keluar">
+                <LogOut className="h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      </nav>
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -14,7 +59,7 @@ export default function WelcomePage() {
             <h1 className="text-4xl font-bold" data-testid="text-welcome-title">Compliance Hub</h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Platform Manajemen Kepatuhan Anti Penyuapan & Anti Korupsi untuk Perusahaan Konstruksi Indonesia
+            Selamat datang, {user?.firstName || 'User'}! Pilih jalur kepatuhan untuk memulai.
           </p>
         </div>
 
