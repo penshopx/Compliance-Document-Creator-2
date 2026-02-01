@@ -25,6 +25,8 @@ import TemplateRepository from "@/pages/template-repository";
 import SMAPChecklist from "@/pages/smap-checklist";
 import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
+import SMAPMentorChat from "@/components/smap-mentor-chat";
+import DokumentenderChat from "@/components/dokumentender-chat";
 
 function Router() {
   return (
@@ -94,6 +96,8 @@ function App() {
         <SidebarProvider style={style as React.CSSProperties}>
           <AppContent />
         </SidebarProvider>
+        <SMAPMentorChat />
+        <DokumentenderChat />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
