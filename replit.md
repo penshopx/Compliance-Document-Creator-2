@@ -18,6 +18,12 @@ The core architecture includes:
 - **Document Management**: APIs for listing and generating basic documents, and CRUD for advanced SMAP documents with metadata. A vast **Template Repository** contains over 270 SMAP document templates categorized by type, ISO clause, business area, and criticality, supporting advanced search and filtering.
 - **AI Integration**: AI prompt generation for documents, designed to be used with external AI models like those from dokumenttender.com, using context from the application.
 
+## Payment System
+The application uses **manual bank transfer** for payments instead of automated payment gateways:
+- Pricing tiers: Starter (Free), Professional (Rp 499.000/month), Enterprise (Custom)
+- Bank transfer details displayed on landing page
+- Manual activation via WhatsApp confirmation after payment
+
 ## External Dependencies
 - **PostgreSQL**: Primary database for all application data.
 - **Shadcn/UI**: UI component library.
@@ -27,6 +33,7 @@ The core architecture includes:
 - **Express.js**: Backend web framework.
 - **Drizzle ORM**: TypeScript ORM for PostgreSQL.
 - **Zod**: Schema validation library.
+- **Replit Auth**: User authentication via Google/GitHub/Apple/email login with PostgreSQL sessions.
 - **Replit AI Integrations (Gemini)**: Utilizes `gemini-2.5-flash` and `gemini-2.5-pro` models for AI-powered content generation, leveraging Replit credits.
 - **Platform Jaga.id**: External platform referenced for Pancek pathway integration.
 - **dokumenttender.com**: Referenced as a potential external AI aggregator for generated prompts.

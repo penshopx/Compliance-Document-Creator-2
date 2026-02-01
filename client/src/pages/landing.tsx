@@ -303,6 +303,35 @@ export default function LandingPage() {
               </Card>
             ))}
           </div>
+
+          <Card className="mt-12 max-w-3xl mx-auto">
+            <CardContent className="p-6">
+              <h3 className="font-bold text-lg mb-4 text-center">Pembayaran via Transfer Bank</h3>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Rekening Pembayaran:</p>
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-1">
+                    <p className="text-sm"><span className="text-muted-foreground">Bank:</span> BCA</p>
+                    <p className="text-sm"><span className="text-muted-foreground">No. Rekening:</span> 1234567890</p>
+                    <p className="text-sm"><span className="text-muted-foreground">Atas Nama:</span> PT Compliance Hub Indonesia</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Cara Pembayaran:</p>
+                  <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                    <li>Transfer sesuai nominal paket</li>
+                    <li>Kirim bukti transfer ke WhatsApp</li>
+                    <li>Aktivasi dalam 1x24 jam kerja</li>
+                  </ol>
+                  <Button variant="outline" size="sm" className="mt-2" asChild>
+                    <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer">
+                      Konfirmasi WhatsApp
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
