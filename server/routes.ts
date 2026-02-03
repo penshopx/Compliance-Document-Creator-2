@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
+import { industryConfigs } from "@shared/data/industry-configs";
 import { z } from "zod";
 import {
   insertCompanySchema,

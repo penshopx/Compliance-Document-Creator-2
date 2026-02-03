@@ -159,23 +159,21 @@ export default function UnifiedChatbot() {
 
   if (!isOpen) {
     return (
-      <div 
-        className="fixed shadow-lg"
-        style={{ zIndex: 9999, bottom: '16px', left: '16px' }}
-      >
+      <div className="fixed bottom-4 right-6 z-40">
         <Button
           onClick={() => setIsOpen(true)}
-          className={`rounded-full ${colorClass} h-14 w-14`}
+          className={`rounded-full shadow-lg ${colorClass}`}
+          size="icon"
           data-testid="button-open-chatbot"
         >
-          <Bot className="h-6 w-6" />
+          <Bot className="h-5 w-5" />
         </Button>
       </div>
     );
   }
 
   return (
-    <Card className="fixed bottom-4 left-4 w-96 h-[520px] shadow-xl flex flex-col" style={{ zIndex: 9999 }} data-testid="card-chatbot">
+    <Card className="fixed bottom-4 right-6 w-96 h-[520px] shadow-xl z-50 flex flex-col" data-testid="card-chatbot">
       <CardHeader className={`pb-2 border-b ${colorClass} text-white rounded-t-lg`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
