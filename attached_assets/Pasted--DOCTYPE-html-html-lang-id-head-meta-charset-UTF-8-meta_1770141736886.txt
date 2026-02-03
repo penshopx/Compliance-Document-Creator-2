@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SMAP - Sistem Manajemen Anti Penyuapan</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50:  '#f0f7f6',
+              100: '#d1f2eb',
+              200: '#a3e4d7',
+              300: '#76d7c4',
+              400: '#48c9b0',
+              500: '#1abc9c',
+              600: '#17a589',
+              700: '#148f77',
+              800: '#117864',
+              900: '#0e6251',
+            },
+            accent: {
+              500: '#f39c12',
+              600: '#e67e22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Grid.js CSS -->
+  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet">
+  <!-- ApexCharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="bg-gray-50 text-gray-700 font-sans">
+  <!-- ===================== HEADER & NAVBAR ===================== -->
+  <header class="bg-white shadow-sm sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-3">
+        <!-- Placeholder Logo -->
+        <img src="https://fakeimg.pl/48x48?text=LOGO" alt="Logo SMAP" class="w-12 h-12 rounded-lg bg-gray-100" />
+        <span class="text-2xl font-bold text-primary-700 tracking-tight">SMAP</span>
+      </div>
+      <nav aria-label="Menu utama" class="hidden md:flex gap-6 items-center">
+        <a href="#mainContent" class="text-gray-700 hover:text-primary-600 transition-colors font-medium focus:outline-none focus:text-primary-700" tabindex="0">Beranda</a>
+        <a href="#smap-app" class="text-gray-700 hover:text-primary-600 transition-colors font-medium focus:outline-none focus:text-primary-700" tabindex="0">Aplikasi SMAP</a>
+        <a href="#learning" class="text-gray-700 hover:text-primary-600 transition-colors font-medium focus:outline-none focus:text-primary-700" tabindex="0">Learning & Pedoman</a>
+        <a href="#lampiran" class="text-gray-700 hover:text-primary-600 transition-colors font-medium focus:outline-none focus:text-primary-700" tabindex="0">Lampiran Strategis</a>
+        <button id="langSwitcher" aria-label="Ganti Bahasa" class="ml-4 px-3 py-2 rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400">
+          <i class="fas fa-globe fa-lg mr-1"></i>
+          <span id="langLabel">EN</span>
+        </button>
+      </nav>
+      <!-- Mobile menu button -->
+      <button id="mobileMenuBtn" class="md:hidden text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-400" aria-label="Buka menu">
+        <i class="fas fa-bars fa-2x"></i>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden bg-white border-t border-gray-100 px-4 py-2">
+      <a href="#mainContent" class="block py-2 text-gray-700 hover:text-primary-600 transition-colors font-medium">Beranda</a>
+      <a href="#smap-app" class="block py-2 text-gray-700 hover:text-primary-600 transition-colors font-medium">Aplikasi SMAP</a>
+      <a href="#learning" class="block py-2 text-gray-700 hover:text-primary-600 transition-colors font-medium">Learning & Pedoman</a>
+      <a href="#lampiran" class="block py-2 text-gray-700 hover:text-primary-600 transition-colors font-medium">Lampiran Strategis</a>
+      <button id="langSwitcherMobile" class="w-full mt-2 px-3 py-2 rounded-md bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400">
+        <i class="fas fa-globe fa-lg mr-1"></i>
+        <span id="langLabelMobile">EN</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== HERO / LANDING PAGE ===================== -->
+  <main id="mainContent" tabindex="-1">
+    <section class="bg-primary-50 py-12" id="hero">
+      <div class="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center gap-10 px-4">
+        <div class="md:w-1/2">
+          <h1 class="text-4xl font-bold text-primary-800 mb-4 leading-tight" id="heroTitle">
+            Sistem Manajemen Anti Penyuapan (SMAP)
+          </h1>
+          <p class="text-lg text-gray-700 mb-6" id="heroDesc">
+            Platform terintegrasi untuk membantu perusahaan Anda dalam membangun, mengelola, dan memverifikasi dokumen SMAP sesuai Permen PU No. 8 Tahun 2022 & ISO 37001:2016. Tingkatkan integritas, transparansi, dan kepatuhan organisasi Anda dengan mudah.
+          </p>
+          <ul class="mb-6 space-y-2" id="heroBenefits">
+            <li class="flex items-center gap-2 text-base text-gray-700">
+              <i class="fas fa-shield-alt text-primary-600"></i>
+              <span>Otomatisasi checklist & verifikasi dokumen anti-penyuapan</span>
+            </li>
+            <li class="flex items-center gap-2 text-base text-gray-700">
+              <i class="fas fa-file-alt text-primary-600"></i>
+              <span>Template & generator dokumen SMAP siap pakai</span>
+            </li>
+            <li class="flex items-center gap-2 text-base text-gray-700">
+              <i class="fas fa-language text-primary-600"></i>
+              <span>Dukungan Bahasa Indonesia & Inggris</span>
+            </li>
+          </ul>
+          <a href="#smap-app" class="inline-block px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-md shadow transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400" id="ctaBtn">
+            <i class="fas fa-check-circle mr-2"></i> Mulai Aplikasi SMAP
+          </a>
+        </div>
+        <div class="md:w-1/2 flex justify-center">
+          <img src="https://fakeimg.pl/600x400?text=Anti+Bribery" alt="Ilustrasi anti penyuapan" class="w-full max-w-md h-auto rounded-lg shadow-md" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SMAP SIDEBAR APP ===================== -->
+    <section class="max-w-7xl mx-auto py-12 px-2" id="smap-app">
+      <div class="flex flex-col lg:flex-row gap-8">
+        <!-- SIDEBAR -->
+        <aside class="w-full lg:w-1/4 bg-white rounded-lg shadow-sm border border-gray-100 p-4 sticky top-24 h-fit" id="smapSidebar" aria-label="Sidebar Klausul SMAP">
+          <h2 class="text-lg font-bold text-primary-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-list-alt text-primary-600"></i> Klausul & Dokumen SMAP
+          </h2>
+          <nav>
+            <ul class="space-y-2 text-sm" id="sidebarMenu">
+              <!-- Sidebar menu will be rendered by JS -->
+            </ul>
+          </nav>
+        </aside>
+        <!-- MAIN PANEL -->
+        <section class="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-6 min-h-[500px]" id="smapMainPanel" tabindex="0">
+          <div id="smapPanelContent" class="text-gray-600 flex flex-col gap-4 items-center justify-center h-full">
+            <img src="https://fakeimg.pl/400x300?text=SMAP" alt="SMAP App" class="w-64 h-48 rounded-lg mb-4">
+            <h3 class="text-xl font-semibold text-primary-700 text-center">Pilih klausul, subklausul, atau jenis dokumen dari sidebar untuk mulai membuat atau mengelola dokumen SMAP Anda.</h3>
+            <p class="text-base text-gray-500 text-center">Outline dan struktur sesuai Permen PU No. 08 Tahun 2022 & ISO 37001:2016.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ===================== LEARNING & PEDOMAN ===================== -->
+    <section class="max-w-7xl mx-auto py-12 px-4" id="learning">
+      <h2 class="text-2xl font-semibold text-primary-800 mb-6" id="learningTitle">
+        Learning & Pedoman SMAP
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100 flex flex-col gap-3">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2" id="permenTitle">Permen PU No. 8 Tahun 2022</h3>
+          <p class="text-base text-gray-600" id="permenDesc">
+            Peraturan Menteri Pekerjaan Umum dan Perumahan Rakyat No. 8 Tahun 2022 tentang Sistem Manajemen Anti Penyuapan di lingkungan Kementerian PUPR. <br>
+            <a href="#" class="text-primary-600 hover:underline focus:outline-none" tabindex="0"><i class="fas fa-download mr-1"></i>Unduh Ringkasan</a>
+          </p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100 flex flex-col gap-3">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2" id="isoTitle">ISO 37001:2016</h3>
+          <p class="text-base text-gray-600" id="isoDesc">
+            Standar internasional untuk sistem manajemen anti penyuapan, memberikan kerangka kerja pencegahan, deteksi, dan penanganan penyuapan. <br>
+            <a href="#" class="text-primary-600 hover:underline focus:outline-none" tabindex="0"><i class="fas fa-download mr-1"></i>Unduh Ringkasan</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LAMPIRAN STRATEGIS ===================== -->
+    <section class="max-w-7xl mx-auto py-12 px-4" id="lampiran">
+      <h2 class="text-2xl font-semibold text-primary-800 mb-6" id="lampiranTitle">
+        Lampiran Strategis
+      </h2>
+      <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-search text-primary-600"></i>
+            <input type="text" id="lampiranSearch" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-primary-400 focus:border-primary-400 transition" placeholder="Cari lampiran..." aria-label="Cari lampiran">
+          </div>
+          <button id="addLampiranBtn" class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500">
+            <i class="fas fa-plus mr-1"></i> Tambah Lampiran
+          </button>
+        </div>
+        <!-- Table: Lampiran Strategis -->
+        <div class="overflow-x-auto">
+          <table id="lampiranTable" class="min-w-full bg-white" aria-label="Tabel Lampiran Strategis">
+            <thead class="bg-gray-100">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Lampiran</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" id="lampiranTableBody">
+              <!-- Dummy data, will be filled by JS -->
+            </tbody>
+          </table>
+          <div id="lampiranTableEmpty" class="text-center text-gray-500 py-4 hidden">Tidak ada lampiran.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="bg-white border-t border-gray-100 mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <img src="https://fakeimg.pl/32x32?text=LOGO" alt="Logo SMAP" class="w-8 h-8 rounded-lg bg-gray-100" />
+        <span class="text-base font-semibold text-primary-700">SMAP</span>
+      </div>
+      <div class="text-sm text-gray-500 text-center md:text-right">
+        &copy; 2024 SMAP. Sistem Manajemen Anti Penyuapan. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <!-- Grid.js -->
+  <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+  <!-- ApexCharts already loaded in <head> -->
+  <script>
+    // ===================== RESPONSIVE NAVBAR =====================
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // ===================== LANGUAGE SWITCHER =====================
+    const langSwitcher = document.getElementById('langSwitcher');
+    const langSwitcherMobile = document.getElementById('langSwitcherMobile');
+    const langLabel = document.getElementById('langLabel');
+    const langLabelMobile = document.getElementById('langLabelMobile');
+    let currentLang = localStorage.getItem('smapLang') || 'id';
+
+    // Simple i18n dictionary
+    const i18n = {
+      id: {
+        heroTitle: "Sistem Manajemen Anti Penyuapan (SMAP)",
+        heroDesc: "Platform terintegrasi untuk membantu perusahaan Anda dalam membangun, mengelola, dan memverifikasi dokumen SMAP sesuai Permen PU No. 8 Tahun 2022 & ISO 37001:2016. Tingkatkan integritas, transparansi, dan kepatuhan organisasi Anda dengan mudah.",
+        heroBenefits: [
+          "Otomatisasi checklist & verifikasi dokumen anti-penyuapan",
+          "Template & generator dokumen SMAP siap pakai",
+          "Dukungan Bahasa Indonesia & Inggris"
+        ],
+        ctaBtn: "Mulai Aplikasi SMAP",
+        lampiranTitle: "Lampiran Strategis"
+      },
+      en: {
+        heroTitle: "Anti-Bribery Management System (SMAP)",
+        heroDesc: "An integrated platform to help your company build, manage, and verify SMAP documents in accordance with Permen PU No. 8/2022 & ISO 37001:2016. Easily enhance your organization's integrity, transparency, and compliance.",
+        heroBenefits: [
+          "Automated anti-bribery checklist & document verification",
+          "Ready-to-use SMAP document templates & generator",
+          "Support for Indonesian & English languages"
+        ],
+        ctaBtn: "Start SMAP App",
+        lampiranTitle: "Strategic Attachments"
+      }
+    };
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('smapLang', lang);
+      // Hero
+      document.getElementById('heroTitle').textContent = i18n[lang].heroTitle;
+      document.getElementById('heroDesc').textContent = i18n[lang].heroDesc;
+      const heroBenefits = document.getElementById('heroBenefits');
+      heroBenefits.innerHTML = '';
+      i18n[lang].heroBenefits.forEach((b, i) => {
+        const li = document.createElement('li');
+        li.className = "flex items-center gap-2 text-base text-gray-700";
+        li.innerHTML = `<i class="fas fa-${['shield-alt','file-alt','language'][i]} text-primary-600"></i><span>${b}</span>`;
+        heroBenefits.appendChild(li);
+      });
+      document.getElementById('ctaBtn').innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${i18n[lang].ctaBtn}`;
+      // Lampiran
+      document.getElementById('lampiranTitle').textContent = i18n[lang].lampiranTitle;
+      // Update language label
+      langLabel.textContent = lang === 'id' ? 'EN' : 'ID';
+      langLabelMobile.textContent = lang === 'id' ? 'EN' : 'ID';
+      // Update sidebar menu
+      renderSidebarMenu();
+      // If a clause is selected, rerender its form
+      if (window.selectedSidebarKey) {
+        renderSmapPanel(window.selectedSidebarKey);
+      }
+    }
+    langSwitcher.addEventListener('click', () => {
+      setLang(currentLang === 'id' ? 'en' : 'id');
+    });
+    langSwitcherMobile.addEventListener('click', () => {
+      setLang(currentLang === 'id' ? 'en' : 'id');
+      mobileMenu.classList.add('hidden');
+    });
+    // On load
+    setLang(currentLang);
+
+    // ===================== SIDEBAR MENU DATA (Permen PU 08/2022 + ISO 37001:2016) =====================
+    // Outline: Bab 0-10, Lampiran, Rekaman, Checklist, Dokumen Khusus
+    // Each item: { key, label, children: [subklausul], type }
+    const sidebarOutline = [
+      {
+        key: "bab0",
+        label: { id: "Bab 0. Pendahuluan", en: "Chapter 0. Introduction" },
+        children: [
+          { key: "bab0-1", label: { id: "0.1 Latar Belakang", en: "0.1 Background" }, iso: "ISO 37001:2016 1-2" },
+          { key: "bab0-2", label: { id: "0.2 Ruang Lingkup", en: "0.2 Scope" }, iso: "ISO 37001:2016 1" }
+        ]
+      },
+      {
+        key: "bab1",
+        label: { id: "Bab 1. Istilah & Definisi", en: "Chapter 1. Terms & Definitions" },
+        children: [
+          { key: "bab1-1", label: { id: "1.1 Istilah", en: "1.1 Terms" }, iso: "ISO 37001:2016 3" },
+          { key: "bab1-2", label: { id: "1.2 Definisi", en: "1.2 Definitions" }, iso: "ISO 37001:2016 3" }
+        ]
+      },
+      {
+        key: "bab2",
+        label: { id: "Bab 2. Konteks Organisasi", en: "Chapter 2. Organization Context" },
+        children: [
+          { key: "bab2-1", label: { id: "2.1 Memahami Organisasi", en: "2.1 Understanding the Organization" }, iso: "ISO 37001:2016 4.1" },
+          { key: "bab2-2", label: { id: "2.2 Kebutuhan & Harapan Pihak Berkepentingan", en: "2.2 Needs & Expectations of Interested Parties" }, iso: "ISO 37001:2016 4.2" },
+          { key: "bab2-3", label: { id: "2.3 Ruang Lingkup SMAP", en: "2.3 Scope of ABMS" }, iso: "ISO 37001:2016 4.3" },
+          { key: "bab2-4", label: { id: "2.4 SMAP & Prosesnya", en: "2.4 ABMS & Its Processes" }, iso: "ISO 37001:2016 4.4" }
+        ]
+      },
+      {
+        key: "bab3",
+        label: { id: "Bab 3. Kepemimpinan", en: "Chapter 3. Leadership" },
+        children: [
+          { key: "bab3-1", label: { id: "3.1 Komitmen Pimpinan", en: "3.1 Leadership Commitment" }, iso: "ISO 37001:2016 5.1" },
+          { key: "bab3-2", label: { id: "3.2 Kebijakan Anti Penyuapan", en: "3.2 Anti-Bribery Policy" }, iso: "ISO 37001:2016 5.2" },
+          { key: "bab3-3", label: { id: "3.3 Peran, Tanggung Jawab, Wewenang", en: "3.3 Roles, Responsibilities, Authorities" }, iso: "ISO 37001:2016 5.3" }
+        ]
+      },
+      {
+        key: "bab4",
+        label: { id: "Bab 4. Perencanaan", en: "Chapter 4. Planning" },
+        children: [
+          { key: "bab4-1", label: { id: "4.1 Tindakan Menghadapi Risiko & Peluang", en: "4.1 Actions to Address Risks & Opportunities" }, iso: "ISO 37001:2016 6.1" },
+          { key: "bab4-2", label: { id: "4.2 Tujuan SMAP & Perencanaan", en: "4.2 ABMS Objectives & Planning" }, iso: "ISO 37001:2016 6.2" }
+        ]
+      },
+      {
+        key: "bab5",
+        label: { id: "Bab 5. Dukungan", en: "Chapter 5. Support" },
+        children: [
+          { key: "bab5-1", label: { id: "5.1 Sumber Daya", en: "5.1 Resources" }, iso: "ISO 37001:2016 7.1" },
+          { key: "bab5-2", label: { id: "5.2 Kompetensi", en: "5.2 Competence" }, iso: "ISO 37001:2016 7.2" },
+          { key: "bab5-3", label: { id: "5.3 Kesadaran", en: "5.3 Awareness" }, iso: "ISO 37001:2016 7.3" },
+          { key: "bab5-4", label: { id: "5.4 Komunikasi", en: "5.4 Communication" }, iso: "ISO 37001:2016 7.4" },
+          { key: "bab5-5", label: { id: "5.5 Informasi Terdokumentasi", en: "5.5 Documented Information" }, iso: "ISO 37001:2016 7.5" }
+        ]
+      },
+      {
+        key: "bab6",
+        label: { id: "Bab 6. Operasi", en: "Chapter 6. Operation" },
+        children: [
+          { key: "bab6-1", label: { id: "6.1 Perencanaan & Pengendalian Operasi", en: "6.1 Operational Planning & Control" }, iso: "ISO 37001:2016 8.1" },
+          { key: "bab6-2", label: { id: "6.2 Due Diligence", en: "6.2 Due Diligence" }, iso: "ISO 37001:2016 8.2" },
+          { key: "bab6-3", label: { id: "6.3 Kontrol Keuangan & Non-Keuangan", en: "6.3 Financial & Non-Financial Controls" }, iso: "ISO 37001:2016 8.3" },
+          { key: "bab6-4", label: { id: "6.4 Kontrol atas Proyek, Mitra, Pihak Ketiga", en: "6.4 Controls over Projects, Partners, Third Parties" }, iso: "ISO 37001:2016 8.4" },
+          { key: "bab6-5", label: { id: "6.5 Proses Pelaporan & Investigasi", en: "6.5 Reporting & Investigation Process" }, iso: "ISO 37001:2016 8.9" }
+        ]
+      },
+      {
+        key: "bab7",
+        label: { id: "Bab 7. Evaluasi Kinerja", en: "Chapter 7. Performance Evaluation" },
+        children: [
+          { key: "bab7-1", label: { id: "7.1 Pemantauan, Pengukuran, Analisis, Evaluasi", en: "7.1 Monitoring, Measurement, Analysis, Evaluation" }, iso: "ISO 37001:2016 9.1" },
+          { key: "bab7-2", label: { id: "7.2 Audit Internal", en: "7.2 Internal Audit" }, iso: "ISO 37001:2016 9.2" },
+          { key: "bab7-3", label: { id: "7.3 Tinjauan Manajemen", en: "7.3 Management Review" }, iso: "ISO 37001:2016 9.3" }
+        ]
+      },
+      {
+        key: "bab8",
+        label: { id: "Bab 8. Peningkatan", en: "Chapter 8. Improvement" },
+        children: [
+          { key: "bab8-1", label: { id: "8.1 Ketidaksesuaian & Tindakan Perbaikan", en: "8.1 Nonconformity & Corrective Action" }, iso: "ISO 37001:2016 10.1" },
+          { key: "bab8-2", label: { id: "8.2 Peningkatan Berkelanjutan", en: "8.2 Continual Improvement" }, iso: "ISO 37001:2016 10.2" }
+        ]
+      },
+      {
+        key: "bab9",
+        label: { id: "Bab 9. Lampiran Permen PU", en: "Chapter 9. Permen PU Attachments" },
+        children: [
+          { key: "bab9-1", label: { id: "Lampiran I: Checklist SMAP", en: "Annex I: SMAP Checklist" }, iso: "" },
+          { key: "bab9-2", label: { id: "Lampiran II: Contoh Dokumen", en: "Annex II: Document Examples" }, iso: "" }
+        ]
+      },
+      {
+        key: "rekaman",
+        label: { id: "Dokumen Rekaman Pelaksanaan", en: "Implementation Records" },
+        children: [
+          { key: "rekaman-notulen", label: { id: "Notulen Rapat", en: "Meeting Minutes" } },
+          { key: "rekaman-laporan", label: { id: "Laporan Pelaksanaan", en: "Implementation Report" } },
+          { key: "rekaman-bukti", label: { id: "Bukti Kegiatan", en: "Activity Evidence" } }
+        ]
+      },
+      {
+        key: "checklist",
+        label: { id: "Checklist SMAP", en: "SMAP Checklist" },
+        children: []
+      },
+      {
+        key: "khusus",
+        label: { id: "Dokumen Khusus/Lain-lain", en: "Special/Other Documents" },
+        children: [
+          { key: "khusus-lain", label: { id: "Dokumen Lain-lain", en: "Other Documents" } }
+        ]
+      }
+    ];
+
+    // ===================== FIELD DEFINITIONS FOR ALL SUBKLAUSUL/DOKUMEN =====================
+    // Each key maps to a field definition array
+    // If not found, fallback to Dokumen Khusus
+    window.docFieldDefs = {
+      // Bab 0
+      "bab0-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Pendahuluan", en: "Introduction"}, required: true },
+        { name: "latarBelakang", label: {id: "Latar Belakang", en: "Background"}, type: "textarea", placeholder: {id: "Tuliskan latar belakang...", en: "Write background..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab0-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Ruang Lingkup", en: "Scope"}, required: true },
+        { name: "ruangLingkup", label: {id: "Ruang Lingkup", en: "Scope"}, type: "textarea", placeholder: {id: "Tuliskan ruang lingkup...", en: "Write scope..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 1
+      "bab1-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Istilah", en: "Terms"}, required: true },
+        { name: "istilah", label: {id: "Daftar Istilah", en: "List of Terms"}, type: "textarea", placeholder: {id: "Tuliskan istilah-istilah...", en: "Write terms..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab1-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Definisi", en: "Definitions"}, required: true },
+        { name: "definisi", label: {id: "Daftar Definisi", en: "List of Definitions"}, type: "textarea", placeholder: {id: "Tuliskan definisi-definisi...", en: "Write definitions..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 2
+      "bab2-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Memahami Organisasi", en: "Understanding the Organization"}, required: true },
+        { name: "uraian", label: {id: "Uraian", en: "Description"}, type: "textarea", placeholder: {id: "Tuliskan uraian...", en: "Write description..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab2-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Kebutuhan & Harapan", en: "Needs & Expectations"}, required: true },
+        { name: "pihakBerkepentingan", label: {id: "Pihak Berkepentingan", en: "Interested Parties"}, type: "textarea", placeholder: {id: "Tuliskan pihak berkepentingan...", en: "Write interested parties..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab2-3": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Ruang Lingkup SMAP", en: "Scope of ABMS"}, required: true },
+        { name: "ruangLingkup", label: {id: "Ruang Lingkup", en: "Scope"}, type: "textarea", placeholder: {id: "Tuliskan ruang lingkup SMAP...", en: "Write ABMS scope..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab2-4": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "SMAP & Prosesnya", en: "ABMS & Its Processes"}, required: true },
+        { name: "proses", label: {id: "Proses SMAP", en: "ABMS Processes"}, type: "textarea", placeholder: {id: "Tuliskan proses SMAP...", en: "Write ABMS processes..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 3
+      "bab3-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Komitmen Pimpinan", en: "Leadership Commitment"}, required: true },
+        { name: "komitmen", label: {id: "Komitmen", en: "Commitment"}, type: "textarea", placeholder: {id: "Tuliskan komitmen pimpinan...", en: "Write leadership commitment..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab3-2": [
+        { name: "profesi", label: {id: "Profesi/Pekerjaan", en: "Profession/Role"}, type: "text", placeholder: {id: "Contoh: Direktur Utama", en: "e.g. CEO"}, required: true },
+        { name: "tujuan", label: {id: "Tujuan/Target Audiens", en: "Purpose/Target Audience"}, type: "text", placeholder: {id: "Contoh: Seluruh Karyawan", en: "e.g. All Employees"}, required: true },
+        { name: "formatPenulisan", label: {id: "Format Penulisan", en: "Document Format"}, type: "select", options: [
+          {value: "Narasi", label: {id: "Narasi", en: "Narrative"}},
+          {value: "Poin", label: {id: "Poin", en: "Bullet Points"}},
+          {value: "Surat Resmi", label: {id: "Surat Resmi", en: "Official Letter"}}
+        ], required: true },
+        { name: "nomorDokumen", label: {id: "Nomor Dokumen", en: "Document Number"}, type: "text", placeholder: {id: "Contoh: 001/SMAP/2024", en: "e.g. 001/SMAP/2024"}, required: false },
+        { name: "tanggalPengesahan", label: {id: "Tanggal Pengesahan", en: "Approval Date"}, type: "date", required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true },
+        { name: "instruksi", label: {id: "Instruksi Tambahan", en: "Additional Instructions"}, type: "textarea", placeholder: {id: "Contoh: Sertakan referensi ISO 37001", en: "e.g. Include ISO 37001 reference"}, required: false },
+        { name: "dataPerusahaan", label: {id: "Data Internal Perusahaan", en: "Company Internal Data"}, type: "textarea", placeholder: {id: "Contoh: Nama Perusahaan, NPWP, Alamat, dsb.", en: "e.g. Company Name, Tax ID, Address, etc."}, required: false }
+      ],
+      "bab3-3": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Peran, Tanggung Jawab, Wewenang", en: "Roles, Responsibilities, Authorities"}, required: true },
+        { name: "peran", label: {id: "Peran", en: "Roles"}, type: "textarea", placeholder: {id: "Tuliskan peran...", en: "Write roles..."}, required: false },
+        { name: "tanggungJawab", label: {id: "Tanggung Jawab", en: "Responsibilities"}, type: "textarea", placeholder: {id: "Tuliskan tanggung jawab...", en: "Write responsibilities..."}, required: false },
+        { name: "wewenang", label: {id: "Wewenang", en: "Authorities"}, type: "textarea", placeholder: {id: "Tuliskan wewenang...", en: "Write authorities..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 4
+      "bab4-1": [
+        { name: "profesi", label: {id: "Disusun Oleh (Profesi)", en: "Prepared By (Profession)"}, type: "text", placeholder: {id: "Contoh: Tim Kepatuhan", en: "e.g. Compliance Team"}, required: true },
+        { name: "periodeAnalisis", label: {id: "Periode Analisis", en: "Analysis Period"}, type: "text", placeholder: {id: "Contoh: 2024", en: "e.g. 2024"}, required: true },
+        { name: "metode", label: {id: "Metode Analisis", en: "Analysis Method"}, type: "text", placeholder: {id: "Contoh: FMEA, Checklist, dsb.", en: "e.g. FMEA, Checklist, etc."}, required: false },
+        { name: "risikoUtama", label: {id: "Risiko Utama", en: "Main Risks"}, type: "textarea", placeholder: {id: "Contoh: Suap pada proses pengadaan", en: "e.g. Bribery in procurement process"}, required: false },
+        { name: "langkahMitigasi", label: {id: "Langkah Mitigasi", en: "Mitigation Steps"}, type: "textarea", placeholder: {id: "Contoh: Pengawasan ketat, pelatihan", en: "e.g. Strict supervision, training"}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true },
+        { name: "instruksi", label: {id: "Instruksi Tambahan", en: "Additional Instructions"}, type: "textarea", placeholder: {id: "Contoh: Sertakan matriks risiko", en: "e.g. Include risk matrix"}, required: false }
+      ],
+      "bab4-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Tujuan SMAP & Perencanaan", en: "ABMS Objectives & Planning"}, required: true },
+        { name: "tujuan", label: {id: "Tujuan", en: "Objectives"}, type: "textarea", placeholder: {id: "Tuliskan tujuan...", en: "Write objectives..."}, required: false },
+        { name: "perencanaan", label: {id: "Perencanaan", en: "Planning"}, type: "textarea", placeholder: {id: "Tuliskan perencanaan...", en: "Write planning..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 5
+      "bab5-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Sumber Daya", en: "Resources"}, required: true },
+        { name: "sumberDaya", label: {id: "Sumber Daya", en: "Resources"}, type: "textarea", placeholder: {id: "Tuliskan sumber daya...", en: "Write resources..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab5-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Kompetensi", en: "Competence"}, required: true },
+        { name: "kompetensi", label: {id: "Kompetensi", en: "Competence"}, type: "textarea", placeholder: {id: "Tuliskan kompetensi...", en: "Write competence..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab5-3": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Kesadaran", en: "Awareness"}, required: true },
+        { name: "kesadaran", label: {id: "Kesadaran", en: "Awareness"}, type: "textarea", placeholder: {id: "Tuliskan kesadaran...", en: "Write awareness..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab5-4": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Komunikasi", en: "Communication"}, required: true },
+        { name: "komunikasi", label: {id: "Komunikasi", en: "Communication"}, type: "textarea", placeholder: {id: "Tuliskan komunikasi...", en: "Write communication..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab5-5": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Informasi Terdokumentasi", en: "Documented Information"}, required: true },
+        { name: "informasi", label: {id: "Informasi Terdokumentasi", en: "Documented Information"}, type: "textarea", placeholder: {id: "Tuliskan informasi...", en: "Write information..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 6
+      "bab6-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Perencanaan & Pengendalian Operasi", en: "Operational Planning & Control"}, required: true },
+        { name: "perencanaan", label: {id: "Perencanaan", en: "Planning"}, type: "textarea", placeholder: {id: "Tuliskan perencanaan...", en: "Write planning..."}, required: false },
+        { name: "pengendalian", label: {id: "Pengendalian", en: "Control"}, type: "textarea", placeholder: {id: "Tuliskan pengendalian...", en: "Write control..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab6-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Due Diligence", en: "Due Diligence"}, required: true },
+        { name: "dueDiligence", label: {id: "Due Diligence", en: "Due Diligence"}, type: "textarea", placeholder: {id: "Tuliskan due diligence...", en: "Write due diligence..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab6-3": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Kontrol Keuangan & Non-Keuangan", en: "Financial & Non-Financial Controls"}, required: true },
+        { name: "kontrol", label: {id: "Kontrol", en: "Controls"}, type: "textarea", placeholder: {id: "Tuliskan kontrol...", en: "Write controls..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab6-4": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Kontrol atas Proyek, Mitra, Pihak Ketiga", en: "Controls over Projects, Partners, Third Parties"}, required: true },
+        { name: "kontrol", label: {id: "Kontrol", en: "Controls"}, type: "textarea", placeholder: {id: "Tuliskan kontrol...", en: "Write controls..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab6-5": [
+        { name: "profesi", label: {id: "Disusun Oleh (Profesi)", en: "Prepared By (Profession)"}, type: "text", placeholder: {id: "Contoh: Manajer SDM", en: "e.g. HR Manager"}, required: true },
+        { name: "tujuan", label: {id: "Tujuan Prosedur", en: "Procedure Purpose"}, type: "text", placeholder: {id: "Contoh: Pelaporan dugaan penyuapan", en: "e.g. Reporting suspected bribery"}, required: true },
+        { name: "alurPelaporan", label: {id: "Alur Pelaporan", en: "Reporting Flow"}, type: "textarea", placeholder: {id: "Contoh: 1. Lapor ke atasan, 2. ...", en: "e.g. 1. Report to supervisor, 2. ..."}, required: false },
+        { name: "kontakPelaporan", label: {id: "Kontak Pelaporan", en: "Reporting Contact"}, type: "text", placeholder: {id: "Contoh: email@perusahaan.com", en: "e.g. email@company.com"}, required: false },
+        { name: "formatPenulisan", label: {id: "Format Penulisan", en: "Document Format"}, type: "select", options: [
+          {value: "Narasi", label: {id: "Narasi", en: "Narrative"}},
+          {value: "Poin", label: {id: "Poin", en: "Bullet Points"}},
+          {value: "Surat Resmi", label: {id: "Surat Resmi", en: "Official Letter"}}
+        ], required: true },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true },
+        { name: "instruksi", label: {id: "Instruksi Tambahan", en: "Additional Instructions"}, type: "textarea", placeholder: {id: "Contoh: Sertakan flowchart", en: "e.g. Include flowchart"}, required: false }
+      ],
+      // Bab 7
+      "bab7-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Pemantauan, Pengukuran, Analisis, Evaluasi", en: "Monitoring, Measurement, Analysis, Evaluation"}, required: true },
+        { name: "uraian", label: {id: "Uraian", en: "Description"}, type: "textarea", placeholder: {id: "Tuliskan uraian...", en: "Write description..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab7-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Audit Internal", en: "Internal Audit"}, required: true },
+        { name: "audit", label: {id: "Audit Internal", en: "Internal Audit"}, type: "textarea", placeholder: {id: "Tuliskan audit internal...", en: "Write internal audit..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab7-3": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Tinjauan Manajemen", en: "Management Review"}, required: true },
+        { name: "tinjauan", label: {id: "Tinjauan Manajemen", en: "Management Review"}, type: "textarea", placeholder: {id: "Tuliskan tinjauan manajemen...", en: "Write management review..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 8
+      "bab8-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Ketidaksesuaian & Tindakan Perbaikan", en: "Nonconformity & Corrective Action"}, required: true },
+        { name: "uraian", label: {id: "Uraian", en: "Description"}, type: "textarea", placeholder: {id: "Tuliskan uraian...", en: "Write description..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab8-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Peningkatan Berkelanjutan", en: "Continual Improvement"}, required: true },
+        { name: "uraian", label: {id: "Uraian", en: "Description"}, type: "textarea", placeholder: {id: "Tuliskan uraian...", en: "Write description..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Bab 9
+      "bab9-1": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Checklist SMAP", en: "SMAP Checklist"}, required: true },
+        { name: "isiLampiran", label: {id: "Isi Lampiran", en: "Attachment Content"}, type: "textarea", placeholder: {id: "Tuliskan isi lampiran...", en: "Write attachment content..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "bab9-2": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Contoh Dokumen", en: "Document Examples"}, required: true },
+        { name: "isiLampiran", label: {id: "Isi Lampiran", en: "Attachment Content"}, type: "textarea", placeholder: {id: "Tuliskan isi lampiran...", en: "Write attachment content..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Rekaman
+      "rekaman-notulen": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Notulen Rapat", en: "Meeting Minutes"}, required: true },
+        { name: "tanggal", label: {id: "Tanggal", en: "Date"}, type: "date", required: false },
+        { name: "peserta", label: {id: "Peserta", en: "Participants"}, type: "textarea", placeholder: {id: "Tuliskan peserta...", en: "Write participants..."}, required: false },
+        { name: "isiNotulen", label: {id: "Isi Notulen", en: "Minutes Content"}, type: "textarea", placeholder: {id: "Tuliskan isi notulen...", en: "Write minutes content..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "rekaman-laporan": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Laporan Pelaksanaan", en: "Implementation Report"}, required: true },
+        { name: "periode", label: {id: "Periode", en: "Period"}, type: "text", placeholder: {id: "Contoh: Jan-Jun 2024", en: "e.g. Jan-Jun 2024"}, required: false },
+        { name: "isiLaporan", label: {id: "Isi Laporan", en: "Report Content"}, type: "textarea", placeholder: {id: "Tuliskan isi laporan...", en: "Write report content..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      "rekaman-bukti": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Bukti Kegiatan", en: "Activity Evidence"}, required: true },
+        { name: "deskripsi", label: {id: "Deskripsi", en: "Description"}, type: "textarea", placeholder: {id: "Tuliskan deskripsi bukti...", en: "Write evidence description..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ],
+      // Dokumen Khusus/Lain-lain
+      "khusus-lain": [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Dokumen Lain-lain", en: "Other Documents"}, required: true },
+        { name: "isiDokumen", label: {id: "Isi Dokumen", en: "Document Content"}, type: "textarea", placeholder: {id: "Tulis isi dokumen di sini...", en: "Write document content here..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ]
+    };
+
+    // ===================== SIDEBAR RENDERING =====================
+    function renderSidebarMenu() {
+      const sidebarMenu = document.getElementById('sidebarMenu');
+      sidebarMenu.innerHTML = '';
+      sidebarOutline.forEach(section => {
+        // Section title
+        const li = document.createElement('li');
+        li.className = "font-semibold text-primary-700 mt-2";
+        li.textContent = section.label[currentLang] || section.label.id;
+        sidebarMenu.appendChild(li);
+        // Children
+        if (section.children && section.children.length > 0) {
+          section.children.forEach(child => {
+            const subLi = document.createElement('li');
+            subLi.className = "ml-3 flex items-center gap-2 py-1 cursor-pointer hover:text-primary-600 transition-colors sidebar-item";
+            subLi.setAttribute('tabindex', '0');
+            subLi.setAttribute('data-key', child.key);
+            subLi.innerHTML = `<i class="fas fa-file-alt text-primary-400"></i> <span>${child.label[currentLang] || child.label.id}</span>` +
+              (child.iso ? `<span class="ml-2 text-xs text-gray-400">(${child.iso})</span>` : '');
+            sidebarMenu.appendChild(subLi);
+          });
+        } else if (section.key === "checklist") {
+          // Checklist menu special
+          const subLi = document.createElement('li');
+          subLi.className = "ml-3 flex items-center gap-2 py-1 cursor-pointer hover:text-primary-600 transition-colors sidebar-item";
+          subLi.setAttribute('tabindex', '0');
+          subLi.setAttribute('data-key', 'checklist-main');
+          subLi.innerHTML = `<i class="fas fa-tasks text-accent-500"></i> <span>${currentLang === 'en' ? 'Open SMAP Checklist' : 'Buka Checklist SMAP'}</span>`;
+          sidebarMenu.appendChild(subLi);
+        }
+      });
+    }
+    renderSidebarMenu();
+
+    // ===================== SIDEBAR INTERACTION =====================
+    function getFieldDefForKey(key) {
+      if (window.docFieldDefs[key]) return window.docFieldDefs[key];
+      // Fallback to Dokumen Khusus
+      return [
+        { name: "judulDokumen", label: {id: "Judul Dokumen", en: "Document Title"}, type: "text", placeholder: {id: "Contoh: Surat Pernyataan", en: "e.g. Statement Letter"}, required: true },
+        { name: "isiDokumen", label: {id: "Isi Dokumen", en: "Document Content"}, type: "textarea", placeholder: {id: "Tulis isi dokumen di sini...", en: "Write document content here..."}, required: false },
+        { name: "bahasa", label: {id: "Bahasa", en: "Language"}, type: "select", options: [
+          {value: "id", label: {id: "Bahasa Indonesia", en: "Bahasa Indonesia"}},
+          {value: "en", label: {id: "English", en: "English"}}
+        ], required: true }
+      ];
+    }
+
+    // For checklist menu
+    function renderChecklistPanel() {
+      const panel = document.getElementById('smapPanelContent');
+      panel.innerHTML = `
+        <h3 class="text-xl font-bold text-primary-700 mb-4 flex items-center gap-2">
+          <i class="fas fa-tasks text-accent-500"></i> ${currentLang === 'en' ? 'SMAP Checklist' : 'Checklist SMAP'}
+        </h3>
+        <div class="mb-4 text-gray-600">${currentLang === 'en'
+          ? 'This checklist links each clause/annex to the relevant questions from Permen PU No. 08/2022. You can mark, edit, and save your progress.'
+          : 'Checklist ini mengaitkan setiap klausul/lampiran dengan butir pertanyaan Permen PU No. 08/2022. Anda dapat menandai, mengedit, dan menyimpan progres.'}</div>
+        <form id="smapChecklistForm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border border-gray-100" aria-label="Checklist SMAP">
+            <thead class="bg-gray-100">
+              <tr>
+                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${currentLang === 'en' ? 'Clause/Annex' : 'Klausul/Lampiran'}</th>
+                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${currentLang === 'en' ? 'Checklist Question' : 'Butir Pertanyaan'}</th>
+                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${currentLang === 'en' ? 'Status' : 'Status'}</th>
+                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${currentLang === 'en' ? 'Notes' : 'Catatan'}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" id="smapChecklistTableBody">
+            </tbody>
+          </table>
+        </div>
+        <div class="flex justify-end mt-4 gap-2">
+          <button type="button" id="saveChecklistBtn" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400">
+            <i class="fas fa-save mr-1"></i> ${currentLang === 'en' ? 'Save Progress' : 'Simpan Progres'}
+          </button>
+          <button type="button" id="resetChecklistBtn" class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-red-400">
+            <i class="fas fa-undo mr-1"></i> ${currentLang === 'en' ? 'Reset' : 'Reset'}
+          </button>
+        </div>
+        <div id="checklistStatus" class="mt-2 text-primary-700 text-sm"></div>
+        </form>
+      `;
+
+      // Checklist data: clause, question, status, notes
+      const defaultChecklistData = [
+        {
+          clauseKey: "bab3-2",
+          clause: currentLang === 'en' ? "3.2 Anti-Bribery Policy" : "3.2 Kebijakan Anti Penyuapan",
+          question: currentLang === 'en' ? "Is there an anti-bribery policy established and communicated?" : "Apakah kebijakan anti penyuapan telah ditetapkan dan dikomunikasikan?",
+        },
+        {
+          clauseKey: "bab4-1",
+          clause: currentLang === 'en' ? "4.1 Actions to Address Risks" : "4.1 Tindakan Menghadapi Risiko",
+          question: currentLang === 'en' ? "Has bribery risk analysis been conducted?" : "Apakah analisis risiko penyuapan telah dilakukan?",
+        },
+        {
+          clauseKey: "bab6-5",
+          clause: currentLang === 'en' ? "6.5 Reporting & Investigation" : "6.5 Proses Pelaporan & Investigasi",
+          question: currentLang === 'en' ? "Is there a procedure for reporting and investigating bribery?" : "Apakah ada prosedur pelaporan dan investigasi penyuapan?",
+        },
+        {
+          clauseKey: "bab9-1",
+          clause: currentLang === 'en' ? "Annex I: SMAP Checklist" : "Lampiran I: Checklist SMAP",
+          question: currentLang === 'en' ? "Is the SMAP checklist completed and updated?" : "Apakah checklist SMAP telah diisi dan diperbarui?",
+        }
+      ];
+
+      // Load from localStorage or use default
+      let checklistData = [];
+      try {
+        const saved = localStorage.getItem('smapChecklistData');
+        if (saved) {
+          checklistData = JSON.parse(saved);
+          // If language changed, update clause/question text
+          checklistData.forEach((item, idx) => {
+            if (defaultChecklistData[idx]) {
+              item.clause = defaultChecklistData[idx].clause;
+              item.question = defaultChecklistData[idx].question;
+            }
+          });
+        } else {
+          checklistData = defaultChecklistData.map(item => ({
+            ...item,
+            status: false,
+            notes: ""
+          }));
+        }
+      } catch {
+        checklistData = defaultChecklistData.map(item => ({
+          ...item,
+          status: false,
+          notes: ""
+        }));
+      }
+
+      // Render table
+      const tbody = panel.querySelector('#smapChecklistTableBody');
+      tbody.innerHTML = '';
+      checklistData.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-2 whitespace-nowrap">${item.clause}</td>
+          <td class="px-4 py-2 whitespace-nowrap">${item.question}</td>
+          <td class="px-4 py-2 whitespace-nowrap">
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="form-checkbox h-5 w-5 text-primary-600" data-idx="${idx}" ${item.status ? 'checked' : ''}>
+              <span class="ml-2 ${item.status ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}">
+                ${item.status ? (currentLang === 'en' ? 'Complete' : 'Lengkap') : (currentLang === 'en' ? 'Incomplete' : 'Belum Lengkap')}
+              </span>
+            </label>
+          </td>
+          <td class="px-4 py-2 whitespace-nowrap">
+            <input type="text" class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:ring-primary-400 focus:border-primary-400 transition" data-idx="${idx}" value="${item.notes || ''}" placeholder="${currentLang === 'en' ? 'Notes' : 'Catatan'}">
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Interactivity
+      tbody.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', function() {
+          const idx = parseInt(this.dataset.idx);
+          checklistData[idx].status = this.checked;
+          // Update label color
+          const label = this.parentElement.querySelector('span');
+          label.textContent = this.checked ? (currentLang === 'en' ? 'Complete' : 'Lengkap') : (currentLang === 'en' ? 'Incomplete' : 'Belum Lengkap');
+          label.className = this.checked ? 'ml-2 text-green-600 font-medium' : 'ml-2 text-red-600 font-medium';
+        });
+      });
+      tbody.querySelectorAll('input[type="text"]').forEach(input => {
+        input.addEventListener('input', function() {
+          const idx = parseInt(this.dataset.idx);
+          checklistData[idx].notes = this.value;
+        });
+      });
+
+      // Save
+      panel.querySelector('#saveChecklistBtn').onclick = function() {
+        localStorage.setItem('smapChecklistData', JSON.stringify(checklistData));
+        panel.querySelector('#checklistStatus').textContent = currentLang === 'en'
+          ? 'Checklist progress saved.'
+          : 'Progres checklist disimpan.';
+        setTimeout(() => { panel.querySelector('#checklistStatus').textContent = ''; }, 2000);
+      };
+      // Reset
+      panel.querySelector('#resetChecklistBtn').onclick = function() {
+        if (confirm(currentLang === 'en'
+          ? 'Reset all checklist progress?'
+          : 'Reset semua progres checklist?')) {
+          localStorage.removeItem('smapChecklistData');
+          renderChecklistPanel();
+        }
+      };
+    }
+
+    // Main render function for panel
+    function renderSmapPanel(key) {
+      window.selectedSidebarKey = key;
+      const panel = document.getElementById('smapPanelContent');
+      // Checklist menu
+      if (key === 'checklist-main') {
+        renderChecklistPanel();
+        return;
+      }
+      // Find clause info
+      let clause = null, parent = null;
+      sidebarOutline.forEach(section => {
+        if (section.children) {
+          section.children.forEach(child => {
+            if (child.key === key) {
+              clause = child;
+              parent = section;
+            }
+          });
+        }
+      });
+      // Custom title
+      let customTitle = clause ? (clause.label[currentLang] || clause.label.id) : "Dokumen SMAP";
+      // Render form
+      panel.innerHTML = `
+        <h3 class="text-xl font-bold text-primary-700 mb-2 flex items-center gap-2">
+          <i class="fas fa-file-alt text-primary-600"></i> ${customTitle}
+        </h3>
+        <div class="mb-2 text-sm text-gray-500">
+          ${parent ? (parent.label[currentLang] || parent.label.id) : ""}${clause && clause.iso ? ` <span class="ml-2 text-xs text-gray-400">(${clause.iso})</span>` : ""}
+        </div>
+        <form id="clauseForm" class="w-full max-w-2xl mb-4"></form>
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium text-gray-700">${currentLang === 'en' ? 'Additional Variables' : 'Variabel Tambahan'}</label>
+            <button type="button" id="addVarBtnClause" class="px-3 py-1 bg-accent-500 hover:bg-accent-600 text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500">
+              <i class="fas fa-plus mr-1"></i> ${currentLang === 'en' ? 'Add Variable' : 'Tambah Variabel'}
+            </button>
+          </div>
+          <div id="customVarsClause"></div>
+        </div>
+        <div class="mb-4">
+          <button type="submit" form="clauseForm" class="w-full mt-2 px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400">
+            <i class="fas fa-magic mr-2"></i> ${currentLang === 'en' ? 'Generate Document' : 'Generate Dokumen'}
+          </button>
+        </div>
+        <div class="bg-gray-50 border border-gray-200 rounded-md p-4 min-h-[180px] max-h-[400px] overflow-auto mb-2" id="clausePreview" contenteditable="false" aria-label="Preview Dokumen"></div>
+        <div class="flex gap-2 mb-2">
+          <button id="editPreviewBtnClause" class="px-3 py-1 bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400" title="Edit Preview">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button id="savePreviewBtnClause" class="px-3 py-1 bg-accent-500 hover:bg-accent-600 text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500" title="Simpan">
+            <i class="fas fa-save"></i>
+          </button>
+          <button id="exportPreviewBtnClause" class="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400" title="Export ke TXT">
+            <i class="fas fa-file-export"></i>
+          </button>
+        </div>
+        <div id="clausePreviewStatus" class="text-sm text-primary-700"></div>
+      `;
+      // Render form fields
+      renderClauseForm(key, customTitle);
+    }
+
+    // Render form fields for clause
+    function renderClauseForm(key, customTitle) {
+      const clauseForm = document.getElementById('clauseForm');
+      const dynamicFieldsDiv = clauseForm;
+      let fields = getFieldDefForKey(key);
+      // If customTitle is set, prefill judulDokumen
+      fields = fields.map(f => f.name === "judulDokumen" ? {...f, defaultValue: customTitle} : f);
+      dynamicFieldsDiv.innerHTML = '';
+      fields.forEach(field => {
+        let label = field.label[currentLang] || field.label.id;
+        let required = field.required ? 'required' : '';
+        let id = field.name;
+        let placeholder = field.placeholder ? (field.placeholder[currentLang] || field.placeholder.id) : '';
+        let value = field.defaultValue || '';
+        let fieldHtml = '';
+        if (field.type === "text" || field.type === "date") {
+          fieldHtml = `
+            <div class="mb-4">
+              <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${label}${field.required ? ' *' : ''}</label>
+              <input type="${field.type}" id="${id}" name="${id}" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary-400 focus:border-primary-400 transition" placeholder="${placeholder}" value="${value || ''}" ${required}>
+            </div>
+          `;
+        } else if (field.type === "textarea") {
+          fieldHtml = `
+            <div class="mb-4">
+              <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${label}${field.required ? ' *' : ''}</label>
+              <textarea id="${id}" name="${id}" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary-400 focus:border-primary-400 transition" placeholder="${placeholder}" ${required}>${value || ''}</textarea>
+            </div>
+          `;
+        } else if (field.type === "select") {
+          fieldHtml = `
+            <div class="mb-4">
+              <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">${label}${field.required ? ' *' : ''}</label>
+              <select id="${id}" name="${id}" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary-400 focus:border-primary-400 transition" ${required}>
+                ${field.options.map(opt => `<option value="${opt.value}" ${value === opt.value ? 'selected' : ''}>${opt.label[currentLang] || opt.label.id}</option>`).join('')}
+              </select>
+            </div>
+          `;
+        }
+        dynamicFieldsDiv.innerHTML += fieldHtml;
+      });
+
+      // Custom vars
+      let customVars = [];
+      const customVarsDiv = document.getElementById('customVarsClause');
+      function renderCustomVarsClause() {
+        customVarsDiv.innerHTML = '';
+        if (customVars.length === 0) {
+          customVarsDiv.innerHTML = '<div class="text-gray-400 text-sm">' + (currentLang === 'en' ? 'No additional variables yet.' : 'Belum ada variabel tambahan.') + '</div>';
+          return;
+        }
+        customVars.forEach((v, idx) => {
+          const varRow = document.createElement('div');
+          varRow.className = "flex items-center gap-2 mb-2";
+          varRow.innerHTML = `
+            <input type="text" class="flex-1 px-3 py-1 border border-gray-300 rounded-md focus:ring-primary-400 focus:border-primary-400 transition text-sm" placeholder="${currentLang === 'en' ? 'Variable Name' : 'Nama Variabel'}" value="${v.name || ''}" data-idx="${idx}" data-type="name">
+            <input type="text" class="flex-1 px-3 py-1 border border-gray-300 rounded-md focus:ring-primary-400 focus:border-primary-400 transition text-sm" placeholder="${currentLang === 'en' ? 'Variable Value' : 'Nilai/Isi Variabel'}" value="${v.value || ''}" data-idx="${idx}" data-type="value">
+            <button type="button" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-400" data-idx="${idx}" title="Hapus Variabel">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          customVarsDiv.appendChild(varRow);
+        });
+        // Add event listeners for input and delete
+        customVarsDiv.querySelectorAll('input[data-type="name"]').forEach(input => {
+          input.addEventListener('input', function() {
+            customVars[parseInt(this.dataset.idx)].name = this.value;
+          });
+        });
+        customVarsDiv.querySelectorAll('input[data-type="value"]').forEach(input => {
+          input.addEventListener('input', function() {
+            customVars[parseInt(this.dataset.idx)].value = this.value;
+          });
+        });
+        customVarsDiv.querySelectorAll('button[title="Hapus Variabel"]').forEach(btn => {
+          btn.addEventListener('click', function() {
+            customVars.splice(parseInt(this.dataset.idx), 1);
+            renderCustomVarsClause();
+          });
+        });
+      }
+      renderCustomVarsClause();
+      document.getElementById('addVarBtnClause').onclick = function() {
+        customVars.push({ name: '', value: '' });
+        renderCustomVarsClause();
+      };
+
+      // Preview logic
+      const clausePreview = document.getElementById('clausePreview');
+      const clausePreviewStatus = document.getElementById('clausePreviewStatus');
+      const editPreviewBtn = document.getElementById('editPreviewBtnClause');
+      const savePreviewBtn = document.getElementById('savePreviewBtnClause');
+      const exportPreviewBtn = document.getElementById('exportPreviewBtnClause');
+
+      // Generator function for preview
+      function generateDummyDocument(vars, fields, customVars, customTitle) {
+        let lang = vars.bahasa === 'en' ? 'en' : 'id';
+        let customVarsSection = '';
+        if (customVars.length > 0 && customVars.some(v => v.name && v.value)) {
+          customVarsSection = `<ul class="list-disc pl-5 mb-2">` +
+            customVars.filter(v => v.name && v.value).map(v =>
+              `<li><b>${v.name}:</b> ${v.value}</li>`
+            ).join('') +
+            `</ul>`;
+        }
+        // Compose body based on fields
+        let body = `<h2 class="text-xl font-bold mb-2">${vars.judulDokumen || customTitle || '[Judul Dokumen]'}</h2>`;
+        fields.forEach(field => {
+          if (field.name === "judulDokumen") return;
+          let label = field.label ? (field.label[lang] || field.label.id) : field.name;
+          let value = vars[field.name];
+          if (value) {
+            if (field.type === "textarea") {
+              body += `<p class="mb-2"><b>${label}:</b><br>${value.replace(/\n/g, "<br>")}</p>`;
+            } else if (field.type === "date") {
+              body += `<p class="mb-2"><b>${label}:</b> ${value}</p>`;
+            } else if (field.type === "select") {
+              // skip language field
+            } else {
+              body += `<p class="mb-2"><b>${label}:</b> ${value}</p>`;
+            }
+          }
+        });
+        if (customVarsSection) {
+          body += `<div class="mb-2"><b>${lang === 'en' ? 'Additional Variables' : 'Variabel Tambahan'}:</b>${customVarsSection}</div>`;
+        }
+        body += `<div class="mt-4 italic text-gray-500">${lang === 'en' ? 'This is a dummy preview. Please edit as needed before saving or exporting.' : 'Ini adalah preview dummy. Silakan edit sebelum menyimpan atau mengekspor.'}</div>`;
+        return body;
+      }
+
+      clauseForm.onsubmit = function(e) {
+        e.preventDefault();
+        // Collect all form values
+        let vars = {};
+        fields.forEach(field => {
+          vars[field.name] = clauseForm.elements[field.name] ? clauseForm.elements[field.name].value : '';
+        });
+        clausePreview.innerHTML = generateDummyDocument(vars, fields, customVars, customTitle);
+        clausePreview.setAttribute('contenteditable', 'false');
+        clausePreview.classList.remove('bg-white');
+        clausePreview.classList.add('bg-gray-50');
+        clausePreviewStatus.textContent = '';
+      };
+
+      editPreviewBtn.onclick = function() {
+        clausePreview.setAttribute('contenteditable', 'true');
+        clausePreview.focus();
+        clausePreview.classList.remove('bg-gray-50');
+        clausePreview.classList.add('bg-white');
+        clausePreviewStatus.textContent = currentLang === 'en'
+          ? 'You are editing the document preview. Click Save to finish editing.'
+          : 'Anda sedang mengedit preview dokumen. Klik Simpan untuk menyelesaikan.';
+      };
+      savePreviewBtn.onclick = function() {
+        clausePreview.setAttribute('contenteditable', 'false');
+        clausePreview.classList.remove('bg-white');
+        clausePreview.classList.add('bg-gray-50');
+        clausePreviewStatus.textContent = currentLang === 'en'
+          ? 'Preview saved. You can now export or copy the document.'
+          : 'Preview disimpan. Anda dapat mengekspor atau menyalin dokumen.';
+        setTimeout(() => { clausePreviewStatus.textContent = ''; }, 3000);
+      };
+      exportPreviewBtn.onclick = function() {
+        let text = clausePreview.innerText || clausePreview.textContent;
+        let blob = new Blob([text], { type: "text/plain" });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "dokumen_smap.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        clausePreviewStatus.textContent = currentLang === 'en'
+          ? 'Document exported as TXT.'
+          : 'Dokumen berhasil diekspor ke TXT.';
+        setTimeout(() => { clausePreviewStatus.textContent = ''; }, 3000);
+      };
+    }
+
+    // Sidebar click event
+    document.getElementById('sidebarMenu').addEventListener('click', function(e) {
+      let target = e.target;
+      while (target && !target.classList.contains('sidebar-item') && target !== this) {
+        target = target.parentElement;
+      }
+      if (target && target.classList.contains('sidebar-item')) {
+        const key = target.getAttribute('data-key');
+        renderSmapPanel(key);
+        // Highlight selected
+        document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('bg-primary-50', 'font-bold'));
+        target.classList.add('bg-primary-50', 'font-bold');
+      }
+    });
+    // Keyboard accessibility for sidebar
+    document.getElementById('sidebarMenu').addEventListener('keydown', function(e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('sidebar-item')) {
+        e.preventDefault();
+        e.target.click();
+      }
+    });
+
+    // ===================== LAMPIRAN STRATEGIS (DUMMY DATA) =====================
+    const lampiranTableBody = document.getElementById('lampiranTableBody');
+    const lampiranTableEmpty = document.getElementById('lampiranTableEmpty');
+    let lampiranData = [
+      { name: "Kebijakan Integritas", type: "Kebijakan" },
+      { name: "SOP Pelaporan", type: "SOP" }
+    ];
+    function renderLampiranTable(data) {
+      lampiranTableBody.innerHTML = '';
+      if (data.length === 0) {
+        lampiranTableEmpty.classList.remove('hidden');
+        return;
+      }
+      lampiranTableEmpty.classList.add('hidden');
+      data.forEach((lampiran, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">${lampiran.name}</td>
+          <td class="px-6 py-4 whitespace-nowrap">${lampiran.type}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <button class="px-3 py-1 bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400" aria-label="Edit"><i class="fas fa-edit"></i></button>
+            <button class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 ml-2" aria-label="Hapus"><i class="fas fa-trash"></i></button>
+          </td>
+        `;
+        lampiranTableBody.appendChild(tr);
+      });
+    }
+    renderLampiranTable(lampiranData);
+
+    // Search/filter
+    document.getElementById('lampiranSearch').addEventListener('keyup', function() {
+      const searchText = this.value.toLowerCase();
+      const filtered = lampiranData.filter(lampiran =>
+        lampiran.name.toLowerCase().includes(searchText) ||
+        lampiran.type.toLowerCase().includes(searchText)
+      );
+      renderLampiranTable(filtered);
+    });
+
+    // Add dummy lampiran
+    document.getElementById('addLampiranBtn').addEventListener('click', function() {
+      const newLampiran = { name: "Lampiran Baru", type: "Lainnya" };
+      lampiranData.push(newLampiran);
+      renderLampiranTable(lampiranData);
+    });
+
+    // ===================== ACCESSIBILITY: FOCUS MAIN ON SKIP =====================
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const target = document.getElementById(this.getAttribute('href').substring(1));
+        if (target) {
+          setTimeout(() => target.focus(), 300);
+        }
+      });
+    });
+
+    // ===================== SMOOTH SCROLL FOR ANCHORS =====================
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const target = document.getElementById(this.getAttribute('href').substring(1));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // ===================== KEYBOARD ACCESSIBILITY FOR CARDS =====================
+    document.querySelectorAll('[tabindex="0"]').forEach(card => {
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          this.classList.add('ring-2', 'ring-primary-400');
+        }
+      });
+      card.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          this.classList.remove('ring-2', 'ring-primary-400');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
