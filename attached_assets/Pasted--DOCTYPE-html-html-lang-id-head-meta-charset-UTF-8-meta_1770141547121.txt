@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pancek KPK - SMAP Checklist</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind Config: Primary accent red, neutral grays -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              200: '#fecaca',
+              300: '#fca5a5',
+              400: '#f87171',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+            },
+            accent: {
+              500: '#f59e42'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Grid.js CSS -->
+  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet">
+  <!-- ApexCharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+  <!-- =======================
+       Navigation
+  ======================== -->
+  <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30" aria-label="Navigasi utama">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex-shrink-0">
+          <span class="text-2xl font-bold text-primary-700 tracking-tight">Pancek KPK</span>
+        </div>
+        <div>
+          <ul class="flex space-x-2 sm:space-x-6" role="menubar" aria-label="Menu utama">
+            <li>
+              <button id="nav-home" class="px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors" aria-current="page" role="menuitem">
+                <i class="fas fa-home mr-2"></i>Beranda
+              </button>
+            </li>
+            <li>
+              <button id="nav-generator" class="px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors" role="menuitem">
+                <i class="fas fa-file-signature mr-2"></i>Generator Dokumen
+              </button>
+            </li>
+            <li>
+              <button id="nav-checklist" class="px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors" role="menuitem">
+                <i class="fas fa-list-check mr-2"></i>Panduan
+              </button>
+            </li>
+            <li>
+              <button id="nav-inventarisasi" class="px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors" role="menuitem">
+                <i class="fas fa-folder-open mr-2"></i>Inventarisasi Dokumen
+              </button>
+            </li>
+            <li>
+              <button id="nav-contact" class="px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors" role="menuitem">
+                <i class="fas fa-envelope mr-2"></i>Kontak
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- =======================
+       Main Content
+  ======================== -->
+  <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-8 sm:py-12" id="main-content" tabindex="-1">
+    <!-- Halaman Beranda (default) -->
+    <section id="section-home" class="">
+      <!-- Hero Section -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-primary-700 mb-4">Selamat Datang di Pancek KPK</h1>
+        <p class="text-lg text-gray-700 mb-6 max-w-2xl">
+          <span class="font-semibold text-primary-600">Pancek KPK</span> adalah aplikasi edukasi dan generator dokumen <span class="font-semibold">Sistem Manajemen Anti Penyuapan (SMAP)</span> berbasis <span class="font-semibold">Panduan Cegah Korupsi</span> dari Komisi Pemberantasan Korupsi (KPK). 
+          <br><br>
+          Aplikasi ini membantu perusahaan memahami dan menerapkan prinsip-prinsip anti penyuapan secara sistematis, sesuai standar dan rekomendasi KPK.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button id="to-generator" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto" aria-label="Mulai Generator Dokumen">
+            <i class="fas fa-file-signature mr-2"></i>Mulai Generator Dokumen
+          </button>
+          <button id="to-checklist" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto" aria-label="Lihat Panduan">
+            <i class="fas fa-list-check mr-2"></i>Panduan SMAP
+          </button>
+        </div>
+      </div>
+      <!-- Info Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 transition-shadow hover:shadow-md">
+          <h2 class="text-2xl font-semibold text-primary-700 mb-2"><i class="fas fa-shield-alt mr-2 text-primary-500"></i>Tujuan Pancek KPK</h2>
+          <p class="text-base text-gray-700">
+            Membantu perusahaan dan organisasi dalam membangun budaya anti penyuapan, meningkatkan transparansi, serta memenuhi persyaratan <span class="font-semibold">SNI ISO 37001:2016</span> dan regulasi terkait.
+          </p>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 transition-shadow hover:shadow-md">
+          <h2 class="text-2xl font-semibold text-primary-700 mb-2"><i class="fas fa-book-open mr-2 text-primary-500"></i>Panduan KPK</h2>
+          <p class="text-base text-gray-700">
+            Checklist dan fitur aplikasi mengacu pada <span class="font-semibold">Panduan Cegah Korupsi</span> yang diterbitkan oleh KPK, sehingga dapat menjadi referensi terpercaya dalam implementasi SMAP.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================
+         Generator Dokumen - Landing Page
+    ======================== -->
+    <section id="section-generator-landing" class="hidden">
+      <h1 class="text-4xl font-bold text-primary-700 mb-4">Generator Dokumen SMAP</h1>
+      <p class="text-base text-gray-700 mb-6 max-w-2xl">
+        Pilih indikator PANCEK di bawah ini untuk mulai membuat dokumen SMAP sesuai kebutuhan organisasi Anda. Setiap indikator berisi daftar jenis dokumen yang dapat digenerate secara otomatis.
+      </p>
+      <!-- Indikator PANCEK -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Komitmen -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col items-center transition-shadow hover:shadow-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-handshake fa-2x text-primary-500 mr-2"></i>
+            <span class="text-xl font-bold text-primary-700">Komitmen</span>
+          </div>
+          <div class="w-full mt-2 space-y-3">
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Komitmen" data-doc="Pernyataan Komitmen Anti Penyuapan">
+              <i class="fas fa-file-alt text-primary-600"></i>
+              <span class="font-medium text-primary-800">Pernyataan Komitmen Anti Penyuapan</span>
+            </button>
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Komitmen" data-doc="Kebijakan Anti Penyuapan">
+              <i class="fas fa-file-contract text-primary-600"></i>
+              <span class="font-medium text-primary-800">Kebijakan Anti Penyuapan</span>
+            </button>
+          </div>
+        </div>
+        <!-- Perencanaan -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col items-center transition-shadow hover:shadow-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-lightbulb fa-2x text-primary-500 mr-2"></i>
+            <span class="text-xl font-bold text-primary-700">Perencanaan</span>
+          </div>
+          <div class="w-full mt-2 space-y-3">
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Perencanaan" data-doc="Analisis Risiko Penyuapan">
+              <i class="fas fa-exclamation-triangle text-primary-600"></i>
+              <span class="font-medium text-primary-800">Analisis Risiko Penyuapan</span>
+            </button>
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Perencanaan" data-doc="Sasaran SMAP">
+              <i class="fas fa-bullseye text-primary-600"></i>
+              <span class="font-medium text-primary-800">Sasaran SMAP</span>
+            </button>
+          </div>
+        </div>
+        <!-- Pelaksanaan -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col items-center transition-shadow hover:shadow-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-cogs fa-2x text-primary-500 mr-2"></i>
+            <span class="text-xl font-bold text-primary-700">Pelaksanaan</span>
+          </div>
+          <div class="w-full mt-2 space-y-3">
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Pelaksanaan" data-doc="Prosedur Anti Penyuapan">
+              <i class="fas fa-list-ul text-primary-600"></i>
+              <span class="font-medium text-primary-800">Prosedur Anti Penyuapan</span>
+            </button>
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Pelaksanaan" data-doc="Bukti Pelatihan SMAP">
+              <i class="fas fa-chalkboard-teacher text-primary-600"></i>
+              <span class="font-medium text-primary-800">Bukti Pelatihan SMAP</span>
+            </button>
+          </div>
+        </div>
+        <!-- Evaluasi -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col items-center transition-shadow hover:shadow-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-search fa-2x text-primary-500 mr-2"></i>
+            <span class="text-xl font-bold text-primary-700">Evaluasi</span>
+          </div>
+          <div class="w-full mt-2 space-y-3">
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Evaluasi" data-doc="Laporan Audit Internal SMAP">
+              <i class="fas fa-clipboard-check text-primary-600"></i>
+              <span class="font-medium text-primary-800">Laporan Audit Internal SMAP</span>
+            </button>
+          </div>
+        </div>
+        <!-- Perbaikan -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col items-center transition-shadow hover:shadow-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-sync-alt fa-2x text-primary-500 mr-2"></i>
+            <span class="text-xl font-bold text-primary-700">Perbaikan</span>
+          </div>
+          <div class="w-full mt-2 space-y-3">
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Perbaikan" data-doc="Rencana Tindak Lanjut">
+              <i class="fas fa-tasks text-primary-600"></i>
+              <span class="font-medium text-primary-800">Rencana Tindak Lanjut</span>
+            </button>
+          </div>
+        </div>
+        <!-- Respon -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col items-center transition-shadow hover:shadow-lg">
+          <div class="flex items-center mb-2">
+            <i class="fas fa-bullhorn fa-2x text-primary-500 mr-2"></i>
+            <span class="text-xl font-bold text-primary-700">Respon</span>
+          </div>
+          <div class="w-full mt-2 space-y-3">
+            <button class="doc-card w-full flex items-center gap-3 px-4 py-3 bg-primary-50 hover:bg-primary-100 rounded-md shadow-sm border border-primary-100 transition-all cursor-pointer" data-indikator="Respon" data-doc="Laporan Penanganan Pelanggaran">
+              <i class="fas fa-flag text-primary-600"></i>
+              <span class="font-medium text-primary-800">Laporan Penanganan Pelanggaran</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button id="btn-back-to-home" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <i class="fas fa-arrow-left mr-2"></i>Kembali ke Beranda
+        </button>
+      </div>
+    </section>
+
+    <!-- =======================
+         Generator Dokumen - Form Page
+    ======================== -->
+    <section id="section-generator-form" class="hidden">
+      <div class="flex items-center gap-3 mb-2">
+        <button id="btn-back-to-generator-landing" class="text-primary-600 hover:text-primary-800 focus:outline-none" aria-label="Kembali ke daftar dokumen">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2 class="text-2xl font-bold text-primary-700" id="generator-form-title"></h2>
+      </div>
+      <div class="mb-6 text-gray-700" id="generator-form-desc"></div>
+      <form id="dynamic-generator-form" class="space-y-6 bg-white rounded-lg shadow-md border border-gray-100 p-6">
+        <!-- Dynamic fields will be injected here -->
+      </form>
+      <div class="flex flex-col sm:flex-row gap-4 justify-end mt-6">
+        <button id="btn-generate-doc" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+          <i class="fas fa-magic mr-2"></i>Generate Dokumen
+        </button>
+        <button id="btn-save-template" class="px-6 py-3 bg-accent-500 hover:bg-primary-600 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+          <i class="fas fa-save mr-2"></i>Simpan Template
+        </button>
+      </div>
+      <!-- Template Saved Notification -->
+      <div id="template-saved-notif" class="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 hidden transition-opacity">
+        <i class="fas fa-check-circle mr-2"></i>Template berhasil disimpan!
+      </div>
+      <!-- Pilihan Template -->
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold text-primary-700 mb-2">Template Tersimpan</h3>
+        <div id="saved-templates-list" class="flex flex-wrap gap-3"></div>
+      </div>
+    </section>
+
+    <!-- =======================
+         Generator Dokumen - Hasil Page
+    ======================== -->
+    <section id="section-generator-result" class="hidden">
+      <div class="flex items-center gap-3 mb-2">
+        <button id="btn-back-to-generator-form" class="text-primary-600 hover:text-primary-800 focus:outline-none" aria-label="Kembali ke form generator">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <h2 class="text-2xl font-bold text-primary-700" id="generator-result-title"></h2>
+      </div>
+      <div class="mb-4 text-gray-700" id="generator-result-desc"></div>
+      <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
+        <div id="generator-result-content"></div>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-4 justify-end">
+        <button id="btn-export-word" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+          <i class="fas fa-file-word mr-2"></i>Ekspor Word
+        </button>
+        <button id="btn-export-excel" class="px-6 py-3 bg-accent-500 hover:bg-primary-600 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+          <i class="fas fa-file-excel mr-2"></i>Ekspor Excel
+        </button>
+        <button id="btn-export-pdf" class="px-6 py-3 bg-gray-700 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+          <i class="fas fa-file-pdf mr-2"></i>Ekspor PDF
+        </button>
+      </div>
+    </section>
+
+    <!-- Halaman Generator Dokumen (Checklist) - Tetap Ada untuk Fitur Checklist -->
+    <section id="section-generator" class="hidden">
+      <h1 class="text-4xl font-bold text-primary-700 mb-4">Generator Dokumen SMAP (Checklist)</h1>
+      <p class="text-base text-gray-700 mb-6 max-w-2xl">
+        Isi checklist berikut untuk menghasilkan rekap dokumen SMAP. Jawab setiap pertanyaan, tambahkan keterangan jika perlu, dan upload dokumen pendukung. Klik ikon <i class="fas fa-circle-info text-primary-500"></i> untuk penjelasan.
+      </p>
+      <form id="generator-form-checklist" class="space-y-8">
+        <!-- Checklist Form Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white rounded-lg shadow-sm border border-gray-100">
+            <thead class="bg-gray-100">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pertanyaan <span class="sr-only">Penjelasan</span></th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jawaban</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Dokumen</th>
+              </tr>
+            </thead>
+            <tbody id="generator-tbody" class="divide-y divide-gray-200">
+              <!-- Rows generated by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-end">
+          <button type="button" id="btn-preview-rekap" class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+            <i class="fas fa-eye mr-2"></i>Lihat Rekap Hasil
+          </button>
+          <button type="button" id="btn-download-excel" class="px-6 py-3 bg-accent-500 hover:bg-primary-600 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto" disabled>
+            <i class="fas fa-file-excel mr-2"></i>Unduh Excel
+          </button>
+        </div>
+      </form>
+      <!-- Rekap Hasil Modal -->
+      <div id="rekap-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden transition-opacity">
+        <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 relative">
+          <button id="close-rekap-modal" class="absolute top-3 right-3 text-gray-400 hover:text-primary-600 text-xl focus:outline-none" aria-label="Tutup">
+            <i class="fas fa-times"></i>
+          </button>
+          <h2 class="text-2xl font-bold text-primary-700 mb-4">Rekap Hasil Checklist SMAP</h2>
+          <div id="rekap-table-container" class="overflow-x-auto max-h-[400px]">
+            <!-- Rekap table generated by JS -->
+          </div>
+          <div class="mt-4 flex justify-end">
+            <button id="rekap-download-excel" class="px-5 py-2 bg-accent-500 hover:bg-primary-600 text-white rounded-md font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <i class="fas fa-file-excel mr-2"></i>Unduh Excel
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Tooltip Modal -->
+      <div id="tooltip-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden transition-opacity">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
+          <button id="close-tooltip-modal" class="absolute top-3 right-3 text-gray-400 hover:text-primary-600 text-xl focus:outline-none" aria-label="Tutup">
+            <i class="fas fa-times"></i>
+          </button>
+          <h3 class="text-lg font-semibold text-primary-700 mb-2" id="tooltip-title"></h3>
+          <div class="text-gray-700" id="tooltip-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Halaman Panduan (Checklist Edukasi) -->
+    <section id="section-checklist" class="hidden">
+      <h1 class="text-4xl font-bold text-primary-700 mb-4">Panduan SMAP (Pancek KPK)</h1>
+      <p class="text-base text-gray-700 mb-6 max-w-2xl">
+        Berikut adalah <span class="font-semibold">daftar periksa utama</span> untuk membantu perusahaan menerapkan Sistem Manajemen Anti Penyuapan (SMAP) sesuai panduan KPK. Checklist ini dikelompokkan dalam enam kategori utama dan disajikan sebagai informasi/edukasi.
+      </p>
+      <!-- Checklist Accordion -->
+      <div class="space-y-4" id="checklist-accordion">
+        <!-- Komitmen -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
+          <button type="button" aria-expanded="true" aria-controls="panel-komitmen" class="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors group">
+            <span class="text-xl font-semibold text-primary-700"><i class="fas fa-handshake mr-2 text-primary-500"></i>Komitmen</span>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-primary-600 transition-transform"></i>
+          </button>
+          <div id="panel-komitmen" class="px-6 pb-4" role="region">
+            <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+              <li>Pimpinan organisasi menyatakan komitmen anti penyuapan secara tertulis.</li>
+              <li>Tersedia kebijakan anti penyuapan yang diketahui seluruh karyawan.</li>
+              <li>Pimpinan memberikan contoh perilaku anti penyuapan (tone from the top).</li>
+              <li>Penetapan tanggung jawab dan peran untuk pengelolaan SMAP.</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Perencanaan -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
+          <button type="button" aria-expanded="false" aria-controls="panel-perencanaan" class="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors group">
+            <span class="text-xl font-semibold text-primary-700"><i class="fas fa-lightbulb mr-2 text-primary-500"></i>Perencanaan</span>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-primary-600 transition-transform"></i>
+          </button>
+          <div id="panel-perencanaan" class="px-6 pb-4 hidden" role="region">
+            <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+              <li>Identifikasi risiko penyuapan di seluruh proses bisnis.</li>
+              <li>Penetapan tujuan dan sasaran SMAP yang terukur.</li>
+              <li>Perencanaan sumber daya dan pelatihan terkait SMAP.</li>
+              <li>Penyusunan prosedur dan mekanisme pengendalian penyuapan.</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Pelaksanaan -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
+          <button type="button" aria-expanded="false" aria-controls="panel-pelaksanaan" class="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors group">
+            <span class="text-xl font-semibold text-primary-700"><i class="fas fa-cogs mr-2 text-primary-500"></i>Pelaksanaan</span>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-primary-600 transition-transform"></i>
+          </button>
+          <div id="panel-pelaksanaan" class="px-6 pb-4 hidden" role="region">
+            <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+              <li>Penerapan kebijakan dan prosedur anti penyuapan di seluruh unit kerja.</li>
+              <li>Penyampaian pelatihan dan sosialisasi SMAP kepada karyawan dan mitra.</li>
+              <li>Penerapan mekanisme pelaporan dugaan penyuapan (whistleblowing system).</li>
+              <li>Penerapan pengendalian atas transaksi dan relasi bisnis berisiko tinggi.</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Evaluasi -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
+          <button type="button" aria-expanded="false" aria-controls="panel-evaluasi" class="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors group">
+            <span class="text-xl font-semibold text-primary-700"><i class="fas fa-search mr-2 text-primary-500"></i>Evaluasi</span>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-primary-600 transition-transform"></i>
+          </button>
+          <div id="panel-evaluasi" class="px-6 pb-4 hidden" role="region">
+            <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+              <li>Monitoring dan evaluasi efektivitas SMAP secara berkala.</li>
+              <li>Audit internal terkait penerapan SMAP.</li>
+              <li>Pelaporan hasil evaluasi kepada pimpinan dan pemangku kepentingan.</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Perbaikan -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
+          <button type="button" aria-expanded="false" aria-controls="panel-perbaikan" class="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors group">
+            <span class="text-xl font-semibold text-primary-700"><i class="fas fa-sync-alt mr-2 text-primary-500"></i>Perbaikan</span>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-primary-600 transition-transform"></i>
+          </button>
+          <div id="panel-perbaikan" class="px-6 pb-4 hidden" role="region">
+            <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+              <li>Tindak lanjut atas temuan audit dan hasil evaluasi SMAP.</li>
+              <li>Perbaikan kebijakan, prosedur, dan pengendalian sesuai kebutuhan.</li>
+              <li>Peningkatan kompetensi dan kesadaran karyawan secara berkelanjutan.</li>
+            </ul>
+          </div>
+        </div>
+        <!-- Respon -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 transition-shadow hover:shadow-md">
+          <button type="button" aria-expanded="false" aria-controls="panel-respon" class="w-full flex justify-between items-center px-6 py-4 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors group">
+            <span class="text-xl font-semibold text-primary-700"><i class="fas fa-bullhorn mr-2 text-primary-500"></i>Respon</span>
+            <i class="fas fa-chevron-down text-gray-400 group-hover:text-primary-600 transition-transform"></i>
+          </button>
+          <div id="panel-respon" class="px-6 pb-4 hidden" role="region">
+            <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+              <li>Penanganan laporan dugaan penyuapan secara adil dan rahasia.</li>
+              <li>Pemberian sanksi dan tindakan korektif atas pelanggaran SMAP.</li>
+              <li>Komunikasi hasil penanganan kepada pihak terkait.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Checklist Accordion -->
+    </section>
+
+    <!-- Halaman Inventarisasi Dokumen -->
+    <section id="section-inventarisasi" class="hidden">
+      <h1 class="text-4xl font-bold text-primary-700 mb-4">Inventarisasi Dokumen SMAP</h1>
+      <p class="text-base text-gray-700 mb-6 max-w-2xl">
+        Berikut adalah daftar dokumen dan template yang perlu dilengkapi untuk setiap bagian checklist SMAP. Gunakan daftar ini sebagai referensi dalam penyusunan dan pelengkapan dokumen.
+      </p>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-lg shadow-sm border border-gray-100">
+          <thead class="bg-gray-100">
+            <tr>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bagian</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Dokumen/Template</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contoh/Gambar</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Komitmen</td>
+              <td class="px-4 py-4 whitespace-nowrap">Pernyataan Komitmen Anti Penyuapan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen tertulis yang ditandatangani pimpinan sebagai bukti komitmen anti penyuapan.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Pernyataan Komitmen" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Komitmen</td>
+              <td class="px-4 py-4 whitespace-nowrap">Kebijakan Anti Penyuapan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen kebijakan yang diketahui dan dipahami seluruh karyawan.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Kebijakan Anti Penyuapan" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Perencanaan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Analisis Risiko Penyuapan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen hasil identifikasi dan penilaian risiko penyuapan.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Analisis Risiko" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Perencanaan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Sasaran SMAP</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen tujuan dan sasaran SMAP yang terukur.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Sasaran SMAP" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Pelaksanaan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Prosedur Anti Penyuapan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen prosedur dan mekanisme pengendalian penyuapan.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Prosedur" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Pelaksanaan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Bukti Pelatihan SMAP</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen absensi, sertifikat, atau materi pelatihan SMAP.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Bukti Pelatihan" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Evaluasi</td>
+              <td class="px-4 py-4 whitespace-nowrap">Laporan Audit Internal SMAP</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen hasil audit internal terkait penerapan SMAP.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Laporan Audit" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Perbaikan</td>
+              <td class="px-4 py-4 whitespace-nowrap">Rencana Tindak Lanjut</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen perbaikan atas temuan audit/evaluasi.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Rencana Tindak Lanjut" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-4 whitespace-nowrap font-semibold text-primary-700">Respon</td>
+              <td class="px-4 py-4 whitespace-nowrap">Laporan Penanganan Pelanggaran</td>
+              <td class="px-4 py-4 whitespace-nowrap">Dokumen penanganan laporan dugaan penyuapan.</td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <img src="https://fakeimg.pl/300x200" alt="Contoh Laporan Penanganan" class="w-32 h-auto rounded">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Halaman Kontak -->
+    <section id="section-contact" class="hidden">
+      <h1 class="text-4xl font-bold text-primary-700 mb-4">Kontak</h1>
+      <p class="text-base text-gray-700 mb-6 max-w-2xl">
+        Untuk pertanyaan, saran, atau kerjasama terkait aplikasi Pancek KPK, silakan hubungi:
+      </p>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 max-w-md transition-shadow hover:shadow-md">
+        <ul class="space-y-3 text-gray-700">
+          <li>
+            <i class="fas fa-envelope text-primary-600 mr-2"></i>
+            <span class="font-medium">Email:</span> info@pancekkpk.example
+          </li>
+          <li>
+            <i class="fas fa-phone text-primary-600 mr-2"></i>
+            <span class="font-medium">Telepon:</span> 021-12345678
+          </li>
+          <li>
+            <i class="fas fa-map-marker-alt text-primary-600 mr-2"></i>
+            <span class="font-medium">Alamat:</span> Jakarta, Indonesia
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- =======================
+       Footer
+  ======================== -->
+  <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
+    <div class="max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
+      &copy; 2024 Pancek KPK. Aplikasi edukasi SMAP berbasis Panduan KPK.
+    </div>
+  </footer>
+
+  <!-- =======================
+       Scripts
+  ======================== -->
+  <!-- Grid.js -->
+  <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+  <!-- ApexCharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- FileSaver for Word export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- Custom JS -->
+  <script>
+    // =========================
+    // Navigation logic
+    // =========================
+    const navHome = document.getElementById('nav-home');
+    const navGenerator = document.getElementById('nav-generator');
+    const navChecklist = document.getElementById('nav-checklist');
+    const navInventarisasi = document.getElementById('nav-inventarisasi');
+    const navContact = document.getElementById('nav-contact');
+    const sectionHome = document.getElementById('section-home');
+    const sectionGeneratorLanding = document.getElementById('section-generator-landing');
+    const sectionGeneratorForm = document.getElementById('section-generator-form');
+    const sectionGeneratorResult = document.getElementById('section-generator-result');
+    const sectionGeneratorChecklist = document.getElementById('section-generator');
+    const sectionChecklist = document.getElementById('section-checklist');
+    const sectionInventarisasi = document.getElementById('section-inventarisasi');
+    const sectionContact = document.getElementById('section-contact');
+    const mainContent = document.getElementById('main-content');
+
+    function hideAllSections() {
+      sectionHome.classList.add('hidden');
+      sectionGeneratorLanding.classList.add('hidden');
+      sectionGeneratorForm.classList.add('hidden');
+      sectionGeneratorResult.classList.add('hidden');
+      sectionGeneratorChecklist.classList.add('hidden');
+      sectionChecklist.classList.add('hidden');
+      sectionInventarisasi.classList.add('hidden');
+      sectionContact.classList.add('hidden');
+    }
+
+    function showSection(section) {
+      hideAllSections();
+      section.classList.remove('hidden');
+      section.focus();
+      // Update aria-current
+      navHome.setAttribute('aria-current', section === sectionHome ? 'page' : 'false');
+      navGenerator.setAttribute('aria-current', (section === sectionGeneratorLanding || section === sectionGeneratorForm || section === sectionGeneratorResult || section === sectionGeneratorChecklist) ? 'page' : 'false');
+      navChecklist.setAttribute('aria-current', section === sectionChecklist ? 'page' : 'false');
+      navInventarisasi.setAttribute('aria-current', section === sectionInventarisasi ? 'page' : 'false');
+      navContact.setAttribute('aria-current', section === sectionContact ? 'page' : 'false');
+    }
+
+    navHome.addEventListener('click', () => showSection(sectionHome));
+    navGenerator.addEventListener('click', () => showSection(sectionGeneratorLanding));
+    navChecklist.addEventListener('click', () => showSection(sectionChecklist));
+    navInventarisasi.addEventListener('click', () => showSection(sectionInventarisasi));
+    navContact.addEventListener('click', () => showSection(sectionContact));
+    // Home hero buttons
+    document.getElementById('to-generator').addEventListener('click', () => showSection(sectionGeneratorLanding));
+    document.getElementById('to-checklist').addEventListener('click', () => showSection(sectionChecklist));
+
+    // Keyboard navigation for accessibility
+    [navHome, navGenerator, navChecklist, navInventarisasi, navContact].forEach(btn => {
+      btn.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          btn.click();
+        }
+      });
+    });
+
+    // Back to home from generator landing
+    document.getElementById('btn-back-to-home').addEventListener('click', () => showSection(sectionHome));
+
+    // =========================
+    // Generator Dokumen - Landing Page Logic
+    // =========================
+    // Data for each document type
+    const docTemplates = {
+      "Pernyataan Komitmen Anti Penyuapan": {
+        indikator: "Komitmen",
+        desc: "Dokumen pernyataan resmi dari pimpinan organisasi yang menegaskan komitmen anti penyuapan.",
+        fields: [
+          { name: "Persona", label: "Nama Pimpinan", type: "text", placeholder: "Contoh: Direktur Utama PT ABC" },
+          { name: "Context", label: "Nama Organisasi", type: "text", placeholder: "Contoh: PT ABC" },
+          { name: "Task", label: "Tujuan Pernyataan", type: "textarea", placeholder: "Contoh: Menyatakan komitmen anti penyuapan di seluruh organisasi" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Narasi (Word)", "Tabel (Excel)"] },
+          { name: "Example", label: "Contoh Pernyataan", type: "textarea", placeholder: "Contoh: Dengan ini saya menyatakan..." }
+        ],
+        resultType: "narrative"
+      },
+      "Kebijakan Anti Penyuapan": {
+        indikator: "Komitmen",
+        desc: "Dokumen kebijakan yang mengatur prinsip dan aturan anti penyuapan di organisasi.",
+        fields: [
+          { name: "Persona", label: "Nama Penanggung Jawab", type: "text", placeholder: "Contoh: Kepala Divisi Kepatuhan" },
+          { name: "Context", label: "Nama Organisasi", type: "text", placeholder: "Contoh: PT ABC" },
+          { name: "Task", label: "Ruang Lingkup Kebijakan", type: "textarea", placeholder: "Contoh: Seluruh karyawan dan mitra kerja" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Narasi (Word)", "Tabel (Excel)"] },
+          { name: "Example", label: "Contoh Kebijakan", type: "textarea", placeholder: "Contoh: Setiap karyawan wajib..." }
+        ],
+        resultType: "narrative"
+      },
+      "Analisis Risiko Penyuapan": {
+        indikator: "Perencanaan",
+        desc: "Dokumen hasil identifikasi dan penilaian risiko penyuapan di organisasi.",
+        fields: [
+          { name: "Persona", label: "Tim Penilai Risiko", type: "text", placeholder: "Contoh: Tim Kepatuhan" },
+          { name: "Context", label: "Unit/Proses Bisnis", type: "text", placeholder: "Contoh: Pengadaan Barang" },
+          { name: "Task", label: "Risiko yang Diidentifikasi", type: "textarea", placeholder: "Contoh: Suap dalam proses pengadaan" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Tabel (Excel)", "Narasi (Word)"] },
+          { name: "Example", label: "Contoh Analisis", type: "textarea", placeholder: "Contoh: Risiko: Suap, Dampak: Tinggi, Mitigasi: Pengawasan ketat" }
+        ],
+        resultType: "table"
+      },
+      "Sasaran SMAP": {
+        indikator: "Perencanaan",
+        desc: "Dokumen tujuan dan sasaran SMAP yang terukur.",
+        fields: [
+          { name: "Persona", label: "Penanggung Jawab", type: "text", placeholder: "Contoh: Manajer SMAP" },
+          { name: "Context", label: "Periode Sasaran", type: "text", placeholder: "Contoh: 2024" },
+          { name: "Task", label: "Sasaran SMAP", type: "textarea", placeholder: "Contoh: 100% karyawan mengikuti pelatihan anti penyuapan" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Tabel (Excel)", "Narasi (Word)"] },
+          { name: "Example", label: "Contoh Sasaran", type: "textarea", placeholder: "Contoh: Meningkatkan kepatuhan terhadap kebijakan anti penyuapan" }
+        ],
+        resultType: "table"
+      },
+      "Prosedur Anti Penyuapan": {
+        indikator: "Pelaksanaan",
+        desc: "Dokumen prosedur dan mekanisme pengendalian penyuapan.",
+        fields: [
+          { name: "Persona", label: "Penyusun Prosedur", type: "text", placeholder: "Contoh: Tim SMAP" },
+          { name: "Context", label: "Unit/Proses", type: "text", placeholder: "Contoh: Proses Pembayaran Vendor" },
+          { name: "Task", label: "Langkah Prosedur", type: "textarea", placeholder: "Contoh: 1. Verifikasi dokumen, 2. Persetujuan atasan, dst." },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Tabel (Excel)", "Narasi (Word)"] },
+          { name: "Example", label: "Contoh Prosedur", type: "textarea", placeholder: "Contoh: Setiap pembayaran harus diverifikasi..." }
+        ],
+        resultType: "table"
+      },
+      "Bukti Pelatihan SMAP": {
+        indikator: "Pelaksanaan",
+        desc: "Dokumen absensi, sertifikat, atau materi pelatihan SMAP.",
+        fields: [
+          { name: "Persona", label: "Nama Peserta", type: "text", placeholder: "Contoh: Daftar nama peserta" },
+          { name: "Context", label: "Tanggal Pelatihan", type: "text", placeholder: "Contoh: 10 Januari 2024" },
+          { name: "Task", label: "Materi Pelatihan", type: "textarea", placeholder: "Contoh: Materi anti penyuapan, studi kasus, dsb." },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Tabel (Excel)", "Narasi (Word)"] },
+          { name: "Example", label: "Contoh Bukti", type: "textarea", placeholder: "Contoh: Sertifikat, daftar hadir" }
+        ],
+        resultType: "table"
+      },
+      "Laporan Audit Internal SMAP": {
+        indikator: "Evaluasi",
+        desc: "Dokumen hasil audit internal terkait penerapan SMAP.",
+        fields: [
+          { name: "Persona", label: "Auditor", type: "text", placeholder: "Contoh: Tim Audit Internal" },
+          { name: "Context", label: "Periode Audit", type: "text", placeholder: "Contoh: Semester 1 2024" },
+          { name: "Task", label: "Temuan Audit", type: "textarea", placeholder: "Contoh: Tidak ditemukan pelanggaran" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Narasi (Word)", "Tabel (Excel)"] },
+          { name: "Example", label: "Contoh Temuan", type: "textarea", placeholder: "Contoh: Semua prosedur dijalankan sesuai SOP" }
+        ],
+        resultType: "narrative"
+      },
+      "Rencana Tindak Lanjut": {
+        indikator: "Perbaikan",
+        desc: "Dokumen perbaikan atas temuan audit/evaluasi.",
+        fields: [
+          { name: "Persona", label: "Penanggung Jawab", type: "text", placeholder: "Contoh: Kepala Divisi" },
+          { name: "Context", label: "Temuan Audit/Evaluasi", type: "text", placeholder: "Contoh: Kelemahan pengawasan" },
+          { name: "Task", label: "Rencana Tindak Lanjut", type: "textarea", placeholder: "Contoh: Meningkatkan pengawasan, pelatihan ulang" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Tabel (Excel)", "Narasi (Word)"] },
+          { name: "Example", label: "Contoh Rencana", type: "textarea", placeholder: "Contoh: Penambahan SOP pengawasan" }
+        ],
+        resultType: "table"
+      },
+      "Laporan Penanganan Pelanggaran": {
+        indikator: "Respon",
+        desc: "Dokumen penanganan laporan dugaan penyuapan.",
+        fields: [
+          { name: "Persona", label: "Petugas Penanganan", type: "text", placeholder: "Contoh: Tim Kepatuhan" },
+          { name: "Context", label: "Kasus/Laporan", type: "text", placeholder: "Contoh: Laporan dugaan suap pada proyek X" },
+          { name: "Task", label: "Tindakan Penanganan", type: "textarea", placeholder: "Contoh: Investigasi, pemberian sanksi" },
+          { name: "Format", label: "Format Dokumen", type: "select", options: ["Narasi (Word)", "Tabel (Excel)"] },
+          { name: "Example", label: "Contoh Penanganan", type: "textarea", placeholder: "Contoh: Kasus diselesaikan dengan sanksi tegas" }
+        ],
+        resultType: "narrative"
+      }
+    };
+
+    // Card click logic
+    document.querySelectorAll('.doc-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const indikator = this.getAttribute('data-indikator');
+        const doc = this.getAttribute('data-doc');
+        openGeneratorForm(docTemplates[doc], doc);
+      });
+    });
+
+    // Back to generator landing from form
+    document.getElementById('btn-back-to-generator-landing').addEventListener('click', () => {
+      showSection(sectionGeneratorLanding);
+    });
+
+    // Back to generator form from result
+    document.getElementById('btn-back-to-generator-form').addEventListener('click', () => {
+      showSection(sectionGeneratorForm);
+    });
+
+    // =========================
+    // Generator Dokumen - Dynamic Form Logic
+    // =========================
+    let currentDocTemplate = null;
+    let currentDocName = '';
+    let lastGeneratedResult = null;
+
+    function openGeneratorForm(template, docName) {
+      currentDocTemplate = template;
+      currentDocName = docName;
+      // Set title and desc
+      document.getElementById('generator-form-title').textContent = docName;
+      document.getElementById('generator-form-desc').textContent = template.desc;
+      // Render fields
+      const form = document.getElementById('dynamic-generator-form');
+      form.innerHTML = '';
+      template.fields.forEach(field => {
+        let fieldHtml = '';
+        if (field.type === 'text') {
+          fieldHtml = `
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">${field.label}</label>
+              <input type="text" name="${field.name}" class="border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 transition-colors w-full" placeholder="${field.placeholder || ''}" required>
+            </div>
+          `;
+        } else if (field.type === 'textarea') {
+          fieldHtml = `
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">${field.label}</label>
+              <textarea name="${field.name}" rows="3" class="border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 transition-colors w-full" placeholder="${field.placeholder || ''}" required></textarea>
+            </div>
+          `;
+        } else if (field.type === 'select') {
+          fieldHtml = `
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">${field.label}</label>
+              <select name="${field.name}" class="border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 transition-colors w-full" required>
+                <option value="">Pilih Format</option>
+                ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+              </select>
+            </div>
+          `;
+        }
+        form.insertAdjacentHTML('beforeend', fieldHtml);
+      });
+      // Show saved templates for this doc type
+      renderSavedTemplates(docName);
+      showSection(sectionGeneratorForm);
+    }
+
+    // =========================
+    // Generator Dokumen - Generate Result Logic
+    // =========================
+    function getFormValues(form, template) {
+      const values = {};
+      template.fields.forEach(field => {
+        values[field.name] = form.elements[field.name].value;
+      });
+      return values;
+    }
+
+    function renderResultContent(template, values) {
+      // For demo, generate simple narrative or table based on format
+      const format = values.Format || '';
+      let html = '';
+      if (format.includes('Narasi')) {
+        html = `
+          <div class="prose max-w-none">
+            <h3 class="text-xl font-bold text-primary-700 mb-2">${currentDocName}</h3>
+            <p><strong>Indikator:</strong> ${template.indikator}</p>
+            <p><strong>Persona:</strong> ${values.Persona}</p>
+            <p><strong>Context:</strong> ${values.Context}</p>
+            <p><strong>Task:</strong> ${values.Task}</p>
+            <p><strong>Contoh/Isi:</strong></p>
+            <div class="bg-primary-50 rounded p-3 mb-2">${values.Example.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      } else if (format.includes('Tabel')) {
+        // For table, show a simple table with the fields
+        html = `
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Field</th>
+                  <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Isi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr>
+                  <td class="px-4 py-2 font-semibold text-primary-700">Persona</td>
+                  <td class="px-4 py-2">${values.Persona}</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-2 font-semibold text-primary-700">Context</td>
+                  <td class="px-4 py-2">${values.Context}</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-2 font-semibold text-primary-700">Task</td>
+                  <td class="px-4 py-2">${values.Task}</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-2 font-semibold text-primary-700">Contoh/Isi</td>
+                  <td class="px-4 py-2">${values.Example.replace(/\n/g, '<br>')}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        html = `<div class="text-gray-500">Format dokumen belum dipilih.</div>`;
+      }
+      return html;
+    }
+
+    document.getElementById('btn-generate-doc').addEventListener('click', function(e) {
+      e.preventDefault();
+      const form = document.getElementById('dynamic-generator-form');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const values = getFormValues(form, currentDocTemplate);
+      lastGeneratedResult = { template: currentDocTemplate, values: values, docName: currentDocName };
+      // Set result title/desc
+      document.getElementById('generator-result-title').textContent = currentDocName;
+      document.getElementById('generator-result-desc').textContent = currentDocTemplate.desc;
+      document.getElementById('generator-result-content').innerHTML = renderResultContent(currentDocTemplate, values);
+      showSection(sectionGeneratorResult);
+    });
+
+    // =========================
+    // Generator Dokumen - Export Logic
+    // =========================
+    document.getElementById('btn-export-word').addEventListener('click', function() {
+      if (!lastGeneratedResult) return;
+      const { template, values, docName } = lastGeneratedResult;
+      let content = '';
+      if ((values.Format || '').includes('Narasi')) {
+        content = `${docName}\n\nIndikator: ${template.indikator}\nPersona: ${values.Persona}\nContext: ${values.Context}\nTask: ${values.Task}\n\nContoh/Isi:\n${values.Example}`;
+      } else {
+        content = `Field\tIsi\nPersona\t${values.Persona}\nContext\t${values.Context}\nTask\t${values.Task}\nContoh/Isi\t${values.Example}`;
+      }
+      const blob = new Blob([content], { type: "application/msword" });
+      saveAs(blob, `${docName.replace(/\s+/g, '_').toLowerCase()}.doc`);
+    });
+
+    document.getElementById('btn-export-excel').addEventListener('click', function() {
+      if (!lastGeneratedResult) return;
+      const { values, docName } = lastGeneratedResult;
+      let csv = 'Field,Isi\n';
+      csv += `Persona,"${values.Persona.replace(/"/g, '""')}"\n`;
+      csv += `Context,"${values.Context.replace(/"/g, '""')}"\n`;
+      csv += `Task,"${values.Task.replace(/"/g, '""')}"\n`;
+      csv += `Contoh/Isi,"${values.Example.replace(/"/g, '""')}"\n`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      saveAs(blob, `${docName.replace(/\s+/g, '_').toLowerCase()}.csv`);
+    });
+
+    document.getElementById('btn-export-pdf').addEventListener('click', function() {
+      if (!lastGeneratedResult) return;
+      const { template, values, docName } = lastGeneratedResult;
+      const doc = new window.jspdf.jsPDF();
+      doc.setFontSize(14);
+      doc.text(docName, 10, 15);
+      doc.setFontSize(11);
+      doc.text(`Indikator: ${template.indikator}`, 10, 25);
+      doc.text(`Persona: ${values.Persona}`, 10, 35);
+      doc.text(`Context: ${values.Context}`, 10, 45);
+      doc.text(`Task: ${values.Task}`, 10, 55);
+      doc.text("Contoh/Isi:", 10, 65);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(values.Example, 10, 75, { maxWidth: 180 });
+      doc.save(`${docName.replace(/\s+/g, '_').toLowerCase()}.pdf`);
+    });
+
+    // =========================
+    // Generator Dokumen - Template Save/Load Logic
+    // =========================
+    function getTemplateKey(docName) {
+      return `pancek_template_${docName.replace(/\s+/g, '_').toLowerCase()}`;
+    }
+
+    document.getElementById('btn-save-template').addEventListener('click', function() {
+      const form = document.getElementById('dynamic-generator-form');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const values = getFormValues(form, currentDocTemplate);
+      // Save to localStorage
+      const key = getTemplateKey(currentDocName);
+      let arr = JSON.parse(localStorage.getItem(key) || '[]');
+      arr.push(values);
+      localStorage.setItem(key, JSON.stringify(arr));
+      // Show notification
+      const notif = document.getElementById('template-saved-notif');
+      notif.classList.remove('hidden');
+      notif.style.opacity = 1;
+      setTimeout(() => {
+        notif.style.transition = 'opacity 0.5s';
+        notif.style.opacity = 0;
+        setTimeout(() => notif.classList.add('hidden'), 500);
+      }, 1500);
+      renderSavedTemplates(currentDocName);
+    });
+
+    function renderSavedTemplates(docName) {
+      const key = getTemplateKey(docName);
+      const arr = JSON.parse(localStorage.getItem(key) || '[]');
+      const container = document.getElementById('saved-templates-list');
+      container.innerHTML = '';
+      if (!arr.length) {
+        container.innerHTML = '<span class="text-gray-400">Belum ada template tersimpan.</span>';
+        return;
+      }
+      arr.forEach((tpl, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "px-3 py-2 bg-primary-100 hover:bg-primary-200 text-primary-800 rounded-md font-medium transition-colors flex items-center gap-2";
+        btn.innerHTML = `<i class="fas fa-file-alt"></i>Template ${idx + 1}`;
+        btn.addEventListener('click', function() {
+          // Load template to form
+          const form = document.getElementById('dynamic-generator-form');
+          currentDocTemplate.fields.forEach(field => {
+            if (form.elements[field.name]) {
+              form.elements[field.name].value = tpl[field.name] || '';
+            }
+          });
+        });
+        // Delete button
+        const delBtn = document.createElement('button');
+        delBtn.className = "ml-2 text-red-500 hover:text-red-700";
+        delBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+        delBtn.title = "Hapus template";
+        delBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          arr.splice(idx, 1);
+          localStorage.setItem(key, JSON.stringify(arr));
+          renderSavedTemplates(docName);
+        });
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex items-center";
+        wrapper.appendChild(btn);
+        wrapper.appendChild(delBtn);
+        container.appendChild(wrapper);
+      });
+    }
+
+    // =========================
+    // Generator Dokumen - Checklist (Legacy) Logic
+    // =========================
+    // Checklist data (dummy, for demo; can be extended)
+    const checklistData = [
+      {
+        kategori: "Komitmen",
+        pertanyaan: "Apakah pimpinan organisasi telah menyatakan komitmen anti penyuapan secara tertulis?",
+        penjelasan: "Komitmen tertulis dari pimpinan menjadi dasar penerapan SMAP dan harus didokumentasikan.",
+      },
+      {
+        kategori: "Komitmen",
+        pertanyaan: "Apakah tersedia kebijakan anti penyuapan yang diketahui seluruh karyawan?",
+        penjelasan: "Kebijakan anti penyuapan harus disosialisasikan dan dipahami oleh seluruh karyawan.",
+      },
+      {
+        kategori: "Komitmen",
+        pertanyaan: "Apakah pimpinan memberikan contoh perilaku anti penyuapan (tone from the top)?",
+        penjelasan: "Pimpinan harus menjadi teladan dalam perilaku anti penyuapan di organisasi.",
+      },
+      {
+        kategori: "Komitmen",
+        pertanyaan: "Apakah telah ditetapkan tanggung jawab dan peran untuk pengelolaan SMAP?",
+        penjelasan: "Penetapan peran dan tanggung jawab penting untuk efektivitas SMAP.",
+      },
+      {
+        kategori: "Perencanaan",
+        pertanyaan: "Apakah telah dilakukan identifikasi risiko penyuapan di seluruh proses bisnis?",
+        penjelasan: "Identifikasi risiko penyuapan harus dilakukan secara menyeluruh di seluruh proses bisnis.",
+      },
+      {
+        kategori: "Perencanaan",
+        pertanyaan: "Apakah tujuan dan sasaran SMAP telah ditetapkan dan terukur?",
+        penjelasan: "Tujuan dan sasaran SMAP harus jelas, terukur, dan terdokumentasi.",
+      },
+      {
+        kategori: "Perencanaan",
+        pertanyaan: "Apakah telah direncanakan sumber daya dan pelatihan terkait SMAP?",
+        penjelasan: "Sumber daya dan pelatihan harus direncanakan untuk mendukung implementasi SMAP.",
+      },
+      {
+        kategori: "Perencanaan",
+        pertanyaan: "Apakah telah disusun prosedur dan mekanisme pengendalian penyuapan?",
+        penjelasan: "Prosedur dan mekanisme pengendalian penyuapan harus terdokumentasi dan diterapkan.",
+      },
+      {
+        kategori: "Pelaksanaan",
+        pertanyaan: "Apakah kebijakan dan prosedur anti penyuapan diterapkan di seluruh unit kerja?",
+        penjelasan: "Penerapan kebijakan dan prosedur harus merata di seluruh unit kerja.",
+      },
+      {
+        kategori: "Pelaksanaan",
+        pertanyaan: "Apakah pelatihan dan sosialisasi SMAP telah diberikan kepada karyawan dan mitra?",
+        penjelasan: "Pelatihan dan sosialisasi penting untuk meningkatkan pemahaman SMAP.",
+      },
+      {
+        kategori: "Pelaksanaan",
+        pertanyaan: "Apakah telah diterapkan mekanisme pelaporan dugaan penyuapan (whistleblowing system)?",
+        penjelasan: "Mekanisme pelaporan harus mudah diakses dan dijaga kerahasiaannya.",
+      },
+      {
+        kategori: "Pelaksanaan",
+        pertanyaan: "Apakah pengendalian atas transaksi dan relasi bisnis berisiko tinggi telah diterapkan?",
+        penjelasan: "Transaksi dan relasi bisnis berisiko tinggi harus dikendalikan secara ketat.",
+      },
+      {
+        kategori: "Evaluasi",
+        pertanyaan: "Apakah monitoring dan evaluasi efektivitas SMAP dilakukan secara berkala?",
+        penjelasan: "Monitoring dan evaluasi berkala penting untuk perbaikan berkelanjutan.",
+      },
+      {
+        kategori: "Evaluasi",
+        pertanyaan: "Apakah audit internal terkait penerapan SMAP telah dilakukan?",
+        penjelasan: "Audit internal membantu memastikan kepatuhan dan efektivitas SMAP.",
+      },
+      {
+        kategori: "Evaluasi",
+        pertanyaan: "Apakah hasil evaluasi dilaporkan kepada pimpinan dan pemangku kepentingan?",
+        penjelasan: "Pelaporan hasil evaluasi penting untuk transparansi dan tindak lanjut.",
+      },
+      {
+        kategori: "Perbaikan",
+        pertanyaan: "Apakah tindak lanjut atas temuan audit dan hasil evaluasi SMAP telah dilakukan?",
+        penjelasan: "Tindak lanjut harus dilakukan untuk setiap temuan audit/evaluasi.",
+      },
+      {
+        kategori: "Perbaikan",
+        pertanyaan: "Apakah kebijakan, prosedur, dan pengendalian diperbaiki sesuai kebutuhan?",
+        penjelasan: "Perbaikan harus dilakukan secara berkala sesuai kebutuhan.",
+      },
+      {
+        kategori: "Perbaikan",
+        pertanyaan: "Apakah peningkatan kompetensi dan kesadaran karyawan dilakukan secara berkelanjutan?",
+        penjelasan: "Peningkatan kompetensi dan kesadaran harus menjadi proses berkelanjutan.",
+      },
+      {
+        kategori: "Respon",
+        pertanyaan: "Apakah laporan dugaan penyuapan ditangani secara adil dan rahasia?",
+        penjelasan: "Penanganan laporan harus adil, rahasia, dan sesuai prosedur.",
+      },
+      {
+        kategori: "Respon",
+        pertanyaan: "Apakah sanksi dan tindakan korektif atas pelanggaran SMAP telah diberikan?",
+        penjelasan: "Sanksi dan tindakan korektif harus diberikan sesuai pelanggaran.",
+      },
+      {
+        kategori: "Respon",
+        pertanyaan: "Apakah hasil penanganan dikomunikasikan kepada pihak terkait?",
+        penjelasan: "Komunikasi hasil penanganan penting untuk transparansi.",
+      }
+    ];
+
+    // Render checklist form
+    function renderGeneratorFormChecklist() {
+      const tbody = document.getElementById('generator-tbody');
+      tbody.innerHTML = '';
+      checklistData.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-3 whitespace-nowrap text-center">${idx + 1}</td>
+          <td class="px-4 py-3 whitespace-normal">
+            <div class="flex items-start gap-2">
+              <span>${item.pertanyaan}</span>
+              <button type="button" class="ml-1 text-primary-500 hover:text-primary-700 focus:outline-none tooltip-btn" data-idx="${idx}" aria-label="Penjelasan">
+                <i class="fas fa-circle-info"></i>
+              </button>
+            </div>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <select name="jawaban-${idx}" class="border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 transition-colors" required>
+              <option value="">Pilih</option>
+              <option value="Ya">Ya</option>
+              <option value="Sebagian">Sebagian</option>
+              <option value="Tidak">Tidak</option>
+            </select>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <input type="text" name="keterangan-${idx}" class="border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 transition-colors w-40" placeholder="Keterangan (opsional)">
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <input type="file" name="dokumen-${idx}" class="block text-sm text-gray-600 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-100 file:text-primary-700 hover:file:bg-primary-200 transition-colors" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    renderGeneratorFormChecklist();
+
+    // Tooltip logic
+    document.getElementById('generator-tbody').addEventListener('click', function(e) {
+      if (e.target.closest('.tooltip-btn')) {
+        const idx = e.target.closest('.tooltip-btn').getAttribute('data-idx');
+        const item = checklistData[idx];
+        document.getElementById('tooltip-title').textContent = `Penjelasan: ${item.pertanyaan}`;
+        document.getElementById('tooltip-content').textContent = item.penjelasan;
+        document.getElementById('tooltip-modal').classList.remove('hidden');
+      }
+    });
+    document.getElementById('close-tooltip-modal').addEventListener('click', function() {
+      document.getElementById('tooltip-modal').classList.add('hidden');
+    });
+    document.getElementById('tooltip-modal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.add('hidden');
+    });
+
+    // Rekap hasil logic
+    const btnPreviewRekap = document.getElementById('btn-preview-rekap');
+    const btnDownloadExcel = document.getElementById('btn-download-excel');
+    const rekapModal = document.getElementById('rekap-modal');
+    const closeRekapModal = document.getElementById('close-rekap-modal');
+    const rekapTableContainer = document.getElementById('rekap-table-container');
+    const rekapDownloadExcel = document.getElementById('rekap-download-excel');
+    let lastRekapData = [];
+
+    function getFormDataChecklist() {
+      const form = document.getElementById('generator-form-checklist');
+      const data = [];
+      for (let i = 0; i < checklistData.length; i++) {
+        const jawaban = form.querySelector(`[name="jawaban-${i}"]`).value;
+        const keterangan = form.querySelector(`[name="keterangan-${i}"]`).value;
+        const dokumenInput = form.querySelector(`[name="dokumen-${i}"]`);
+        const dokumen = dokumenInput.files.length > 0 ? dokumenInput.files[0].name : '';
+        data.push({
+          no: i + 1,
+          kategori: checklistData[i].kategori,
+          pertanyaan: checklistData[i].pertanyaan,
+          jawaban,
+          keterangan,
+          dokumen
+        });
+      }
+      return data;
+    }
+
+    function renderRekapTable(data) {
+      if (!data.length) {
+        rekapTableContainer.innerHTML = '<div class="text-center text-gray-500 py-8">Belum ada data diisi.</div>';
+        return;
+      }
+      let html = `
+        <table class="min-w-full bg-white rounded-lg border border-gray-100">
+          <thead class="bg-gray-100">
+            <tr>
+              <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">No</th>
+              <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Kategori</th>
+              <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Pertanyaan</th>
+              <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Jawaban</th>
+              <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+              <th scope="col" class="px-4 py-2 text-xs font-medium text-gray-500 uppercase">Dokumen</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+      `;
+      data.forEach(row => {
+        html += `
+          <tr>
+            <td class="px-4 py-2 text-center">${row.no}</td>
+            <td class="px-4 py-2">${row.kategori}</td>
+            <td class="px-4 py-2">${row.pertanyaan}</td>
+            <td class="px-4 py-2">${row.jawaban || '<span class="text-gray-400">-</span>'}</td>
+            <td class="px-4 py-2">${row.keterangan || '<span class="text-gray-400">-</span>'}</td>
+            <td class="px-4 py-2">${row.dokumen || '<span class="text-gray-400">-</span>'}</td>
+          </tr>
+        `;
+      });
+      html += '</tbody></table>';
+      rekapTableContainer.innerHTML = html;
+    }
+
+    btnPreviewRekap.addEventListener('click', function() {
+      const data = getFormDataChecklist();
+      lastRekapData = data;
+      renderRekapTable(data);
+      rekapModal.classList.remove('hidden');
+      btnDownloadExcel.disabled = false;
+    });
+
+    closeRekapModal.addEventListener('click', function() {
+      rekapModal.classList.add('hidden');
+    });
+    rekapModal.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.add('hidden');
+    });
+
+    // Excel export logic
+    function exportToExcel(data) {
+      // Simple CSV export (Excel can open CSV)
+      let csv = 'No,Kategori,Pertanyaan,Jawaban,Keterangan,Dokumen\n';
+      data.forEach(row => {
+        csv += `"${row.no}","${row.kategori.replace(/"/g, '""')}","${row.pertanyaan.replace(/"/g, '""')}","${row.jawaban}","${(row.keterangan || '').replace(/"/g, '""')}","${(row.dokumen || '').replace(/"/g, '""')}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rekap_smap_pancek_kpk.csv';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }
+
+    btnDownloadExcel.addEventListener('click', function() {
+      if (lastRekapData.length) exportToExcel(lastRekapData);
+    });
+    rekapDownloadExcel.addEventListener('click', function() {
+      if (lastRekapData.length) exportToExcel(lastRekapData);
+    });
+
+    // Enable/disable download button based on form
+    document.getElementById('generator-form-checklist').addEventListener('input', function() {
+      btnDownloadExcel.disabled = false;
+    });
+
+    // =========================
+    // Accordion logic for checklist (Panduan)
+    // =========================
+    const accordion = document.getElementById('checklist-accordion');
+    if (accordion) {
+      accordion.querySelectorAll('button[type="button"]').forEach((btn, idx) => {
+        btn.addEventListener('click', function() {
+          const expanded = this.getAttribute('aria-expanded') === 'true';
+          // Collapse all
+          accordion.querySelectorAll('button[type="button"]').forEach(b => {
+            b.setAttribute('aria-expanded', 'false');
+            b.querySelector('i.fas.fa-chevron-down').classList.remove('rotate-180');
+          });
+          accordion.querySelectorAll('div[role="region"]').forEach(panel => panel.classList.add('hidden'));
+          // Expand this
+          if (!expanded) {
+            this.setAttribute('aria-expanded', 'true');
+            const panelId = this.getAttribute('aria-controls');
+            document.getElementById(panelId).classList.remove('hidden');
+            // Animate chevron
+            this.querySelector('i.fas.fa-chevron-down').classList.add('rotate-180');
+          }
+        });
+        // Keyboard accessibility
+        btn.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      });
+      // Expand first by default
+      accordion.querySelectorAll('button[type="button"]')[0].setAttribute('aria-expanded', 'true');
+      accordion.querySelectorAll('div[role="region"]')[0].classList.remove('hidden');
+    }
+
+    // Set focus to main content on navigation for accessibility
+    function setMainFocus() {
+      mainContent.setAttribute('tabindex', '-1');
+      mainContent.focus();
+    }
+    [navHome, navGenerator, navChecklist, navInventarisasi, navContact].forEach(btn => {
+      btn.addEventListener('click', setMainFocus);
+    });
+
+    // On page load, show home
+    showSection(sectionHome);
+
+    // =========================
+    // Accessibility: close modals with ESC
+    // =========================
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.getElementById('tooltip-modal').classList.add('hidden');
+        rekapModal.classList.add('hidden');
+      }
+    });
+
+    // =========================
+    // Generator Dokumen - Navigation between generator landing, form, result, and checklist
+    // =========================
+    // When user clicks "Generator Dokumen" in nav, always show landing page
+    navGenerator.addEventListener('click', () => {
+      showSection(sectionGeneratorLanding);
+    });
+
+    // Add a button to go to checklist from generator landing
+    // (Optional: could be a tab, but for now, keep both accessible from nav)
+  </script>
+</body>
+</html>
