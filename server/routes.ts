@@ -829,6 +829,67 @@ Gaya komunikasi: Ramah, supportif, menggunakan contoh praktis.`;
     }
   });
 
+  // Help Chat AI - answers questions about app usage and features
+  const helpChatSchema = z.object({
+    message: z.string().min(1).max(5000),
+    history: z.array(z.object({
+      role: z.enum(["user", "assistant"]),
+      content: z.string()
+    })).optional(),
+  });
+
+  app.post("/api/ai/help-chat", async (req, res) => {
+    try {
+      const validated = helpChatSchema.parse(req.body);
+      
+      const systemPrompt = `Anda adalah Help Bot untuk Platform Generator Dokumen Multi-Industri. Tugas Anda adalah membantu pengguna memahami cara menggunakan aplikasi ini.
+
+Platform ini mendukung 20 industri: SMAP, Pancek, Konstruksi, Energi, Migas, Lingkungan, UMKM, ISO, K3, Tender, Keuangan, Kesehatan, Pendidikan, Teknologi, Pertanian, Manufaktur, Properti, Logistik, Pariwisata, dan Telekomunikasi.
+
+Fitur utama aplikasi:
+1. Dashboard - Ringkasan data perusahaan dan statistik
+2. Profil Perusahaan - Input data perusahaan untuk template
+3. Template Dokumen - Library template dokumen per industri
+4. AI Generator - Membuat dokumen otomatis dengan AI
+5. Chatbot Mentor - AI ahli per industri untuk konsultasi
+6. Knowledge Base - Akses knowledge base dari dokumentender.com
+7. Pengaturan Industri - Beralih antar industri
+
+Panduan navigasi:
+- Sidebar kiri untuk navigasi menu
+- Icon chat di pojok kanan bawah untuk chatbot
+- Tombol profil di header untuk akun
+
+Berikan jawaban yang singkat, jelas, dan membantu dalam Bahasa Indonesia.`;
+
+      const historyMessages = validated.history?.map(h => ({
+        role: h.role as "user" | "model",
+        parts: [{ text: h.content }]
+      })) || [];
+
+      const prompt = `${systemPrompt}
+
+Riwayat percakapan sebelumnya:
+${historyMessages.map(h => `${h.role === "user" ? "User" : "Assistant"}: ${h.parts[0].text}`).join("\n")}
+
+User: ${validated.message}
+
+Berikan jawaban yang membantu:`;
+
+      const response = await generateAIContent(prompt, "gemini-2.5-flash");
+      
+      res.json({ response });
+    } catch (error) {
+      console.error("Help chat error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", details: error.errors });
+      }
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to process help request" 
+      });
+    }
+  });
+
   // ============ PAYMENT ROUTES ============
 
   // Get all subscription plans

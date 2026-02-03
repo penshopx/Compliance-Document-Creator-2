@@ -33,6 +33,8 @@ import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
 import IndustrySettingsPage from "@/pages/industry-settings";
 import UnifiedChatbot from "@/components/unified-chatbot";
+import HelpChatbot from "@/components/help-chatbot";
+import KnowledgeChatbot from "@/components/knowledge-chatbot";
 import CheckoutPage from "@/pages/checkout";
 
 function Router() {
@@ -125,6 +127,8 @@ function App() {
             <AppContent />
           </SidebarProvider>
           <UnifiedChatbot />
+          <HelpChatbot />
+          <KnowledgeChatbot />
           <Toaster />
         </IndustryProvider>
       </TooltipProvider>
