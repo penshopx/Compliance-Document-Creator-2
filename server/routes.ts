@@ -40,7 +40,8 @@ const mentorChatSchema = z.object({
   history: z.array(z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string()
-  })).optional()
+  })).optional(),
+  industryId: z.string().optional()
 });
 
 export async function registerRoutes(
@@ -50,6 +51,117 @@ export async function registerRoutes(
   // Setup authentication BEFORE other routes
   await setupAuth(app);
   registerAuthRoutes(app);
+
+  // Industry Configuration Routes
+  app.get("/api/industries", async (req, res) => {
+    try {
+      const industries = Object.values(industryConfigs)
+        .filter(c => c.isActive)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          shortName: c.shortName,
+          tagline: c.tagline,
+          description: c.description,
+          icon: c.icon,
+          color: c.color,
+          isActive: c.isActive,
+          sortOrder: c.sortOrder,
+        }));
+      res.json(industries);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch industries" });
+    }
+  });
+
+  app.get("/api/industries/:id", async (req, res) => {
+    try {
+      const config = industryConfigs[req.params.id];
+      if (!config) {
+        return res.status(404).json({ error: "Industry not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch industry config" });
+    }
+  });
+
+  app.get("/api/industries/:id/templates", async (req, res) => {
+    try {
+      const config = industryConfigs[req.params.id];
+      if (!config) {
+        return res.status(404).json({ error: "Industry not found" });
+      }
+      
+      const category = req.query.category as string | undefined;
+      let templates = config.templates;
+      
+      if (category && category !== "all") {
+        templates = templates.filter(t => t.category === category);
+      }
+      
+      res.json({
+        templates,
+        categories: config.templateCategories,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch templates" });
+    }
+  });
+
+  app.get("/api/industries/:id/field-map", async (req, res) => {
+    try {
+      const config = industryConfigs[req.params.id];
+      if (!config) {
+        return res.status(404).json({ error: "Industry not found" });
+      }
+      
+      // Get actual data from storage to resolve field values
+      const company = await storage.getCompany();
+      const fkap = await storage.getFkapTeam();
+      const management = await storage.getManagement();
+      
+      const fieldValues: Record<string, string> = {};
+      
+      for (const binding of config.dataBindings) {
+        if (binding.source === "system") {
+          if (binding.field === "date") {
+            fieldValues[binding.key] = new Date().toLocaleDateString("id-ID", { 
+              day: "numeric", month: "long", year: "numeric" 
+            });
+          } else if (binding.field === "year") {
+            fieldValues[binding.key] = new Date().getFullYear().toString();
+          }
+        } else if (binding.source === "companies" && company) {
+          const value = (company as any)[binding.field];
+          fieldValues[binding.key] = value || binding.defaultValue || "";
+        } else if (binding.source === "fkapTeam" && fkap.length > 0) {
+          const ketua = fkap.find(f => f.role?.toLowerCase().includes("ketua"));
+          if (ketua) {
+            fieldValues[binding.key] = ketua.name || binding.defaultValue || "";
+          }
+        } else if (binding.source === "management" && management.length > 0) {
+          const director = management.find(m => 
+            m.position?.toLowerCase().includes("direktur") ||
+            m.position?.toLowerCase().includes("director")
+          );
+          if (director) {
+            fieldValues[binding.key] = director.name || binding.defaultValue || "";
+          }
+        } else {
+          fieldValues[binding.key] = binding.defaultValue || "";
+        }
+      }
+      
+      res.json({
+        bindings: config.dataBindings,
+        values: fieldValues,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to resolve field map" });
+    }
+  });
 
   // Dashboard Stats
   app.get("/api/dashboard/stats", async (req, res) => {
@@ -406,69 +518,68 @@ export async function registerRoutes(
     }
   });
 
-  // SMAP Mentor Chat Route
+  // Unified Mentor Chat Route (supports multiple industries)
   app.post("/api/mentor/chat", async (req, res) => {
     try {
-      const { message, history } = mentorChatSchema.parse(req.body);
-      
-      const SYSTEM_PROMPT = `Anda adalah Compliance Hub Mentor, asisten AI yang ahli dalam Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016 dan Panduan Cegah Korupsi (Pancek) dari KPK Indonesia.
+      const { message, history, industryId } = mentorChatSchema.parse(req.body);
+
+      const getSystemPrompt = (indId: string | undefined) => {
+        if (indId === "pancek") {
+          return `Anda adalah Pancek Mentor, asisten AI yang ahli dalam Panduan Cegah Korupsi (Pancek) dari KPK Indonesia dan Platform Jaga.id.
 
 Tugas Anda:
-1. Menjelaskan konsep textbook dan praktis dari SMAP dan Pancek
-2. Membantu pengguna memilih paket yang sesuai dengan fase kesiapan mereka
+1. Menjelaskan konsep dan praktis implementasi Pancek
+2. Membantu pengguna mempersiapkan pengisian kuesioner Jaga.id
 3. Menjawab pertanyaan dengan bahasa Indonesia yang mudah dipahami
-4. Proaktif memberikan saran dan rekomendasi
-5. Siap menerima dan menyelesaikan tugas terkait compliance
-
-PAKET SMAP (4 Fase Produk Siap):
-1. Siap Dokumen SMAP (Rp 2.500.000/bulan)
-   - Materi: Pedoman SMAP, Kebijakan Anti Penyuapan, Manual SMAP, SOP Anti Penyuapan (12 dokumen), dll.
-   - Untuk: Persiapan dokumentasi lengkap SNI ISO 37001:2016
-
-2. Siap Audit Internal (Rp 3.500.000/bulan)
-   - Materi: Semua materi Siap Dokumen + Prosedur Audit Internal, Checklist Audit, Laporan Hasil Audit, dll.
-   - Untuk: Persiapan audit internal dan evaluasi kesesuaian
-
-3. Siap Audit Eksternal (Rp 5.000.000/bulan)
-   - Materi: Semua materi Siap Audit Internal + Checklist Kesiapan Sertifikasi, Mock Interview, dll.
-   - Untuk: Persiapan sertifikasi SNI ISO 37001:2016
-
-4. Siap Surveilance (Rp 3.000.000/bulan)
-   - Materi: Semua materi Siap Audit Eksternal + Laporan Kinerja SMAP Tahunan, Rencana Surveilance, dll.
-   - Untuk: Pemeliharaan dan perpanjangan sertifikat
+4. Proaktif memberikan saran dan rekomendasi pencegahan korupsi
+5. Siap menerima dan menyelesaikan tugas terkait kepatuhan Pancek
 
 PAKET PANCEK (3 Fase Kesiapan):
 1. Siap Pengisian Kuesioner (Rp 1.500.000/bulan)
-   - Materi: Pedoman Cegah Korupsi, Kebijakan Anti Korupsi, Panduan Pengisian Jaga.id, dll.
    - Untuk: Persiapan pengisian kuesioner Platform Jaga.id
-
 2. Siap Terverifikasi (Rp 2.500.000/bulan)
-   - Materi: Semua materi Siap Kuesioner + Matriks Pemenuhan Indikator, Dokumen Bukti, dll.
    - Untuk: Persiapan verifikasi oleh KPK/Jaga.id
-
 3. Siap Surveilance Pancek (Rp 2.000.000/bulan)
-   - Materi: Semua materi Siap Terverifikasi + Laporan Kinerja Pancek Berkala, dll.
    - Untuk: Pemeliharaan status terverifikasi
 
-Pengetahuan Anda mencakup:
-- SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
-- Pancek (Panduan Cegah Korupsi) KPK dengan 6 fase PDCAR:
-  * P = Plan (Perencanaan) - Menyusun rencana pencegahan korupsi
-  * D = Do (Pelaksanaan) - Melaksanakan program anti korupsi
-  * C = Check (Pemeriksaan) - Memeriksa dan mengevaluasi pelaksanaan
-  * A = Act (Tindakan) - Mengambil tindakan perbaikan
-  * R = Respon (Penanganan) - Merespon dan menangani insiden/pelanggaran
-- Permen PUPR 08/2022 tentang SMAP di sektor konstruksi
-- Implementasi praktis di perusahaan konstruksi Indonesia
-- Template dokumen dan checklist compliance
-- Integrasi dengan Platform Jaga.id untuk pelaporan dan verifikasi
+Pengetahuan Anda:
+- Pancek (Panduan Cegah Korupsi) KPK dengan 6 fase PDCAR
+- Platform Jaga.id untuk pelaporan dan verifikasi
+- Kode Etik dan Kebijakan Anti Korupsi
+- Prosedur Pelaporan Pelanggaran (Whistleblowing)
 
-Gaya komunikasi:
-- Ramah dan supportif
-- Proaktif menyarankan paket yang sesuai dengan kebutuhan pengguna
-- Menggunakan contoh praktis untuk menjelaskan konsep
-- Memberikan langkah-langkah yang actionable
-- Di akhir respons, tawarkan untuk membantu lebih lanjut atau tanyakan apakah ada aspek lain yang ingin dipelajari`;
+Gaya komunikasi: Ramah, supportif, menggunakan contoh praktis.`;
+        }
+        
+        return `Anda adalah SMAP Mentor, asisten AI yang ahli dalam Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016.
+
+Tugas Anda:
+1. Menjelaskan konsep dan praktis implementasi SMAP
+2. Membantu pengguna mempersiapkan dokumentasi dan sertifikasi
+3. Menjawab pertanyaan dengan bahasa Indonesia yang mudah dipahami
+4. Proaktif memberikan saran dan rekomendasi
+5. Siap menerima dan menyelesaikan tugas terkait compliance SMAP
+
+PAKET SMAP (4 Fase Produk Siap):
+1. Siap Dokumen SMAP (Rp 2.500.000/bulan)
+   - Untuk: Persiapan dokumentasi lengkap SNI ISO 37001:2016
+2. Siap Audit Internal (Rp 3.500.000/bulan)
+   - Untuk: Persiapan audit internal dan evaluasi kesesuaian
+3. Siap Audit Eksternal (Rp 5.000.000/bulan)
+   - Untuk: Persiapan sertifikasi SNI ISO 37001:2016
+4. Siap Surveilance (Rp 3.000.000/bulan)
+   - Untuk: Pemeliharaan dan perpanjangan sertifikat
+
+Pengetahuan Anda:
+- SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
+- Permen PUPR 08/2022 tentang SMAP di sektor konstruksi
+- Template dokumen dan checklist compliance
+- Implementasi praktis di perusahaan Indonesia
+
+Gaya komunikasi: Ramah, supportif, menggunakan contoh praktis.`;
+      };
+
+      const SYSTEM_PROMPT = getSystemPrompt(industryId);
 
       // Use Replit AI Integration (Gemini via Google GenAI SDK)
       const { GoogleGenAI } = await import("@google/genai");

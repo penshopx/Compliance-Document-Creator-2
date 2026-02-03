@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/use-auth";
+import { IndustryProvider } from "@/hooks/use-industry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
@@ -30,8 +31,8 @@ import TemplateRepository from "@/pages/template-repository";
 import SMAPChecklist from "@/pages/smap-checklist";
 import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
-import SMAPMentorChat from "@/components/smap-mentor-chat";
-import DokumentenderChat from "@/components/dokumentender-chat";
+import IndustrySettingsPage from "@/pages/industry-settings";
+import UnifiedChatbot from "@/components/unified-chatbot";
 import CheckoutPage from "@/pages/checkout";
 
 function Router() {
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/template-repository" component={TemplateRepository} />
       <Route path="/smap-checklist" component={SMAPChecklist} />
       <Route path="/produk-siap" component={ProdukSiap} />
+      <Route path="/industry-settings" component={IndustrySettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -118,12 +120,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <SidebarProvider style={style as React.CSSProperties}>
-          <AppContent />
-        </SidebarProvider>
-        <SMAPMentorChat />
-        <DokumentenderChat />
-        <Toaster />
+        <IndustryProvider>
+          <SidebarProvider style={style as React.CSSProperties}>
+            <AppContent />
+          </SidebarProvider>
+          <UnifiedChatbot />
+          <Toaster />
+        </IndustryProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

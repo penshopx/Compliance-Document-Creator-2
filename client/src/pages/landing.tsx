@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useIndustry } from "@/hooks/use-industry";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,15 +13,31 @@ import {
   ArrowRight,
   BookOpen,
   Award,
-  Loader2
+  Loader2,
+  Bot,
+  Settings2,
+  Sparkles
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { SubscriptionPlan } from "@shared/schema";
 
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Shield,
+  FileCheck,
+  Users,
+  Building2,
+  BookOpen,
+  Award,
+  Bot,
+  Settings2,
+  Sparkles,
+};
+
 export default function LandingPage() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const { currentIndustry, industries, setIndustry, currentIndustryId } = useIndustry();
   const [, setLocation] = useLocation();
   
   const [pricingTab, setPricingTab] = useState<"smap" | "pancek">("smap");
@@ -54,38 +71,14 @@ export default function LandingPage() {
     );
   }
 
-  const features = [
-    {
-      icon: Shield,
-      title: "4 Fase Produk Siap SMAP",
-      description: "Siap Dokumen → Siap Audit Internal → Siap Audit Eksternal → Siap Surveilance untuk sertifikasi SNI ISO 37001:2016"
-    },
-    {
-      icon: Award,
-      title: "3 Fase Kesiapan Pancek",
-      description: "Siap Pengisian Kuesioner → Siap Terverifikasi → Siap Surveilance untuk Platform Jaga.id KPK"
-    },
-    {
-      icon: FileCheck,
-      title: "270+ Template Dokumen",
-      description: "Template siap pakai untuk setiap fase SMAP dan Pancek, dilengkapi AI Prompt Generator"
-    },
-    {
-      icon: Users,
-      title: "Manajemen Tim Lengkap",
-      description: "Kelola Tim FKAP, Tim Audit Internal, Manajemen, dan Pegawai untuk kepatuhan"
-    },
-    {
-      icon: Building2,
-      title: "Data Perusahaan Terintegrasi",
-      description: "Profil perusahaan, proyek, vendor, peralatan, dan kualifikasi SBU dalam satu sistem"
-    },
-    {
-      icon: BookOpen,
-      title: "Dual AI Mentor",
-      description: "SMAP Mentor untuk ISO 37001 dan Pancek Mentor untuk Panduan Cegah Korupsi KPK"
-    }
-  ];
+  const landingContent = currentIndustry?.landingContent;
+  const features = landingContent?.features || [];
+  const stats = landingContent?.stats || [];
+
+  const getFeatureIcon = (iconName: string) => {
+    const Icon = iconMap[iconName] || Shield;
+    return Icon;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -97,6 +90,7 @@ export default function LandingPage() {
               <span className="font-bold text-xl" data-testid="text-brand">Compliance Hub</span>
             </div>
             <div className="hidden md:flex items-center gap-6">
+              <a href="#industries" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-industries">Industri</a>
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">Fitur</a>
               <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">Harga</a>
             </div>
@@ -115,23 +109,23 @@ export default function LandingPage() {
       <section className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge variant="secondary" className="mb-4" data-testid="badge-construction">
-              Untuk Perusahaan Konstruksi Indonesia
+            <Badge variant="secondary" className="mb-4" data-testid="badge-platform">
+              Platform Generator Dokumen Generik
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6" data-testid="text-headline">
-              Sistem Manajemen <span className="text-primary">Anti Penyuapan</span> & Cegah Korupsi
+              {landingContent?.headline || "Platform Compliance"} <span className="text-primary">{landingContent?.headlineHighlight || "Dokumen"}</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto" data-testid="text-subheadline">
-              Platform lengkap untuk implementasi SNI ISO 37001:2016 (SMAP) dan Panduan Cegah Korupsi KPK (Pancek) dengan AI-powered document generation.
+              {landingContent?.subheadline || "Platform lengkap untuk membuat dokumen compliance dengan AI-powered document generation yang dapat disesuaikan untuk berbagai industri."}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button size="lg" asChild data-testid="button-cta-primary">
                 <a href="/api/login">
-                  Mulai Sekarang <ArrowRight className="ml-2 h-5 w-5" />
+                  {landingContent?.ctaPrimary || "Mulai Sekarang"} <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild data-testid="button-cta-secondary">
-                <a href="#features">Pelajari Lebih Lanjut</a>
+                <a href="#features">{landingContent?.ctaSecondary || "Pelajari Lebih Lanjut"}</a>
               </Button>
             </div>
             <div className="flex flex-wrap justify-center items-center gap-6 mt-8 text-sm text-muted-foreground">
@@ -145,94 +139,149 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span>Setup dalam 5 menit</span>
+                <span>Dapat dikustomisasi</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="features" className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
+      <section id="industries" className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-features-title">Fitur Lengkap untuk Kepatuhan</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-industries-title">Pilih Industri Anda</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Semua yang Anda butuhkan untuk implementasi sistem anti penyuapan dan cegah korupsi
+              Platform ini dapat disesuaikan untuk berbagai industri dan standar compliance
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <Card key={index} className="hover-elevate" data-testid={`card-feature-${index}`}>
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {industries.map((ind, index) => {
+              const isActive = currentIndustryId === ind.id;
+              const Icon = iconMap[ind.icon] || Shield;
+              return (
+                <Card 
+                  key={ind.id} 
+                  className={`hover-elevate cursor-pointer transition-all ${isActive ? "border-primary ring-2 ring-primary/20" : ""}`}
+                  onClick={() => setIndustry(ind.id)}
+                  data-testid={`card-industry-${ind.id}`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${ind.color === "green" ? "bg-green-100 dark:bg-green-900" : "bg-blue-100 dark:bg-blue-900"}`}>
+                        <Icon className={`h-6 w-6 ${ind.color === "green" ? "text-green-600 dark:text-green-300" : "text-blue-600 dark:text-blue-300"}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-lg">{ind.shortName}</h3>
+                          {isActive && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{ind.tagline}</p>
+                        <p className="text-xs text-muted-foreground mt-2">{ind.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+            
+            <Card className="border-dashed hover-elevate cursor-pointer opacity-60">
+              <CardContent className="p-6 text-center">
+                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg">Industri Lainnya</h3>
+                <p className="text-sm text-muted-foreground">Kustomisasi untuk kebutuhan Anda</p>
+                <Badge variant="secondary" className="mt-2">Segera Tersedia</Badge>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-4">
+      <section id="features" className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4">{currentIndustry?.shortName || "Fitur"}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-features-title">Fitur Lengkap untuk {currentIndustry?.shortName || "Compliance"}</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Semua yang Anda butuhkan untuk implementasi {currentIndustry?.name || "sistem compliance"}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => {
+              const FeatureIcon = getFeatureIcon(feature.icon);
+              return (
+                <Card key={index} className="hover-elevate" data-testid={`card-feature-${index}`}>
+                  <CardContent className="p-6">
+                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                      <FeatureIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge variant="outline" className="mb-4">Dual Pathway</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">SMAP & Pancek dalam Satu Platform</h2>
+              <Badge variant="outline" className="mb-4">Multi-Industri</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Platform Generator Dokumen Generik</h2>
               <div className="space-y-4">
                 <div className="flex gap-4">
                   <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0">
-                    <span className="font-bold text-blue-600 dark:text-blue-300">S</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-300">1</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold">SMAP - SNI ISO 37001:2016</h3>
-                    <p className="text-muted-foreground text-sm">Standar internasional untuk Sistem Manajemen Anti Penyuapan. Dengan 4 fase Produk Siap dan tracking progres sertifikasi.</p>
+                    <h3 className="font-semibold">Pilih Industri</h3>
+                    <p className="text-muted-foreground text-sm">SMAP, Pancek, atau industri kustom lainnya dengan konfigurasi yang dapat disesuaikan</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center shrink-0">
-                    <span className="font-bold text-green-600 dark:text-green-300">P</span>
+                    <span className="font-bold text-green-600 dark:text-green-300">2</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold">Pancek - Panduan Cegah Korupsi KPK</h3>
-                    <p className="text-muted-foreground text-sm">Panduan nasional dengan 6 fase PDCAR (Plan, Do, Check, Act, Respon) terintegrasi Platform Jaga.id.</p>
+                    <h3 className="font-semibold">Isi Data Perusahaan</h3>
+                    <p className="text-muted-foreground text-sm">Data profil, tim, karyawan, vendor, dan proyek terintegrasi dalam satu sistem</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center shrink-0">
+                    <span className="font-bold text-purple-600 dark:text-purple-300">3</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Generate Dokumen dengan AI</h3>
+                    <p className="text-muted-foreground text-sm">AI Mentor membantu membuat dokumen sesuai standar industri Anda</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-8">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-primary">270+</div>
-                  <div className="text-sm text-muted-foreground">Template Dokumen</div>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-primary">51</div>
-                  <div className="text-sm text-muted-foreground">Klausul PDCA</div>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-primary">46</div>
-                  <div className="text-sm text-muted-foreground">Referensi SMAP</div>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-primary">30+</div>
-                  <div className="text-sm text-muted-foreground">Checklist Item</div>
-                </div>
+                {stats.map((stat, idx) => (
+                  <div key={idx} className="bg-white dark:bg-slate-800 rounded-lg p-4 text-center">
+                    <div className="text-3xl font-bold text-primary">{stat.value}</div>
+                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="pricing" className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
+      <section id="pricing" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-pricing-title">Pilih Paket Sesuai Tahapan Anda</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Harga berdasarkan fase kesiapan sertifikasi - bayar sesuai kebutuhan
+              Harga berdasarkan fase kesiapan - bayar sesuai kebutuhan
             </p>
           </div>
           
@@ -287,22 +336,6 @@ export default function LandingPage() {
                           )}
                         </ul>
                       </div>
-                      {plan.materials && (
-                        <div>
-                          <p className="text-xs font-medium mb-2">Materi:</p>
-                          <ul className="space-y-1">
-                            {plan.materials.split(",").slice(0, 3).map((material, i) => (
-                              <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                                <FileCheck className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                                <span>{material.trim()}</span>
-                              </li>
-                            ))}
-                            {(plan.materials.split(",").length || 0) > 3 && (
-                              <li className="text-xs text-muted-foreground">+{(plan.materials.split(",").length || 0) - 3} materi lainnya</li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
                       <Button className="w-full" size="sm" variant={index === 2 ? "default" : "outline"} asChild data-testid={`button-smap-${index}`}>
                         <Link href={`/checkout?plan=${plan.id}`}>Pilih Paket</Link>
                       </Button>
@@ -351,22 +384,6 @@ export default function LandingPage() {
                           )}
                         </ul>
                       </div>
-                      {plan.materials && (
-                        <div>
-                          <p className="text-xs font-medium mb-2">Materi:</p>
-                          <ul className="space-y-1">
-                            {plan.materials.split(",").slice(0, 3).map((material, i) => (
-                              <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                                <FileCheck className="h-3 w-3 text-primary shrink-0 mt-0.5" />
-                                <span>{material.trim()}</span>
-                              </li>
-                            ))}
-                            {(plan.materials.split(",").length || 0) > 3 && (
-                              <li className="text-xs text-muted-foreground">+{(plan.materials.split(",").length || 0) - 3} materi lainnya</li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
                       <Button className="w-full" size="sm" variant={index === 1 ? "default" : "outline"} asChild data-testid={`button-pancek-${index}`}>
                         <Link href={`/checkout?plan=${plan.id}`}>Pilih Paket</Link>
                       </Button>
@@ -430,11 +447,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-white/50 dark:bg-slate-800/50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Siap Memulai Perjalanan Compliance?</h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Bergabung dengan perusahaan konstruksi Indonesia yang sudah menggunakan Compliance Hub untuk implementasi SMAP dan Pancek.
+            Bergabung dengan perusahaan Indonesia yang sudah menggunakan Compliance Hub untuk berbagai standar dan sertifikasi.
           </p>
           <Button size="lg" asChild data-testid="button-final-cta">
             <a href="/api/login">
@@ -451,7 +468,7 @@ export default function LandingPage() {
             <span className="font-semibold">Compliance Hub</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            2024 Compliance Hub. Platform Kepatuhan untuk Konstruksi Indonesia.
+            2024 Compliance Hub. Platform Generator Dokumen Generik untuk Indonesia.
           </p>
         </div>
       </footer>

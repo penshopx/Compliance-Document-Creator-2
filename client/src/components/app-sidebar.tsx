@@ -11,6 +11,8 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Building2,
@@ -30,44 +32,47 @@ import {
   ListChecks,
   Package,
   Home,
-  Globe,
+  Settings2,
 } from "lucide-react";
+import { useIndustry } from "@/hooks/use-industry";
 
-const mainMenuItems = [
-  { title: "Beranda", url: "/", icon: Home },
-  { title: "Dashboard SMAP", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Profil Perusahaan", url: "/company", icon: Building2 },
-  { title: "Manajemen Perusahaan", url: "/management", icon: Users },
-  { title: "Tim FKAP", url: "/fkap", icon: Shield },
-  { title: "Tim Audit Internal", url: "/audit-internal", icon: ClipboardCheck },
-];
-
-const dataMenuItems = [
-  { title: "Karyawan", url: "/employees", icon: UserCheck },
-  { title: "Klasifikasi SBU", url: "/qualifications", icon: Award },
-  { title: "Peralatan", url: "/equipment", icon: Wrench },
-  { title: "Proyek", url: "/projects", icon: FolderKanban },
-  { title: "Vendor & Mitra", url: "/vendors", icon: Handshake },
-];
-
-const documentMenuItems = [
-  { title: "Produk Siap SMAP", url: "/produk-siap", icon: Package },
-  { title: "Checklist SMAP", url: "/smap-checklist", icon: ListChecks },
-  { title: "Template Repository", url: "/template-repository", icon: Library },
-  { title: "Referensi Dokumen", url: "/smap-reference", icon: BookOpen },
-  { title: "Generator Dokumen", url: "/documents", icon: FileText },
-  { title: "Document Builder", url: "/document-builder", icon: FilePlus2 },
-  { title: "PDCA Generator", url: "/pdca", icon: Zap },
-];
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Home,
+  LayoutDashboard,
+  Building2,
+  Users,
+  Shield,
+  ClipboardCheck,
+  Award,
+  Wrench,
+  FolderKanban,
+  Handshake,
+  FileText,
+  UserCheck,
+  Zap,
+  FilePlus2,
+  BookOpen,
+  Library,
+  ListChecks,
+  Package,
+  Settings2,
+};
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { currentIndustry, industries, setIndustry, currentIndustryId } = useIndustry();
+
+  const menuGroups = currentIndustry?.menuGroups || [];
+
+  const getIcon = (iconName: string) => {
+    return iconMap[iconName] || FileText;
+  };
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-sidebar-primary">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-md ${currentIndustry?.color === "green" ? "bg-green-600" : "bg-sidebar-primary"}`}>
             <Shield className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
           <div className="flex flex-col">
@@ -75,81 +80,80 @@ export function AppSidebar() {
               Compliance Hub
             </span>
             <span className="text-xs text-sidebar-foreground/70">
-              SMAP & Pancek
+              {currentIndustry?.shortName || "Platform"}
             </span>
           </div>
+        </div>
+        
+        <div className="mt-3 flex gap-1">
+          {industries.map((ind) => (
+            <Button
+              key={ind.id}
+              variant={currentIndustryId === ind.id ? "default" : "ghost"}
+              size="sm"
+              className="flex-1 text-xs h-7"
+              onClick={() => setIndustry(ind.id)}
+              data-testid={`sidebar-industry-${ind.id}`}
+            >
+              {ind.shortName}
+            </Button>
+          ))}
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider px-2 mb-2">
-            Menu Utama
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location === item.url}
-                    className="h-10"
-                  >
-                    <Link href={item.url} data-testid={`nav-${item.url.replace("/", "") || "dashboard"}`}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {menuGroups.map((group, groupIdx) => (
+          <SidebarGroup key={groupIdx} className={groupIdx > 0 ? "mt-6" : ""}>
+            <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider px-2 mb-2">
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const Icon = getIcon(item.icon);
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location === item.url}
+                        className="h-10"
+                      >
+                        <Link href={item.url} data-testid={`nav-${item.url.replace("/", "") || "home"}`}>
+                          <Icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                          {item.badge && (
+                            <Badge variant="secondary" className="ml-auto text-xs">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
 
         <SidebarGroup className="mt-6">
           <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider px-2 mb-2">
-            Data Perusahaan
+            Pengaturan
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {dataMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location === item.url}
-                    className="h-10"
-                  >
-                    <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-6">
-          <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider px-2 mb-2">
-            Dokumen SMAP
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {documentMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location === item.url}
-                    className="h-10"
-                  >
-                    <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location === "/industry-settings"}
+                  className="h-10"
+                >
+                  <Link href="/industry-settings" data-testid="nav-industry-settings">
+                    <Settings2 className="h-4 w-4" />
+                    <span>Pengaturan Industri</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -157,11 +161,11 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border px-4 py-4">
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-sidebar-primary">
-            SNI ISO 37001:2016
+          <span className={`text-xs font-medium ${currentIndustry?.color === "green" ? "text-green-600" : "text-sidebar-primary"}`}>
+            {currentIndustry?.tagline || "Platform Generik"}
           </span>
           <span className="text-xs text-sidebar-foreground/60">
-            Sistem Manajemen Anti Penyuapan
+            {currentIndustry?.name || "Generator Dokumen"}
           </span>
         </div>
       </SidebarFooter>
