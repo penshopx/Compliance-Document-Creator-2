@@ -44,50 +44,22 @@ export const konstruksiConfig: IndustryConfig = {
       ]
     },
     {
-      label: "Legalitas",
+      label: "Data Perusahaan",
       items: [
-        { title: "NIB & OSS", url: "/nib", icon: "CreditCard" },
-        { title: "Akta & Legalitas", url: "/legalitas", icon: "Scale" },
-        { title: "NPWP & Pajak", url: "/pajak", icon: "Receipt" }
+        { title: "Karyawan", url: "/employees", icon: "UserCheck" },
+        { title: "Klasifikasi SBU", url: "/qualifications", icon: "Award" },
+        { title: "Peralatan", url: "/equipment", icon: "Wrench" },
+        { title: "Proyek", url: "/projects", icon: "FolderKanban" },
+        { title: "Vendor & Mitra", url: "/vendors", icon: "Handshake" }
       ]
     },
     {
-      label: "Perijinan",
+      label: "Dokumen Kepatuhan",
       items: [
-        { title: "SBU (Sertifikat Badan Usaha)", url: "/sbu", icon: "Building2" },
-        { title: "IMB/PBG", url: "/imb", icon: "Building" },
-        { title: "Izin Lingkungan", url: "/izin-lingkungan", icon: "Leaf" }
-      ]
-    },
-    {
-      label: "Sertifikasi",
-      items: [
-        { title: "SKK (Sertifikat Kompetensi)", url: "/skk", icon: "Award" },
-        { title: "Sertifikasi K3", url: "/k3-sertifikasi", icon: "Shield" },
-        { title: "ISO & SNI", url: "/iso-sni", icon: "CheckCircle" }
-      ]
-    },
-    {
-      label: "Tender",
-      items: [
-        { title: "Dokumen Kualifikasi", url: "/kualifikasi", icon: "FileCheck" },
-        { title: "Dokumen Penawaran", url: "/penawaran", icon: "FileText" },
-        { title: "RAB & Metode Kerja", url: "/rab", icon: "Calculator" }
-      ]
-    },
-    {
-      label: "Operasional",
-      items: [
-        { title: "SOP Proyek", url: "/sop", icon: "ClipboardList" },
-        { title: "Laporan Proyek", url: "/laporan", icon: "BarChart3" },
-        { title: "HSE & Quality", url: "/hse", icon: "Shield" }
-      ]
-    },
-    {
-      label: "AI Tools",
-      items: [
-        { title: "Template Dokumen", url: "/templates", icon: "FileText" },
-        { title: "AI Generator", url: "/generator", icon: "Sparkles" }
+        { title: "Template Repository", url: "/template-repository", icon: "Library", badge: "5 Domain" },
+        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
+        { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]
     }
   ],

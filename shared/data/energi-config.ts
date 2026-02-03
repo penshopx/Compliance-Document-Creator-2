@@ -44,28 +44,22 @@ export const energiConfig: IndustryConfig = {
       ]
     },
     {
-      label: "Perijinan Usaha",
+      label: "Data Perusahaan",
       items: [
-        { title: "IUPTL/IUPTLS", url: "/iuptl", icon: "Zap" },
-        { title: "IUJPTL", url: "/iujptl", icon: "Settings" },
-        { title: "IOSK", url: "/iosk", icon: "Factory" },
-        { title: "Wilayah Usaha", url: "/wilayah", icon: "Map" }
+        { title: "Karyawan", url: "/employees", icon: "UserCheck" },
+        { title: "Klasifikasi Usaha", url: "/qualifications", icon: "Award" },
+        { title: "Peralatan", url: "/equipment", icon: "Wrench" },
+        { title: "Proyek", url: "/projects", icon: "FolderKanban" },
+        { title: "Vendor & Mitra", url: "/vendors", icon: "Handshake" }
       ]
     },
     {
-      label: "Sertifikasi",
+      label: "Dokumen Kepatuhan",
       items: [
-        { title: "SLO (Laik Operasi)", url: "/slo", icon: "CheckCircle" },
-        { title: "SKTTK", url: "/skttk", icon: "UserCheck" },
-        { title: "Sertifikat Teknisi", url: "/teknisi", icon: "Wrench" }
-      ]
-    },
-    {
-      label: "Dokumen",
-      items: [
-        { title: "Template Dokumen", url: "/templates", icon: "FileText" },
-        { title: "Laporan Teknis", url: "/laporan", icon: "BarChart3" },
-        { title: "AI Generator", url: "/generator", icon: "Sparkles" }
+        { title: "Template Repository", url: "/template-repository", icon: "Library" },
+        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
+        { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]
     }
   ],

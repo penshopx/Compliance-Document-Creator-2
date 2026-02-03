@@ -44,36 +44,22 @@ export const tenderConfig: IndustryConfig = {
       ]
     },
     {
-      label: "Tender Pemerintah",
+      label: "Data Perusahaan",
       items: [
-        { title: "LPSE & SPSE", url: "/lpse", icon: "Globe" },
-        { title: "e-Purchasing", url: "/e-purchasing", icon: "ShoppingCart" },
-        { title: "e-Tendering", url: "/e-tendering", icon: "FileSearch" },
-        { title: "e-Katalog", url: "/e-katalog", icon: "BookOpen" }
+        { title: "Karyawan", url: "/employees", icon: "UserCheck" },
+        { title: "Klasifikasi Usaha", url: "/qualifications", icon: "Award" },
+        { title: "Peralatan", url: "/equipment", icon: "Wrench" },
+        { title: "Proyek", url: "/projects", icon: "FolderKanban" },
+        { title: "Vendor & Mitra", url: "/vendors", icon: "Handshake" }
       ]
     },
     {
-      label: "Dokumen Administrasi",
+      label: "Dokumen Tender",
       items: [
-        { title: "Dokumen Kualifikasi", url: "/kualifikasi", icon: "ClipboardList" },
-        { title: "Company Profile", url: "/company-profile", icon: "Building2" },
-        { title: "Daftar Pengalaman", url: "/pengalaman", icon: "History" },
-        { title: "Daftar Personil", url: "/personil", icon: "Users" }
-      ]
-    },
-    {
-      label: "Dokumen Teknis & Harga",
-      items: [
-        { title: "Metode Pelaksanaan", url: "/metode", icon: "Settings" },
-        { title: "RAB", url: "/rab", icon: "FileSpreadsheet" },
-        { title: "Analisa Harga Satuan", url: "/ahs", icon: "Table" }
-      ]
-    },
-    {
-      label: "Dokumen",
-      items: [
-        { title: "Template Dokumen", url: "/templates", icon: "FileText" },
-        { title: "AI Generator", url: "/generator", icon: "Sparkles" }
+        { title: "Template Repository", url: "/template-repository", icon: "Library" },
+        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
+        { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]
     }
   ],

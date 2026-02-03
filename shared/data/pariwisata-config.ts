@@ -44,30 +44,22 @@ export const pariwisataConfig: IndustryConfig = {
       ]
     },
     {
-      label: "Perijinan",
+      label: "Data Perusahaan",
       items: [
-        { title: "TDUP", url: "/tdup", icon: "FileCheck" },
-        { title: "Sertifikasi Bintang", url: "/bintang", icon: "Star" },
-        { title: "CHSE", url: "/chse", icon: "Shield" },
-        { title: "Sertifikasi Kompetensi", url: "/kompetensi", icon: "Award" }
+        { title: "Karyawan", url: "/employees", icon: "UserCheck" },
+        { title: "Klasifikasi Usaha", url: "/qualifications", icon: "Star" },
+        { title: "Fasilitas", url: "/equipment", icon: "Palmtree" },
+        { title: "Proyek", url: "/projects", icon: "FolderKanban" },
+        { title: "Vendor & Mitra", url: "/vendors", icon: "Handshake" }
       ]
     },
     {
-      label: "Operasional",
+      label: "Dokumen Kepatuhan",
       items: [
-        { title: "SOP Front Office", url: "/sop-fo", icon: "Users" },
-        { title: "SOP Housekeeping", url: "/sop-hk", icon: "Home" },
-        { title: "SOP F&B", url: "/sop-fb", icon: "ShoppingCart" },
-        { title: "Guest Experience", url: "/guest", icon: "MessageSquare" }
-      ]
-    },
-    {
-      label: "Dokumen",
-      items: [
-        { title: "Template Dokumen", url: "/templates", icon: "FileText" },
-        { title: "Kontrak Vendor", url: "/kontrak", icon: "Handshake" },
-        { title: "Laporan Operasional", url: "/laporan", icon: "FileBarChart" },
-        { title: "AI Generator", url: "/generator", icon: "Sparkles" }
+        { title: "Template Repository", url: "/template-repository", icon: "Library" },
+        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
+        { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]
     }
   ],

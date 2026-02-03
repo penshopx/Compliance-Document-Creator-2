@@ -44,30 +44,22 @@ export const logistikConfig: IndustryConfig = {
       ]
     },
     {
-      label: "Perijinan",
+      label: "Data Perusahaan",
       items: [
-        { title: "SIUJPT", url: "/siujpt", icon: "FileCheck" },
-        { title: "Izin Trayek", url: "/trayek", icon: "Map" },
-        { title: "AEO (Authorized Economic Operator)", url: "/aeo", icon: "Award" },
-        { title: "NIK Kepabeanan", url: "/nik", icon: "CreditCard" }
+        { title: "Karyawan", url: "/employees", icon: "UserCheck" },
+        { title: "Klasifikasi Usaha", url: "/qualifications", icon: "Award" },
+        { title: "Armada & Peralatan", url: "/equipment", icon: "Truck" },
+        { title: "Proyek", url: "/projects", icon: "FolderKanban" },
+        { title: "Vendor & Mitra", url: "/vendors", icon: "Handshake" }
       ]
     },
     {
-      label: "Ekspor-Impor",
+      label: "Dokumen Kepatuhan",
       items: [
-        { title: "PEB (Pemberitahuan Ekspor)", url: "/peb", icon: "Upload" },
-        { title: "PIB (Pemberitahuan Impor)", url: "/pib", icon: "Package" },
-        { title: "Bill of Lading", url: "/bl", icon: "FileText" },
-        { title: "Dokumen Bea Cukai", url: "/beacukai", icon: "Shield" }
-      ]
-    },
-    {
-      label: "Dokumen",
-      items: [
-        { title: "Template Dokumen", url: "/templates", icon: "FileText" },
-        { title: "Kontrak Pengiriman", url: "/kontrak", icon: "FileSignature" },
-        { title: "SOP Operasional", url: "/sop", icon: "ClipboardList" },
-        { title: "AI Generator", url: "/generator", icon: "Sparkles" }
+        { title: "Template Repository", url: "/template-repository", icon: "Library" },
+        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
+        { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]
     }
   ],

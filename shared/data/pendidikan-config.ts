@@ -44,30 +44,22 @@ export const pendidikanConfig: IndustryConfig = {
       ]
     },
     {
-      label: "Akreditasi",
+      label: "Data Institusi",
       items: [
-        { title: "BAN-PT (Perguruan Tinggi)", url: "/ban-pt", icon: "Award" },
-        { title: "BAN-SM (Sekolah)", url: "/ban-sm", icon: "FileCheck" },
-        { title: "BAN-PAUD/PNF", url: "/ban-paud", icon: "Users" },
-        { title: "LAMDIK", url: "/lamdik", icon: "Shield" }
+        { title: "SDM Pendidik", url: "/employees", icon: "UserCheck" },
+        { title: "Program Studi", url: "/qualifications", icon: "GraduationCap" },
+        { title: "Fasilitas", url: "/equipment", icon: "Building" },
+        { title: "Proyek/Kerjasama", url: "/projects", icon: "FolderKanban" },
+        { title: "Mitra", url: "/vendors", icon: "Handshake" }
       ]
     },
     {
-      label: "Akademik",
+      label: "Dokumen Akreditasi",
       items: [
-        { title: "Kurikulum", url: "/kurikulum", icon: "BookOpen" },
-        { title: "RPS & Silabus", url: "/rps", icon: "FileText" },
-        { title: "Capaian Pembelajaran", url: "/cpl", icon: "Target" },
-        { title: "SDM Pendidik", url: "/sdm", icon: "UserCheck" }
-      ]
-    },
-    {
-      label: "Dokumen",
-      items: [
-        { title: "Template Dokumen", url: "/templates", icon: "FileText" },
-        { title: "LKPS & LED", url: "/lkps", icon: "FileBarChart" },
-        { title: "Proposal & Laporan", url: "/proposal", icon: "FilePlus2" },
-        { title: "AI Generator", url: "/generator", icon: "Sparkles" }
+        { title: "Template Repository", url: "/template-repository", icon: "Library" },
+        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
+        { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]
     }
   ],
