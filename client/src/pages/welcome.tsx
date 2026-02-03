@@ -3,9 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Globe, Flag, Shield, FileCheck, CheckCircle2, ArrowRight, Building2, Scale, Award, LogOut, Loader2 } from "lucide-react";
+import { Globe, Flag, Shield, FileCheck, CheckCircle2, ArrowRight, Building2, Scale, Award, LogOut, Loader2, Gavel, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
+
+const complianceDomains = [
+  { id: "legalitas", name: "Legalitas", icon: Scale, color: "blue", description: "Akta, NIB, NPWP", examples: ["Akta Pendirian", "NIB (OSS)", "NPWP"] },
+  { id: "perijinan", name: "Perijinan", icon: FileCheck, color: "green", description: "SBU, SKK, Izin Usaha", examples: ["SBU", "SKK", "SIUP"] },
+  { id: "sertifikasi", name: "Sertifikasi", icon: Award, color: "amber", description: "ISO, SNI, K3", examples: ["ISO 37001", "SNI", "K3"] },
+  { id: "tender", name: "Tender", icon: Gavel, color: "purple", description: "RAB, Penawaran, Kontrak", examples: ["RAB", "Metode", "Proposal"] },
+  { id: "operasional", name: "Operasional", icon: Settings, color: "cyan", description: "SOP, Laporan, QC", examples: ["SOP", "Laporan", "HSE"] },
+];
 
 export default function WelcomePage() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -81,7 +89,7 @@ export default function WelcomePage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <Card className="hover-elevate transition-all duration-300 border-2 hover:border-primary/50" data-testid="card-pancek">
+          <Card className="hover-elevate transition-all duration-300" data-testid="card-pancek">
             <CardHeader className="text-center pb-4">
               <div className="flex justify-center mb-4">
                 <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30">
@@ -140,7 +148,7 @@ export default function WelcomePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover-elevate transition-all duration-300 border-2 hover:border-primary/50" data-testid="card-smap">
+          <Card className="hover-elevate transition-all duration-300" data-testid="card-smap">
             <CardHeader className="text-center pb-4">
               <div className="flex justify-center mb-4">
                 <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
@@ -266,9 +274,46 @@ export default function WelcomePage() {
           </Card>
         </div>
 
+        <div className="max-w-5xl mx-auto mt-12">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                5 Domain Kepatuhan Usaha
+              </CardTitle>
+              <CardDescription>
+                Semua dokumen bisnis Anda terorganisir dalam 5 domain kepatuhan yang jelas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {complianceDomains.map((domain) => {
+                  const Icon = domain.icon;
+                  const colorClasses = {
+                    blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
+                    green: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
+                    amber: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
+                    purple: "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
+                    cyan: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
+                  };
+                  return (
+                    <div key={domain.id} className="text-center p-4 rounded-xl border hover-elevate" data-testid={`card-domain-${domain.id}`}>
+                      <div className={`h-12 w-12 rounded-xl ${colorClasses[domain.color as keyof typeof colorClasses]} flex items-center justify-center mx-auto mb-3`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{domain.name}</h4>
+                      <p className="text-xs text-muted-foreground">{domain.description}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="text-center mt-12 text-sm text-muted-foreground">
-          <p>Compliance Hub - Platform Manajemen Kepatuhan Anti Penyuapan & Anti Korupsi</p>
-          <p className="mt-1">Mendukung SNI ISO 37001:2016 dan Panduan Cegah Korupsi KPK</p>
+          <p>Compliance Hub - Platform Kepatuhan Multi-Industri Indonesia</p>
+          <p className="mt-1">Legalitas • Perijinan • Sertifikasi • Tender • Operasional</p>
         </div>
       </div>
     </div>

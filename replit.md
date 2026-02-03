@@ -1,16 +1,39 @@
-# Multi-Industry Document Generator Platform
+# Compliance Hub - Multi-Industry Document Generator Platform
 
 ## Overview
-A comprehensive multi-industry document generator platform designed for Indonesian businesses across **20 industries**. Each industry has its own specialized templates, document workflows, AI chatbot persona, and compliance requirements. The platform provides AI-powered document generation, checklist tracking, and industry-specific management tools.
+A comprehensive compliance platform for Indonesian businesses across **20 industries**, organized around **5 Core Compliance Domains**. Each industry has specialized templates, document workflows, AI chatbot persona, and compliance requirements organized within this unified framework.
+
+## 5 Core Compliance Domains (Framework)
+All documents across all 20 industries are organized into these 5 domains:
+
+1. **Legalitas** - Legal foundation documents
+   - Akta Pendirian, NIB (OSS), NPWP, TDP, Domisili, PKP
+   - Basic company registration and legal identity
+
+2. **Perijinan** - Business licensing & permits  
+   - Industry-specific licenses (SBU, SKK, SIUP, IUPTL, etc.)
+   - Operational permits required by regulators
+
+3. **Sertifikasi** - Certification & standards
+   - ISO (9001, 14001, 37001, 45001), SNI, K3
+   - Professional certifications (SKK for construction, SKTTK for energy)
+
+4. **Tender** - Procurement & bidding
+   - Qualification documents, proposals, RAB
+   - Tender submissions and contract documents
+
+5. **Operasional** - Operations & production
+   - SOP, work instructions, reports
+   - Quality control, HSE, daily operational documents
 
 ### Supported Industries (20 Total):
 1. **SMAP** - SNI ISO 37001:2016 Anti-Bribery Management
 2. **Pancek** - Panduan Cegah Korupsi KPK
-3. **Konstruksi** - Construction licensing (SBU, SKA, SKT)
-4. **Energi** - Energy sector (RUPTL, IUPTL)
+3. **Konstruksi** - Construction (SBU, SKK, NIB) - *Note: SKA/SKT replaced by SKK, SIUJK replaced by NIB*
+4. **Energi** - Energy sector (IUPTL, SLO, SKTTK)
 5. **Migas** - Oil & Gas (KKKS, WP&B)
 6. **Lingkungan** - Environmental (AMDAL, UKL-UPL)
-7. **UMKM** - Small Business (NIB, PIRT)
+7. **UMKM** - Small Business (NIB, IUMK, Halal)
 8. **ISO** - ISO Standards (9001, 14001, 45001)
 9. **K3** - Occupational Health & Safety
 10. **Tender** - Procurement & Bidding

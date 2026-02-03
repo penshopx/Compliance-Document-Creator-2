@@ -1,5 +1,77 @@
 import { z } from "zod";
 
+// 5 Core Compliance Domains for Indonesian Businesses
+export const ComplianceDomainEnum = z.enum([
+  "legalitas",      // Legalitas - Legal documents (Akta, NIB, NPWP, etc.)
+  "perijinan",      // Perijinan - Licensing (SBU, SKK, permits, etc.)
+  "sertifikasi",    // Sertifikasi - Certification (ISO, SNI, K3, etc.)
+  "tender",         // Tender - Procurement documents
+  "operasional",    // Operasional/Produksi - Operational documents
+]);
+
+export type ComplianceDomain = z.infer<typeof ComplianceDomainEnum>;
+
+export const ComplianceDomainInfoSchema = z.object({
+  id: ComplianceDomainEnum,
+  name: z.string(),
+  shortName: z.string(),
+  description: z.string(),
+  icon: z.string(),
+  color: z.string(),
+  examples: z.array(z.string()),
+});
+
+export type ComplianceDomainInfo = z.infer<typeof ComplianceDomainInfoSchema>;
+
+// Standard domain definitions used across all industries
+export const COMPLIANCE_DOMAINS: ComplianceDomainInfo[] = [
+  {
+    id: "legalitas",
+    name: "Legalitas Perusahaan",
+    shortName: "Legalitas",
+    description: "Dokumen dasar legalitas usaha seperti akta pendirian, NIB, NPWP, dan dokumen hukum lainnya",
+    icon: "Scale",
+    color: "blue",
+    examples: ["Akta Pendirian", "NIB (OSS)", "NPWP", "TDP", "Domisili", "PKP"],
+  },
+  {
+    id: "perijinan",
+    name: "Perijinan Usaha",
+    shortName: "Perijinan",
+    description: "Izin-izin khusus yang diperlukan sesuai bidang usaha dan regulasi terkait",
+    icon: "FileCheck",
+    color: "green",
+    examples: ["SBU", "SKK", "SIUP", "Izin Lokasi", "Izin Lingkungan"],
+  },
+  {
+    id: "sertifikasi",
+    name: "Sertifikasi & Standar",
+    shortName: "Sertifikasi",
+    description: "Sertifikasi nasional dan internasional untuk standarisasi mutu dan kepatuhan",
+    icon: "Award",
+    color: "amber",
+    examples: ["ISO 9001", "ISO 14001", "SNI", "K3", "SMAP ISO 37001"],
+  },
+  {
+    id: "tender",
+    name: "Tender & Pengadaan",
+    shortName: "Tender",
+    description: "Dokumen untuk mengikuti tender, lelang, dan proses pengadaan barang/jasa",
+    icon: "Gavel",
+    color: "purple",
+    examples: ["Dokumen Kualifikasi", "Penawaran", "RAB", "Metode Kerja"],
+  },
+  {
+    id: "operasional",
+    name: "Operasional & Produksi",
+    shortName: "Operasional",
+    description: "Dokumen operasional harian, SOP, laporan, dan dokumen produksi",
+    icon: "Settings",
+    color: "cyan",
+    examples: ["SOP", "Laporan Proyek", "Quality Control", "HSE"],
+  },
+];
+
 export const MenuItemSchema = z.object({
   title: z.string(),
   url: z.string(),
@@ -24,6 +96,7 @@ export const TemplateSchema = z.object({
   titleEn: z.string().optional(),
   description: z.string(),
   category: z.string(),
+  domain: ComplianceDomainEnum.optional(), // Link to one of 5 compliance domains
   clause: z.string().optional(),
   icon: z.string(),
   color: z.string(),

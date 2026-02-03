@@ -290,6 +290,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="hidden md:flex items-center gap-8">
+              <a href="#domains" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" data-testid="link-domains">5 Domain</a>
               <a href="#industries" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" data-testid="link-industries">Industri</a>
               <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">Fitur</a>
               <a href="#testimonials" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" data-testid="link-testimonials">Testimoni</a>
@@ -466,7 +467,105 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="industries" className="py-20 px-4">
+      <section id="domains" className="py-20 px-4 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4">Framework Kepatuhan</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-domains-title">
+              5 Domain <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Kepatuhan Usaha</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Semua dokumen bisnis Anda terorganisir dalam 5 domain kepatuhan yang jelas dan terstruktur
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <Card className="hover-elevate text-center" data-testid="card-domain-legalitas">
+              <CardContent className="p-6">
+                <div className="h-16 w-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto mb-4">
+                  <Scale className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Legalitas</h3>
+                <p className="text-sm text-muted-foreground mb-4">Dokumen dasar legalitas usaha</p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  <Badge variant="secondary" className="text-xs">Akta</Badge>
+                  <Badge variant="secondary" className="text-xs">NIB</Badge>
+                  <Badge variant="secondary" className="text-xs">NPWP</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover-elevate text-center" data-testid="card-domain-perijinan">
+              <CardContent className="p-6">
+                <div className="h-16 w-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+                  <FileCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Perijinan</h3>
+                <p className="text-sm text-muted-foreground mb-4">Izin-izin sesuai bidang usaha</p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  <Badge variant="secondary" className="text-xs">SBU</Badge>
+                  <Badge variant="secondary" className="text-xs">SKK</Badge>
+                  <Badge variant="secondary" className="text-xs">SIUP</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover-elevate text-center" data-testid="card-domain-sertifikasi">
+              <CardContent className="p-6">
+                <div className="h-16 w-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-4">
+                  <Award className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Sertifikasi</h3>
+                <p className="text-sm text-muted-foreground mb-4">Standar mutu dan kepatuhan</p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  <Badge variant="secondary" className="text-xs">ISO</Badge>
+                  <Badge variant="secondary" className="text-xs">SNI</Badge>
+                  <Badge variant="secondary" className="text-xs">K3</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover-elevate text-center" data-testid="card-domain-tender">
+              <CardContent className="p-6">
+                <div className="h-16 w-16 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mx-auto mb-4">
+                  <Gavel className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Tender</h3>
+                <p className="text-sm text-muted-foreground mb-4">Dokumen pengadaan barang/jasa</p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  <Badge variant="secondary" className="text-xs">RAB</Badge>
+                  <Badge variant="secondary" className="text-xs">Metode</Badge>
+                  <Badge variant="secondary" className="text-xs">Penawaran</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover-elevate text-center" data-testid="card-domain-operasional">
+              <CardContent className="p-6">
+                <div className="h-16 w-16 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center mx-auto mb-4">
+                  <Settings className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Operasional</h3>
+                <p className="text-sm text-muted-foreground mb-4">Dokumen operasional harian</p>
+                <div className="flex flex-wrap justify-center gap-1">
+                  <Badge variant="secondary" className="text-xs">SOP</Badge>
+                  <Badge variant="secondary" className="text-xs">Laporan</Badge>
+                  <Badge variant="secondary" className="text-xs">QC</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-muted-foreground mb-4">Semua 20 sektor industri menggunakan framework 5 domain ini</p>
+            <Button variant="outline" asChild>
+              <a href="#industries">Lihat Semua Industri <ChevronRight className="ml-2 h-4 w-4" /></a>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section id="industries" className="py-20 px-4 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4">20 Industri Tersedia</Badge>
