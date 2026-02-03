@@ -46,9 +46,24 @@ export default function UnifiedChatbot() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const chatbotConfig = currentIndustry?.chatbot;
-  const colorClass = currentIndustry?.color === "green" ? "bg-green-600" : "bg-blue-600";
-  const iconColorClass = currentIndustry?.color === "green" ? "text-green-600" : "text-blue-600";
-  const iconBgClass = currentIndustry?.color === "green" ? "bg-green-100" : "bg-blue-100";
+  
+  const colorMap: Record<string, { bg: string; iconColor: string; iconBg: string }> = {
+    blue: { bg: "bg-blue-600", iconColor: "text-blue-600", iconBg: "bg-blue-100" },
+    green: { bg: "bg-green-600", iconColor: "text-green-600", iconBg: "bg-green-100" },
+    amber: { bg: "bg-amber-600", iconColor: "text-amber-600", iconBg: "bg-amber-100" },
+    yellow: { bg: "bg-yellow-600", iconColor: "text-yellow-600", iconBg: "bg-yellow-100" },
+    orange: { bg: "bg-orange-600", iconColor: "text-orange-600", iconBg: "bg-orange-100" },
+    purple: { bg: "bg-purple-600", iconColor: "text-purple-600", iconBg: "bg-purple-100" },
+    indigo: { bg: "bg-indigo-600", iconColor: "text-indigo-600", iconBg: "bg-indigo-100" },
+    red: { bg: "bg-red-600", iconColor: "text-red-600", iconBg: "bg-red-100" },
+    cyan: { bg: "bg-cyan-600", iconColor: "text-cyan-600", iconBg: "bg-cyan-100" },
+    emerald: { bg: "bg-emerald-600", iconColor: "text-emerald-600", iconBg: "bg-emerald-100" },
+  };
+  
+  const colors = colorMap[currentIndustry?.color || "blue"] || colorMap.blue;
+  const colorClass = colors.bg;
+  const iconColorClass = colors.iconColor;
+  const iconBgClass = colors.iconBg;
 
   useEffect(() => {
     if (isOpen && !hasGreeted && chatbotConfig) {
@@ -175,7 +190,6 @@ export default function UnifiedChatbot() {
               variant="ghost" 
               size="icon"
               onClick={() => setShowIndustrySelector(!showIndustrySelector)}
-              className="hover:bg-white/20"
               data-testid="button-industry-selector"
             >
               <Settings2 className="h-4 w-4" />
@@ -184,7 +198,6 @@ export default function UnifiedChatbot() {
               variant="ghost" 
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="hover:bg-white/20"
               data-testid="button-close-chatbot"
             >
               <X className="h-4 w-4" />

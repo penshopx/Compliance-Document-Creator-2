@@ -33,6 +33,53 @@ import {
   Package,
   Home,
   Settings2,
+  Fuel,
+  Leaf,
+  Store,
+  HardHat,
+  Gavel,
+  Banknote,
+  Map,
+  Truck,
+  Warehouse,
+  FileSearch,
+  Factory,
+  CheckCircle,
+  Globe,
+  ShoppingCart,
+  Calculator,
+  FileSpreadsheet,
+  Table,
+  History,
+  Settings,
+  CreditCard,
+  Receipt,
+  Star,
+  Copyright,
+  Scale,
+  TrendingUp,
+  ArrowRightLeft,
+  StickyNote,
+  Percent,
+  Key,
+  AlertOctagon,
+  Target,
+  GitCompare,
+  Search,
+  Sun,
+  Mountain,
+  Trees,
+  Droplets,
+  FileBarChart,
+  AlertTriangle,
+  Mail,
+  FileSignature,
+  BarChart3,
+  Building,
+  CheckSquare,
+  ClipboardList,
+  MessageSquare,
+  RefreshCw,
 } from "lucide-react";
 import { useIndustry } from "@/hooks/use-industry";
 
@@ -56,6 +103,66 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   ListChecks,
   Package,
   Settings2,
+  Fuel,
+  Leaf,
+  Store,
+  HardHat,
+  Gavel,
+  Banknote,
+  Map,
+  Truck,
+  Warehouse,
+  FileSearch,
+  Factory,
+  CheckCircle,
+  Globe,
+  ShoppingCart,
+  Calculator,
+  FileSpreadsheet,
+  Table,
+  History,
+  Settings,
+  CreditCard,
+  Receipt,
+  Star,
+  Copyright,
+  Scale,
+  TrendingUp,
+  ArrowRightLeft,
+  StickyNote,
+  Percent,
+  Key,
+  AlertOctagon,
+  Target,
+  GitCompare,
+  Search,
+  Sun,
+  Mountain,
+  Trees,
+  Droplets,
+  FileBarChart,
+  AlertTriangle,
+  Mail,
+  FileSignature,
+  BarChart3,
+  Building,
+  CheckSquare,
+  ClipboardList,
+  MessageSquare,
+  RefreshCw,
+};
+
+const colorMap: Record<string, { bg: string; text: string }> = {
+  blue: { bg: "bg-blue-600", text: "text-blue-600" },
+  green: { bg: "bg-green-600", text: "text-green-600" },
+  amber: { bg: "bg-amber-600", text: "text-amber-600" },
+  yellow: { bg: "bg-yellow-600", text: "text-yellow-600" },
+  orange: { bg: "bg-orange-600", text: "text-orange-600" },
+  purple: { bg: "bg-purple-600", text: "text-purple-600" },
+  indigo: { bg: "bg-indigo-600", text: "text-indigo-600" },
+  red: { bg: "bg-red-600", text: "text-red-600" },
+  cyan: { bg: "bg-cyan-600", text: "text-cyan-600" },
+  emerald: { bg: "bg-emerald-600", text: "text-emerald-600" },
 };
 
 export function AppSidebar() {
@@ -68,12 +175,15 @@ export function AppSidebar() {
     return iconMap[iconName] || FileText;
   };
 
+  const IndustryIcon = getIcon(currentIndustry?.icon || "Shield");
+  const colors = colorMap[currentIndustry?.color || "blue"] || colorMap.blue;
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 items-center justify-center rounded-md ${currentIndustry?.color === "green" ? "bg-green-600" : "bg-sidebar-primary"}`}>
-            <Shield className="h-5 w-5 text-sidebar-primary-foreground" />
+          <div className={`flex h-10 w-10 items-center justify-center rounded-md ${colors.bg}`}>
+            <IndustryIcon className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
             <span className="text-base font-semibold text-sidebar-foreground">
@@ -85,13 +195,13 @@ export function AppSidebar() {
           </div>
         </div>
         
-        <div className="mt-3 flex gap-1">
+        <div className="mt-3 flex flex-wrap gap-1">
           {industries.map((ind) => (
             <Button
               key={ind.id}
               variant={currentIndustryId === ind.id ? "default" : "ghost"}
               size="sm"
-              className="flex-1 text-xs h-7"
+              className="text-xs h-7 px-2"
               onClick={() => setIndustry(ind.id)}
               data-testid={`sidebar-industry-${ind.id}`}
             >
@@ -161,7 +271,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-sidebar-border px-4 py-4">
         <div className="flex flex-col gap-1">
-          <span className={`text-xs font-medium ${currentIndustry?.color === "green" ? "text-green-600" : "text-sidebar-primary"}`}>
+          <span className={`text-xs font-medium ${colors.text}`}>
             {currentIndustry?.tagline || "Platform Generik"}
           </span>
           <span className="text-xs text-sidebar-foreground/60">

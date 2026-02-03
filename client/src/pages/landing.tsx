@@ -16,7 +16,71 @@ import {
   Loader2,
   Bot,
   Settings2,
-  Sparkles
+  Sparkles,
+  Zap,
+  Fuel,
+  Leaf,
+  Store,
+  HardHat,
+  Gavel,
+  Banknote,
+  Bell,
+  Sun,
+  Mountain,
+  FileText,
+  Upload,
+  Lock,
+  ClipboardCheck,
+  AlertTriangle,
+  Search,
+  Calculator,
+  TrendingUp,
+  Briefcase,
+  Receipt,
+  FileSpreadsheet,
+  LayoutDashboard,
+  Wrench,
+  FolderKanban,
+  Handshake,
+  UserCheck,
+  FilePlus2,
+  Library,
+  ListChecks,
+  Package,
+  Home,
+  Map,
+  Truck,
+  Warehouse,
+  FileSearch,
+  Factory,
+  CheckCircle,
+  Globe,
+  ShoppingCart,
+  Table,
+  History,
+  Settings,
+  CreditCard,
+  Star,
+  Copyright,
+  Scale,
+  ArrowRightLeft,
+  StickyNote,
+  Percent,
+  Key,
+  AlertOctagon,
+  Target,
+  GitCompare,
+  Trees,
+  Droplets,
+  FileBarChart,
+  Mail,
+  FileSignature,
+  BarChart3,
+  Building,
+  CheckSquare,
+  ClipboardList,
+  MessageSquare,
+  RefreshCw,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { useEffect, useState } from "react";
@@ -33,6 +97,83 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bot,
   Settings2,
   Sparkles,
+  Zap,
+  Fuel,
+  Leaf,
+  Store,
+  HardHat,
+  Gavel,
+  Banknote,
+  Bell,
+  Sun,
+  Mountain,
+  FileText,
+  Upload,
+  Lock,
+  ClipboardCheck,
+  AlertTriangle,
+  Search,
+  Calculator,
+  TrendingUp,
+  Briefcase,
+  Receipt,
+  FileSpreadsheet,
+  LayoutDashboard,
+  Wrench,
+  FolderKanban,
+  Handshake,
+  UserCheck,
+  FilePlus2,
+  Library,
+  ListChecks,
+  Package,
+  Home,
+  Map,
+  Truck,
+  Warehouse,
+  FileSearch,
+  Factory,
+  CheckCircle,
+  Globe,
+  ShoppingCart,
+  Table,
+  History,
+  Settings,
+  CreditCard,
+  Star,
+  Copyright,
+  Scale,
+  ArrowRightLeft,
+  StickyNote,
+  Percent,
+  Key,
+  AlertOctagon,
+  Target,
+  GitCompare,
+  Trees,
+  Droplets,
+  FileBarChart,
+  Mail,
+  FileSignature,
+  BarChart3,
+  Building,
+  CheckSquare,
+  ClipboardList,
+  MessageSquare,
+  RefreshCw,
+};
+
+const colorMap: Record<string, { bg: string; bgDark: string; text: string; textDark: string }> = {
+  blue: { bg: "bg-blue-100", bgDark: "dark:bg-blue-900", text: "text-blue-600", textDark: "dark:text-blue-300" },
+  green: { bg: "bg-green-100", bgDark: "dark:bg-green-900", text: "text-green-600", textDark: "dark:text-green-300" },
+  amber: { bg: "bg-amber-100", bgDark: "dark:bg-amber-900", text: "text-amber-600", textDark: "dark:text-amber-300" },
+  yellow: { bg: "bg-yellow-100", bgDark: "dark:bg-yellow-900", text: "text-yellow-600", textDark: "dark:text-yellow-300" },
+  orange: { bg: "bg-orange-100", bgDark: "dark:bg-orange-900", text: "text-orange-600", textDark: "dark:text-orange-300" },
+  purple: { bg: "bg-purple-100", bgDark: "dark:bg-purple-900", text: "text-purple-600", textDark: "dark:text-purple-300" },
+  indigo: { bg: "bg-indigo-100", bgDark: "dark:bg-indigo-900", text: "text-indigo-600", textDark: "dark:text-indigo-300" },
+  red: { bg: "bg-red-100", bgDark: "dark:bg-red-900", text: "text-red-600", textDark: "dark:text-red-300" },
+  cyan: { bg: "bg-cyan-100", bgDark: "dark:bg-cyan-900", text: "text-cyan-600", textDark: "dark:text-cyan-300" },
+  emerald: { bg: "bg-emerald-100", bgDark: "dark:bg-emerald-900", text: "text-emerald-600", textDark: "dark:text-emerald-300" },
 };
 
 export default function LandingPage() {
@@ -158,6 +299,7 @@ export default function LandingPage() {
             {industries.map((ind, index) => {
               const isActive = currentIndustryId === ind.id;
               const Icon = iconMap[ind.icon] || Shield;
+              const colors = colorMap[ind.color] || colorMap.blue;
               return (
                 <Card 
                   key={ind.id} 
@@ -167,8 +309,8 @@ export default function LandingPage() {
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${ind.color === "green" ? "bg-green-100 dark:bg-green-900" : "bg-blue-100 dark:bg-blue-900"}`}>
-                        <Icon className={`h-6 w-6 ${ind.color === "green" ? "text-green-600 dark:text-green-300" : "text-blue-600 dark:text-blue-300"}`} />
+                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${colors.bg} ${colors.bgDark}`}>
+                        <Icon className={`h-6 w-6 ${colors.text} ${colors.textDark}`} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -184,16 +326,6 @@ export default function LandingPage() {
               );
             })}
             
-            <Card className="border-dashed hover-elevate cursor-pointer opacity-60">
-              <CardContent className="p-6 text-center">
-                <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <h3 className="font-semibold text-lg">Industri Lainnya</h3>
-                <p className="text-sm text-muted-foreground">Kustomisasi untuk kebutuhan Anda</p>
-                <Badge variant="secondary" className="mt-2">Segera Tersedia</Badge>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
