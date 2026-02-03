@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
+import { COMPLIANCE_DOMAINS, type ComplianceDomain } from "@shared/config/industry-types";
 import {
   Search,
   FileText,
@@ -83,17 +85,22 @@ const kritisColors: Record<string, string> = {
 
 export default function TemplateRepository() {
   const { toast } = useToast();
+  const { currentIndustry, currentIndustryId, getAllTemplates, getTemplatesByCategory } = useIndustry();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedKategori, setSelectedKategori] = useState("all");
   const [selectedKlausul, setSelectedKlausul] = useState("all");
   const [selectedArea, setSelectedArea] = useState("all");
   const [selectedKritis, setSelectedKritis] = useState("all");
+  const [selectedDomain, setSelectedDomain] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedTemplate, setSelectedTemplate] = useState<SMAPTemplate | null>(null);
   const [showPromptDialog, setShowPromptDialog] = useState(false);
   const [additionalContext, setAdditionalContext] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+
+  const isSMAPIndustry = currentIndustryId === "smap" || currentIndustryId === "pancek";
+  const industryTemplates = getAllTemplates();
 
   // Use placeholders only - no internal company data
   const companyName = "[NAMA PERUSAHAAN]";
@@ -302,10 +309,13 @@ FORMAT OUTPUT:
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold" data-testid="text-page-title">
-              Template Repository SMAP
+              Template Repository {currentIndustry?.shortName || ""}
             </h1>
             <p className="text-muted-foreground">
-              200 template dokumen Sistem Manajemen Anti Penyuapan berdasarkan SNI ISO 37001:2016
+              {isSMAPIndustry 
+                ? "200+ template dokumen Sistem Manajemen Anti Penyuapan berdasarkan SNI ISO 37001:2016"
+                : `${industryTemplates.length} template dokumen kepatuhan untuk industri ${currentIndustry?.shortName || ""}`
+              }
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -433,8 +443,8 @@ FORMAT OUTPUT:
                   <SelectContent>
                     <SelectItem value="all">Semua Tingkat</SelectItem>
                     {TINGKAT_KRITIS.map((k) => (
-                      <SelectItem key={k.id} value={k.id}>
-                        {k.label}
+                      <SelectItem key={k} value={k}>
+                        {k}
                       </SelectItem>
                     ))}
                   </SelectContent>
