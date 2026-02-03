@@ -1,7 +1,29 @@
-# Compliance Hub - SMAP & Pancek
+# Multi-Industry Document Generator Platform
 
 ## Overview
-Compliance Hub is a dual-path application designed for Indonesian construction companies to manage anti-bribery and anti-corruption compliance. It supports both the international **SMAP (SNI ISO 37001:2016)** certification and the national **Pancek (Panduan Cegah Korupsi KPK)** framework. The system streamlines compliance efforts through AI-powered document generation, checklist tracking, and comprehensive management tools, aiming to enhance corporate governance and integrity within the Indonesian construction sector.
+A comprehensive multi-industry document generator platform designed for Indonesian businesses across **20 industries**. Each industry has its own specialized templates, document workflows, AI chatbot persona, and compliance requirements. The platform provides AI-powered document generation, checklist tracking, and industry-specific management tools.
+
+### Supported Industries (20 Total):
+1. **SMAP** - SNI ISO 37001:2016 Anti-Bribery Management
+2. **Pancek** - Panduan Cegah Korupsi KPK
+3. **Konstruksi** - Construction licensing (SBU, SKA, SKT)
+4. **Energi** - Energy sector (RUPTL, IUPTL)
+5. **Migas** - Oil & Gas (KKKS, WP&B)
+6. **Lingkungan** - Environmental (AMDAL, UKL-UPL)
+7. **UMKM** - Small Business (NIB, PIRT)
+8. **ISO** - ISO Standards (9001, 14001, 45001)
+9. **K3** - Occupational Health & Safety
+10. **Tender** - Procurement & Bidding
+11. **Keuangan** - Finance & Accounting
+12. **Kesehatan** - Healthcare (KARS, SNARS)
+13. **Pendidikan** - Education (BAN-PT, KKNI)
+14. **Teknologi** - Technology (PSE, UU PDP)
+15. **Pertanian** - Agriculture (Organic, GAP)
+16. **Manufaktur** - Manufacturing (ISO 9001, GMP)
+17. **Properti** - Real Estate (SHGB, PPJB)
+18. **Logistik** - Logistics (SIUJPT, Export-Import)
+19. **Pariwisata** - Tourism (TDUP, CHSE)
+20. **Telekomunikasi** - Telecommunications (ISR, Spectrum)
 
 ## User Preferences
 I prefer detailed explanations and clear communication. I want iterative development where I am informed before major changes are implemented. I prioritize functionality and robust backend systems.
