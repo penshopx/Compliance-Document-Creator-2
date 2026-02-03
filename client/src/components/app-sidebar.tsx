@@ -80,6 +80,12 @@ import {
   ClipboardList,
   MessageSquare,
   RefreshCw,
+  Heart,
+  GraduationCap,
+  Laptop,
+  Wheat,
+  Palmtree,
+  Radio,
 } from "lucide-react";
 import { useIndustry } from "@/hooks/use-industry";
 
@@ -150,6 +156,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   ClipboardList,
   MessageSquare,
   RefreshCw,
+  Heart,
+  GraduationCap,
+  Laptop,
+  Wheat,
+  Palmtree,
+  Radio,
 };
 
 const colorMap: Record<string, { bg: string; text: string }> = {

@@ -81,6 +81,12 @@ import {
   ClipboardList,
   MessageSquare,
   RefreshCw,
+  Heart,
+  GraduationCap,
+  Laptop,
+  Wheat,
+  Palmtree,
+  Radio,
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { useEffect, useState } from "react";
@@ -161,6 +167,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   ClipboardList,
   MessageSquare,
   RefreshCw,
+  Heart,
+  GraduationCap,
+  Laptop,
+  Wheat,
+  Palmtree,
+  Radio,
 };
 
 const colorMap: Record<string, { bg: string; bgDark: string; text: string; textDark: string }> = {

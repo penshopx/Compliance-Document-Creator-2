@@ -10,6 +10,15 @@ import { isoConfig } from "./iso-config";
 import { k3Config } from "./k3-config";
 import { tenderConfig } from "./tender-config";
 import { keuanganConfig } from "./keuangan-config";
+import { kesehatanConfig } from "./kesehatan-config";
+import { pendidikanConfig } from "./pendidikan-config";
+import { teknologiConfig } from "./teknologi-config";
+import { pertanianConfig } from "./pertanian-config";
+import { manufakturConfig } from "./manufaktur-config";
+import { propertiConfig } from "./properti-config";
+import { logistikConfig } from "./logistik-config";
+import { pariwisataConfig } from "./pariwisata-config";
+import { telekomunikasiConfig } from "./telekomunikasi-config";
 
 export const industryConfigs: Record<string, IndustryConfig> = {
   smap: smapConfig,
@@ -23,6 +32,15 @@ export const industryConfigs: Record<string, IndustryConfig> = {
   k3: k3Config,
   tender: tenderConfig,
   keuangan: keuanganConfig,
+  kesehatan: kesehatanConfig,
+  pendidikan: pendidikanConfig,
+  teknologi: teknologiConfig,
+  pertanian: pertanianConfig,
+  manufaktur: manufakturConfig,
+  properti: propertiConfig,
+  logistik: logistikConfig,
+  pariwisata: pariwisataConfig,
+  telekomunikasi: telekomunikasiConfig,
 };
 
 export const getIndustryConfig = (id: string): IndustryConfig | undefined => {
@@ -49,4 +67,13 @@ export {
   k3Config,
   tenderConfig,
   keuanganConfig,
+  kesehatanConfig,
+  pendidikanConfig,
+  teknologiConfig,
+  pertanianConfig,
+  manufakturConfig,
+  propertiConfig,
+  logistikConfig,
+  pariwisataConfig,
+  telekomunikasiConfig,
 };
