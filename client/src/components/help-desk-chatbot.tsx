@@ -87,64 +87,32 @@ export default function HelpDeskChatbot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/helpdesk/chat", {
+      const response = await fetch("/api/ai/help-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: messageText.trim(),
-          industry: currentIndustry?.id 
+          industry: currentIndustry?.id,
+          history: messages.slice(-10).map(m => ({
+            role: m.role,
+            content: m.content
+          }))
         }),
       });
 
       if (!response.ok) throw new Error("Failed to send message");
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantContent = "";
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (reader) {
-        let buffer = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const events = buffer.split("\n\n");
-          buffer = events.pop() || "";
-
-          for (const event of events) {
-            const lines = event.split("\n");
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                try {
-                  const data = JSON.parse(line.slice(6));
-                  if (data.done) break;
-                  if (data.content) {
-                    assistantContent += data.content;
-                    setMessages((prev) =>
-                      prev.map((m) =>
-                        m.id === assistantMessage.id
-                          ? { ...m, content: assistantContent }
-                          : m
-                      )
-                    );
-                  }
-                } catch {
-                  // Skip partial JSON
-                }
-              }
-            }
-          }
-        }
-      }
+      const data = await response.json();
+      
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.response || "Maaf, tidak ada respons dari AI.",
+          timestamp: new Date(),
+        },
+      ]);
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) => [
