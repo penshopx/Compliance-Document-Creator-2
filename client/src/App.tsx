@@ -34,8 +34,9 @@ import PancekPage from "@/pages/pancek";
 import IndustrySettingsPage from "@/pages/industry-settings";
 import UnifiedChatbot from "@/components/unified-chatbot";
 import HelpChatbot from "@/components/help-chatbot";
-import KnowledgeChatbot from "@/components/knowledge-chatbot";
+import HelpDeskChatbot from "@/components/help-desk-chatbot";
 import CheckoutPage from "@/pages/checkout";
+import KnowledgeBasePage from "@/pages/knowledge-base";
 
 function Router() {
   return (
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/smap-checklist" component={SMAPChecklist} />
       <Route path="/produk-siap" component={ProdukSiap} />
       <Route path="/industry-settings" component={IndustrySettingsPage} />
+      <Route path="/knowledge-base" component={KnowledgeBasePage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -128,7 +130,7 @@ function App() {
           </SidebarProvider>
           <UnifiedChatbot />
           <HelpChatbot />
-          <KnowledgeChatbot />
+          <HelpDeskChatbot />
           <Toaster />
         </IndustryProvider>
       </TooltipProvider>

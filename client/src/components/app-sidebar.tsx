@@ -260,6 +260,28 @@ export function AppSidebar() {
 
         <SidebarGroup className="mt-6">
           <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider px-2 mb-2">
+            Bantuan
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location === "/knowledge-base"}
+                  className="h-10"
+                >
+                  <Link href="/knowledge-base" data-testid="nav-knowledge-base">
+                    <BookOpen className="h-4 w-4" />
+                    <span>Knowledge Base</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/60 uppercase tracking-wider px-2 mb-2">
             Pengaturan
           </SidebarGroupLabel>
           <SidebarGroupContent>

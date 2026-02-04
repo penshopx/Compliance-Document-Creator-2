@@ -891,6 +891,123 @@ Berikan jawaban yang membantu:`;
     }
   });
 
+  // Helpdesk Chat with Knowledge Base - Streaming endpoint
+  const helpdeskChatSchema = z.object({
+    message: z.string().min(1).max(5000),
+    industry: z.string().optional(),
+  });
+
+  app.post("/api/helpdesk/chat", async (req, res) => {
+    try {
+      const validated = helpdeskChatSchema.parse(req.body);
+      
+      const systemPrompt = `Anda adalah Asisten Kepatuhan (Compliance Assistant) untuk platform Compliance Hub Indonesia.
+
+TENTANG PLATFORM:
+Compliance Hub adalah platform manajemen kepatuhan untuk bisnis Indonesia yang mencakup 20 industri, diorganisir dalam 5 Domain Kepatuhan utama:
+
+1. LEGALITAS - Dokumen dasar hukum perusahaan
+   - Akta Pendirian: Dokumen notaris pendirian badan usaha
+   - NIB (Nomor Induk Berusaha): Identitas pelaku usaha melalui OSS
+   - NPWP: Nomor Pokok Wajib Pajak perusahaan
+   - TDP: Tanda Daftar Perusahaan (terintegrasi NIB)
+   - Domisili: Surat Keterangan Domisili
+   - PKP: Status Pengusaha Kena Pajak
+
+2. PERIJINAN - Izin operasional dan sektoral
+   - SBU: Sertifikat Badan Usaha (konstruksi)
+   - SIUP: Surat Izin Usaha Perdagangan
+   - IUPTL: Izin Usaha Penyediaan Tenaga Listrik
+   - Izin Lingkungan, Izin Operasional, Izin Lokasi
+
+3. SERTIFIKASI - Standar nasional/internasional
+   - ISO 9001: Sistem Manajemen Mutu
+   - ISO 14001: Sistem Manajemen Lingkungan
+   - ISO 45001: Sistem Manajemen K3
+   - SNI ISO 37001: Sistem Manajemen Anti Penyuapan (SMAP)
+   - SKK: Sertifikat Kompetensi Kerja (menggantikan SKA/SKT)
+   - SKTTK: Sertifikat Keterampilan Tenaga Teknik Ketenagalistrikan
+
+4. TENDER - Dokumen pengadaan barang/jasa
+   - Dokumen Kualifikasi, Proposal Teknis, RAB
+   - Jaminan Penawaran, Kontrak/SPK, TKDN
+
+5. OPERASIONAL - Dokumen kerja harian
+   - SOP, Instruksi Kerja, Formulir Operasional
+   - Laporan Berkala, Checklist QC, Laporan HSE
+
+FITUR PLATFORM:
+- Dashboard: Ringkasan status kepatuhan dan statistik
+- Repository Template: 270+ template dokumen SMAP dan multi-industri
+- Document Builder: Generate dokumen dengan bantuan AI
+- PDCA Generator: 51 klausul ISO 37001 dengan bantuan AI
+- Profil Perusahaan: Data master pegawai, proyek, vendor
+- Knowledge Base: Pusat informasi kepatuhan dan regulasi
+
+CATATAN PENTING KONSTRUKSI:
+- SKA/SKT sudah digantikan oleh SKK (Sertifikat Kompetensi Kerja)
+- SIUJK sudah digantikan oleh NIB (Nomor Induk Berusaha) melalui OSS
+
+INDUSTRI YANG DIDUKUNG:
+SMAP, Pancek, Konstruksi, Energi, Migas, Lingkungan, UMKM, ISO, K3, Tender, Keuangan, Kesehatan, Pendidikan, Teknologi, Pertanian, Manufaktur, Properti, Logistik, Pariwisata, Telekomunikasi
+
+PANDUAN MENJAWAB:
+1. Jawab dengan bahasa Indonesia yang jelas dan profesional
+2. Berikan informasi yang akurat tentang regulasi Indonesia
+3. Jelaskan cara menggunakan fitur platform jika ditanya
+4. Arahkan ke fitur yang relevan dalam platform
+5. Untuk pertanyaan spesifik regulasi, sarankan konsultasi dengan ahli
+
+${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`;
+
+      // Set up SSE
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const genAI = new GoogleGenAI({
+        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY || "",
+        httpOptions: {
+          apiVersion: "",
+          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
+        },
+      });
+
+      const stream = await genAI.models.generateContentStream({
+        model: "gemini-2.5-flash",
+        contents: [
+          { role: "user", parts: [{ text: systemPrompt }] },
+          { role: "model", parts: [{ text: "Saya siap membantu Anda dengan pertanyaan tentang platform Compliance Hub dan kepatuhan bisnis di Indonesia." }] },
+          { role: "user", parts: [{ text: validated.message }] },
+        ],
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.text || "";
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      }
+
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    } catch (error) {
+      console.error("Helpdesk chat error:", error);
+      if (res.headersSent) {
+        res.write(`data: ${JSON.stringify({ error: "Terjadi kesalahan. Silakan coba lagi." })}\n\n`);
+        res.end();
+      } else {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ error: "Invalid request", details: error.errors });
+        }
+        res.status(500).json({ 
+          error: error instanceof Error ? error.message : "Failed to process helpdesk request" 
+        });
+      }
+    }
+  });
+
   // ============ PAYMENT ROUTES ============
 
   // Get all subscription plans
