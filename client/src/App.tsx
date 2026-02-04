@@ -33,6 +33,7 @@ import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
 import IndustrySettingsPage from "@/pages/industry-settings";
 import HelpDeskChatbot from "@/components/help-desk-chatbot";
+import KnowledgeChatbot from "@/components/knowledge-chatbot";
 import CheckoutPage from "@/pages/checkout";
 import KnowledgeBasePage from "@/pages/knowledge-base";
 
@@ -127,6 +128,7 @@ function App() {
             <AppContent />
           </SidebarProvider>
           <HelpDeskChatbot />
+          <KnowledgeChatbot />
           <Toaster />
         </IndustryProvider>
       </TooltipProvider>

@@ -25,16 +25,16 @@ export default function KnowledgeChatbot() {
   };
 
   return (
-    <div className="fixed bottom-44 right-6 z-40">
-      <Button
+    <div className="fixed bottom-6 left-6 z-50">
+      <div 
         onClick={openKnowledgeBase}
-        className={`rounded-full shadow-lg ${bgColor}`}
-        size="icon"
+        className={`flex items-center justify-center rounded-full shadow-lg cursor-pointer ${bgColor} hover-elevate active-elevate-2`}
+        style={{ width: 56, height: 56 }}
         title="Knowledge Base - dokumentender.com"
         data-testid="button-open-knowledge-chatbot"
       >
-        <BookOpen className="h-5 w-5 text-white" />
-      </Button>
+        <BookOpen className="h-6 w-6 text-white" />
+      </div>
     </div>
   );
 }
