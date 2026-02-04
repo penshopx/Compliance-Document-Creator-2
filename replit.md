@@ -51,6 +51,12 @@ All documents across all 20 industries are organized into these 5 domains:
 ## User Preferences
 I prefer detailed explanations and clear communication. I want iterative development where I am informed before major changes are implemented. I prioritize functionality and robust backend systems.
 
+## Development Roadmap Notes
+- **Current State (Feb 2026)**: 20 industries with 5 compliance domains framework complete
+- **SMAP & Pancek**: Full-featured with integrated document generation, templates, PDCA generator
+- **Other 18 Industries**: Basic pathway with external knowledge base (chat.dokumentender.com)
+- **Future Priority**: Industries will be expanded with full features based on market segment demand/interest
+
 ## System Architecture
 The application is built with a **React + Vite + TypeScript** frontend utilizing **Shadcn/UI** and **Tailwind CSS** for a professional UI/UX, characterized by a blue color scheme (220° hue) to convey trust. State management is handled by **TanStack Query** and routing by **Wouter**. The backend is implemented with **Express.js**, connecting to a **PostgreSQL** database managed with **Drizzle ORM**. **Zod** is used for data validation.
 
