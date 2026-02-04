@@ -32,8 +32,6 @@ import SMAPChecklist from "@/pages/smap-checklist";
 import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
 import IndustrySettingsPage from "@/pages/industry-settings";
-import UnifiedChatbot from "@/components/unified-chatbot";
-import HelpChatbot from "@/components/help-chatbot";
 import HelpDeskChatbot from "@/components/help-desk-chatbot";
 import CheckoutPage from "@/pages/checkout";
 import KnowledgeBasePage from "@/pages/knowledge-base";
@@ -128,8 +126,6 @@ function App() {
           <SidebarProvider style={style as React.CSSProperties}>
             <AppContent />
           </SidebarProvider>
-          <UnifiedChatbot />
-          <HelpChatbot />
           <HelpDeskChatbot />
           <Toaster />
         </IndustryProvider>

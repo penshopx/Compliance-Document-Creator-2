@@ -960,6 +960,14 @@ PANDUAN MENJAWAB:
 
 ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`;
 
+      // Check API key before starting SSE
+      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: "AI tidak tersedia. Hubungi administrator." 
+        });
+      }
+
       // Set up SSE
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
@@ -967,7 +975,7 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
 
       const { GoogleGenAI } = await import("@google/genai");
       const genAI = new GoogleGenAI({
-        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY || "",
+        apiKey,
         httpOptions: {
           apiVersion: "",
           baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
