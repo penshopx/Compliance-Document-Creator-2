@@ -46,16 +46,16 @@ export default function HelpDeskChatbot() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const colorMap: Record<string, string> = {
-    blue: "bg-blue-600 hover:bg-blue-700",
-    green: "bg-green-600 hover:bg-green-700",
-    amber: "bg-amber-600 hover:bg-amber-700",
-    yellow: "bg-yellow-600 hover:bg-yellow-700",
-    orange: "bg-orange-600 hover:bg-orange-700",
-    purple: "bg-purple-600 hover:bg-purple-700",
-    indigo: "bg-indigo-600 hover:bg-indigo-700",
-    red: "bg-red-600 hover:bg-red-700",
-    cyan: "bg-cyan-600 hover:bg-cyan-700",
-    emerald: "bg-emerald-600 hover:bg-emerald-700",
+    blue: "bg-blue-600",
+    green: "bg-green-600",
+    amber: "bg-amber-600",
+    yellow: "bg-yellow-600",
+    orange: "bg-orange-600",
+    purple: "bg-purple-600",
+    indigo: "bg-indigo-600",
+    red: "bg-red-600",
+    cyan: "bg-cyan-600",
+    emerald: "bg-emerald-600",
   };
 
   const bgColor = colorMap[currentIndustry?.color || "blue"] || colorMap.blue;
@@ -111,29 +111,35 @@ export default function HelpDeskChatbot() {
       setMessages((prev) => [...prev, assistantMessage]);
 
       if (reader) {
+        let buffer = "";
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
+          buffer += decoder.decode(value, { stream: true });
+          const events = buffer.split("\n\n");
+          buffer = events.pop() || "";
 
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.content) {
-                  assistantContent += data.content;
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantMessage.id
-                        ? { ...m, content: assistantContent }
-                        : m
-                    )
-                  );
+          for (const event of events) {
+            const lines = event.split("\n");
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  if (data.done) break;
+                  if (data.content) {
+                    assistantContent += data.content;
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === assistantMessage.id
+                          ? { ...m, content: assistantContent }
+                          : m
+                      )
+                    );
+                  }
+                } catch {
+                  // Skip partial JSON
                 }
-              } catch {
-                // Skip invalid JSON
               }
             }
           }
@@ -167,15 +173,15 @@ export default function HelpDeskChatbot() {
   if (!isOpen) {
     return (
       <div className="fixed bottom-6 right-6 z-50">
-        <Button
+        <div 
           onClick={() => setIsOpen(true)}
-          className={`rounded-full shadow-lg ${bgColor} h-14 w-14`}
-          size="icon"
+          className={`flex items-center justify-center rounded-full shadow-lg cursor-pointer ${bgColor} hover-elevate active-elevate-2`}
+          style={{ width: 56, height: 56 }}
           title="Help Desk & Chatbot"
           data-testid="button-open-helpdesk"
         >
           <MessageCircle className="h-6 w-6 text-white" />
-        </Button>
+        </div>
       </div>
     );
   }
