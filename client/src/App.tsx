@@ -36,6 +36,7 @@ import HelpDeskChatbot from "@/components/help-desk-chatbot";
 import KnowledgeChatbot from "@/components/knowledge-chatbot";
 import CheckoutPage from "@/pages/checkout";
 import KnowledgeBasePage from "@/pages/knowledge-base";
+import PathwayPage from "@/pages/pathway";
 
 function Router() {
   return (
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/produk-siap" component={ProdukSiap} />
       <Route path="/industry-settings" component={IndustrySettingsPage} />
       <Route path="/knowledge-base" component={KnowledgeBasePage} />
+      <Route path="/pathway/:industryId/:domainId" component={PathwayPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -72,7 +74,7 @@ function AppContent() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const isFullWidthPage = location === "/pdca";
-  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek" || location.startsWith("/checkout");
+  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek" || location.startsWith("/checkout") || location.startsWith("/pathway");
 
   if (isStandalonePage) {
     return (

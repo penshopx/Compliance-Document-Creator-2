@@ -3,27 +3,126 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Globe, Flag, Shield, FileCheck, CheckCircle2, ArrowRight, Building2, Scale, Award, LogOut, Loader2, Gavel, Settings } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Globe, Flag, Shield, FileCheck, CheckCircle2, ArrowRight, Building2, Scale, Award, 
+  LogOut, Loader2, Gavel, Settings, FileText, Briefcase, ChevronRight, Building,
+  Zap, Flame, Leaf, Store, Heart, GraduationCap, Laptop, Sprout, Factory, Home,
+  Truck, Palmtree, Radio, HardHat
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect } from "react";
+import { useIndustry } from "@/hooks/use-industry";
+import { useEffect, useState } from "react";
+import { industryCompliances, domainInfo, type IndustryCompliance } from "@shared/data/industry-pathways";
 
-const complianceDomains = [
-  { id: "legalitas", name: "Legalitas", icon: Scale, color: "blue", description: "Akta, NIB, NPWP", examples: ["Akta Pendirian", "NIB (OSS)", "NPWP"] },
-  { id: "perijinan", name: "Perijinan", icon: FileCheck, color: "green", description: "SBU, SKK, Izin Usaha", examples: ["SBU", "SKK", "SIUP"] },
-  { id: "sertifikasi", name: "Sertifikasi", icon: Award, color: "amber", description: "ISO, SNI, K3", examples: ["ISO 37001", "SNI", "K3"] },
-  { id: "tender", name: "Tender", icon: Gavel, color: "purple", description: "RAB, Penawaran, Kontrak", examples: ["RAB", "Metode", "Proposal"] },
-  { id: "operasional", name: "Operasional", icon: Settings, color: "cyan", description: "SOP, Laporan, QC", examples: ["SOP", "Laporan", "HSE"] },
-];
+const industryIcons: Record<string, any> = {
+  konstruksi: HardHat,
+  energi: Zap,
+  migas: Flame,
+  lingkungan: Leaf,
+  umkm: Store,
+  iso: Award,
+  k3: Shield,
+  tender: Briefcase,
+  keuangan: Building,
+  kesehatan: Heart,
+  pendidikan: GraduationCap,
+  teknologi: Laptop,
+  pertanian: Sprout,
+  manufaktur: Factory,
+  properti: Home,
+  logistik: Truck,
+  pariwisata: Palmtree,
+  telekomunikasi: Radio,
+  smap: Globe,
+  pancek: Flag,
+};
+
+const industryColors: Record<string, string> = {
+  konstruksi: "orange",
+  energi: "yellow",
+  migas: "red",
+  lingkungan: "green",
+  umkm: "emerald",
+  iso: "blue",
+  k3: "red",
+  tender: "purple",
+  keuangan: "blue",
+  kesehatan: "red",
+  pendidikan: "indigo",
+  teknologi: "cyan",
+  pertanian: "green",
+  manufaktur: "gray",
+  properti: "emerald",
+  logistik: "orange",
+  pariwisata: "cyan",
+  telekomunikasi: "indigo",
+  smap: "blue",
+  pancek: "red",
+};
+
+const domainIcons: Record<string, any> = {
+  legalitas: FileText,
+  perijinan: FileCheck,
+  sertifikasi: Award,
+  tender: Briefcase,
+  operasional: Settings,
+};
+
+const domainColors: Record<string, { bg: string; text: string; border: string }> = {
+  legalitas: { 
+    bg: "bg-blue-100 dark:bg-blue-900/30", 
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-800"
+  },
+  perijinan: { 
+    bg: "bg-green-100 dark:bg-green-900/30", 
+    text: "text-green-600 dark:text-green-400",
+    border: "border-green-200 dark:border-green-800"
+  },
+  sertifikasi: { 
+    bg: "bg-purple-100 dark:bg-purple-900/30", 
+    text: "text-purple-600 dark:text-purple-400",
+    border: "border-purple-200 dark:border-purple-800"
+  },
+  tender: { 
+    bg: "bg-amber-100 dark:bg-amber-900/30", 
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-800"
+  },
+  operasional: { 
+    bg: "bg-orange-100 dark:bg-orange-900/30", 
+    text: "text-orange-600 dark:text-orange-400",
+    border: "border-orange-200 dark:border-orange-800"
+  },
+};
 
 export default function WelcomePage() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const { currentIndustry, setIndustry, industries } = useIndustry();
   const [, setLocation] = useLocation();
+  const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [industryData, setIndustryData] = useState<IndustryCompliance | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       setLocation("/");
     }
   }, [isLoading, isAuthenticated, setLocation]);
+
+  useEffect(() => {
+    if (selectedIndustry) {
+      const data = industryCompliances[selectedIndustry];
+      setIndustryData(data || null);
+    } else {
+      setIndustryData(null);
+    }
+  }, [selectedIndustry]);
+
+  const handleIndustrySelect = (industryId: string) => {
+    setSelectedIndustry(industryId);
+    setIndustry(industryId);
+  };
 
   if (isLoading) {
     return (
@@ -36,6 +135,7 @@ export default function WelcomePage() {
   if (!isAuthenticated) {
     return null;
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <nav className="border-b bg-background/95 backdrop-blur">
@@ -60,256 +160,255 @@ export default function WelcomePage() {
           </div>
         </div>
       </nav>
+
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Shield className="h-12 w-12 text-primary" />
             <h1 className="text-4xl font-bold" data-testid="text-welcome-title">Compliance Hub</h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Selamat datang, {user?.firstName || 'User'}! Pilih jalur kepatuhan untuk memulai.
+            Selamat datang, {user?.firstName || 'User'}! Pilih industri dan jalur kepatuhan untuk memulai.
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto mb-8">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <Building2 className="h-8 w-8 text-primary mt-1" />
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">Pilih Jalur Kepatuhan Anda</h3>
-                  <p className="text-muted-foreground">
-                    Indonesia memiliki dua kerangka kepatuhan anti-korupsi yang dapat diikuti oleh perusahaan. 
-                    Pilih jalur yang sesuai dengan kebutuhan dan tujuan organisasi Anda.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {!selectedIndustry ? (
+          <>
+            <div className="max-w-6xl mx-auto mb-8">
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <Building2 className="h-8 w-8 text-primary mt-1" />
+                    <div>
+                      <h3 className="font-semibold text-lg mb-2">Pilih Sektor Industri Anda</h3>
+                      <p className="text-muted-foreground">
+                        Pilih sektor industri untuk melihat jalur kepatuhan yang relevan. 
+                        Setiap industri memiliki 5 domain kepatuhan: Legalitas, Perijinan, Sertifikasi, Tender, dan Operasional.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <Card className="hover-elevate transition-all duration-300" data-testid="card-pancek">
-            <CardHeader className="text-center pb-4">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/30">
-                  <Flag className="h-12 w-12 text-red-600 dark:text-red-400" />
-                </div>
-              </div>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
-                  Pengakuan Nasional
-                </Badge>
-              </div>
-              <CardTitle className="text-2xl">Pancek</CardTitle>
-              <CardDescription className="text-base">
-                Panduan Cegah Korupsi - KPK
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3 text-sm">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Berbasis UU Tindak Pidana Korupsi & Perma 13/2016</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Pendekatan PDCAR (6 Fase)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Self-Assessment (Non-Sertifikasi)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Terintegrasi Platform Jaga.id</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Gratis</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h4 className="font-medium mb-2 text-sm text-muted-foreground">Dasar Hukum:</h4>
-                <ul className="text-xs text-muted-foreground space-y-1">
-                  <li>• UU No. 31/1999 jo UU No. 20/2001 (Tipikor)</li>
-                  <li>• Perma No. 13/2016 (Pemidanaan Korporasi)</li>
-                  <li>• SE Kementerian BUMN No. SE-2/MBU/07/2019</li>
-                </ul>
-              </div>
-
-              <Link href="/pancek">
-                <Button className="w-full mt-4" size="lg" data-testid="button-go-pancek">
-                  Mulai Pancek
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-elevate transition-all duration-300" data-testid="card-smap">
-            <CardHeader className="text-center pb-4">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                  <Globe className="h-12 w-12 text-blue-600 dark:text-blue-400" />
-                </div>
-              </div>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                  Pengakuan Internasional
-                </Badge>
-              </div>
-              <CardTitle className="text-2xl">SMAP</CardTitle>
-              <CardDescription className="text-base">
-                Sistem Manajemen Anti Penyuapan - ISO 37001
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3 text-sm">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Berbasis SNI ISO 37001:2016</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Pendekatan PDCA (4 Fase)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Sertifikasi oleh Lembaga Terakreditasi</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>Wajib untuk Tender PUPR (Permen PUPR 08/2022)</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
-                  <span>270+ Template Dokumen</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t">
-                <h4 className="font-medium mb-2 text-sm text-muted-foreground">Dasar Hukum:</h4>
-                <ul className="text-xs text-muted-foreground space-y-1">
-                  <li>• SNI ISO 37001:2016</li>
-                  <li>• Permen PUPR No. 8/2022</li>
-                  <li>• SE Kementerian BUMN No. S-35/MBU/01/2020</li>
-                </ul>
-              </div>
-
-              <Link href="/dashboard">
-                <Button className="w-full mt-4" size="lg" data-testid="button-go-smap">
-                  Mulai SMAP
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="max-w-5xl mx-auto mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Scale className="h-5 w-5" />
-                Perbandingan SMAP vs Pancek
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">Aspek</th>
-                      <th className="text-left py-3 px-4 font-medium">
-                        <div className="flex items-center gap-2">
-                          <Flag className="h-4 w-4 text-red-600" />
-                          Pancek (Nasional)
-                        </div>
-                      </th>
-                      <th className="text-left py-3 px-4 font-medium">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-blue-600" />
-                          SMAP (Internasional)
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    <tr>
-                      <td className="py-3 px-4 font-medium">Standar Acuan</td>
-                      <td className="py-3 px-4">UU Tipikor + Panduan KPK</td>
-                      <td className="py-3 px-4">SNI ISO 37001:2016</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 px-4 font-medium">Pendekatan</td>
-                      <td className="py-3 px-4">PDCAR (6 fase)</td>
-                      <td className="py-3 px-4">PDCA (4 fase)</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 px-4 font-medium">Sertifikasi</td>
-                      <td className="py-3 px-4">Non-Sertifikasi (Self-Assessment)</td>
-                      <td className="py-3 px-4">Sertifikasi Terakreditasi</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 px-4 font-medium">Biaya</td>
-                      <td className="py-3 px-4">Gratis</td>
-                      <td className="py-3 px-4">Berbayar</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 px-4 font-medium">Platform</td>
-                      <td className="py-3 px-4">Jaga.id (KPK)</td>
-                      <td className="py-3 px-4">Lembaga Sertifikasi</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 px-4 font-medium">Kewajiban</td>
-                      <td className="py-3 px-4">Sukarela</td>
-                      <td className="py-3 px-4">Wajib untuk tender PUPR</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="max-w-5xl mx-auto mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                5 Domain Kepatuhan Usaha
-              </CardTitle>
-              <CardDescription>
-                Semua dokumen bisnis Anda terorganisir dalam 5 domain kepatuhan yang jelas
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {complianceDomains.map((domain) => {
-                  const Icon = domain.icon;
-                  const colorClasses = {
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl font-bold mb-6 text-center">20 Sektor Industri</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {Object.keys(industryCompliances).map((industryId) => {
+                  const industry = industryCompliances[industryId];
+                  const Icon = industryIcons[industryId] || Building2;
+                  const color = industryColors[industryId] || "blue";
+                  
+                  const colorClasses: Record<string, string> = {
                     blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
                     green: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
                     amber: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
                     purple: "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
                     cyan: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400",
+                    orange: "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400",
+                    red: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400",
+                    yellow: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400",
+                    indigo: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
+                    emerald: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
+                    gray: "bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400",
                   };
+
                   return (
-                    <div key={domain.id} className="text-center p-4 rounded-xl border hover-elevate" data-testid={`card-domain-${domain.id}`}>
-                      <div className={`h-12 w-12 rounded-xl ${colorClasses[domain.color as keyof typeof colorClasses]} flex items-center justify-center mx-auto mb-3`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <h4 className="font-semibold text-sm mb-1">{domain.name}</h4>
-                      <p className="text-xs text-muted-foreground">{domain.description}</p>
-                    </div>
+                    <Card 
+                      key={industryId}
+                      className="hover-elevate cursor-pointer transition-all duration-300"
+                      onClick={() => handleIndustrySelect(industryId)}
+                      data-testid={`card-industry-${industryId}`}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className={`h-12 w-12 rounded-xl ${colorClasses[color]} flex items-center justify-center mx-auto mb-3`}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <h4 className="font-semibold text-sm">{industry.industryName}</h4>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto mt-12">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    5 Domain Kepatuhan
+                  </CardTitle>
+                  <CardDescription>
+                    Semua dokumen bisnis terorganisir dalam 5 domain kepatuhan
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {Object.entries(domainInfo).map(([key, domain]) => {
+                      const Icon = domainIcons[key];
+                      const colors = domainColors[key];
+                      return (
+                        <div key={key} className={`text-center p-4 rounded-xl border ${colors.border}`}>
+                          <div className={`h-12 w-12 rounded-xl ${colors.bg} ${colors.text} flex items-center justify-center mx-auto mb-3`}>
+                            <Icon className="h-6 w-6" />
+                          </div>
+                          <h4 className="font-semibold text-sm mb-1">{domain.name}</h4>
+                          <p className="text-xs text-muted-foreground">{domain.description}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : industryData ? (
+          <>
+            <div className="max-w-6xl mx-auto mb-6">
+              <Button 
+                variant="ghost" 
+                onClick={() => setSelectedIndustry(null)}
+                data-testid="button-back-to-industries"
+              >
+                <ChevronRight className="h-4 w-4 rotate-180 mr-2" />
+                Kembali ke Pilihan Industri
+              </Button>
+            </div>
+
+            <div className="max-w-6xl mx-auto mb-8">
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    {(() => {
+                      const Icon = industryIcons[selectedIndustry] || Building2;
+                      return <Icon className="h-10 w-10 text-primary" />;
+                    })()}
+                    <div>
+                      <h2 className="text-2xl font-bold">{industryData.industryName}</h2>
+                      <p className="text-muted-foreground">
+                        Pilih salah satu dari 5 domain kepatuhan untuk memulai
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(industryData.pathways).map(([domainKey, pathway]) => {
+                  const Icon = domainIcons[domainKey];
+                  const colors = domainColors[domainKey];
+                  const domainData = domainInfo[domainKey as keyof typeof domainInfo];
+
+                  return (
+                    <Card 
+                      key={pathway.id} 
+                      className={`hover-elevate transition-all duration-300 border-2 ${colors.border}`}
+                      data-testid={`card-pathway-${domainKey}`}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-12 w-12 rounded-xl ${colors.bg} ${colors.text} flex items-center justify-center`}>
+                            <Icon className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <Badge variant="secondary" className={`${colors.bg} ${colors.text} mb-1`}>
+                              {domainData.name}
+                            </Badge>
+                            <CardTitle className="text-lg">{pathway.name}</CardTitle>
+                          </div>
+                        </div>
+                        <CardDescription className="mt-2">
+                          {pathway.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Dokumen Utama:</h4>
+                          <ul className="text-sm text-muted-foreground space-y-1">
+                            {pathway.documents.slice(0, 3).map((doc) => (
+                              <li key={doc.id} className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                                <span className="truncate">{doc.name}</span>
+                              </li>
+                            ))}
+                            {pathway.documents.length > 3 && (
+                              <li className="text-xs text-muted-foreground ml-6">
+                                +{pathway.documents.length - 3} dokumen lainnya
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+
+                        <div className="pt-3 border-t">
+                          <h4 className="text-sm font-medium mb-2">Checklist:</h4>
+                          <ul className="text-xs text-muted-foreground space-y-1">
+                            {pathway.checklist.slice(0, 2).map((item, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <div className="h-4 w-4 rounded border shrink-0 mt-0.5" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <Link href={`/pathway/${selectedIndustry}/${domainKey}`}>
+                          <Button className="w-full mt-2" data-testid={`button-pathway-${domainKey}`}>
+                            Mulai {domainData.name}
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+
+            {(selectedIndustry === 'smap' || selectedIndustry === 'pancek') && (
+              <div className="max-w-6xl mx-auto mt-8">
+                <Card className="border-2 border-primary/30">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <div className="flex items-center gap-4">
+                        {selectedIndustry === 'smap' ? (
+                          <Globe className="h-10 w-10 text-blue-600" />
+                        ) : (
+                          <Flag className="h-10 w-10 text-red-600" />
+                        )}
+                        <div>
+                          <h3 className="text-lg font-bold">
+                            {selectedIndustry === 'smap' ? 'Dashboard SMAP Lengkap' : 'Dashboard Pancek Lengkap'}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedIndustry === 'smap' 
+                              ? 'Akses dashboard SMAP dengan 270+ template, checklist, dan AI prompt generator'
+                              : 'Akses dashboard Pancek dengan 6 fase PDCAR dan integrasi Platform Jaga.id'}
+                          </p>
+                        </div>
+                      </div>
+                      <Link href={selectedIndustry === 'smap' ? '/dashboard' : '/pancek'}>
+                        <Button size="lg" data-testid={`button-full-dashboard-${selectedIndustry}`}>
+                          Buka Dashboard {selectedIndustry.toUpperCase()}
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Data industri tidak ditemukan</p>
+            <Button variant="ghost" onClick={() => setSelectedIndustry(null)} className="mt-4">
+              Kembali
+            </Button>
+          </div>
+        )}
 
         <div className="text-center mt-12 text-sm text-muted-foreground">
           <p>Compliance Hub - Platform Kepatuhan Multi-Industri Indonesia</p>
