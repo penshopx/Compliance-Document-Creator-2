@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -110,6 +111,7 @@ const MEGA_REPOSITORY = [
 
 export default function PDCAGenerator() {
   const { toast } = useToast();
+  const { currentIndustry } = useIndustry();
   const [activeTab, setActiveTab] = useState("plan");
   const [selectedClause, setSelectedClause] = useState<string | null>(null);
   const [narasi, setNarasi] = useState("");
@@ -319,12 +321,14 @@ FORMAT OUTPUT:
         <div className="p-4 border-b">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-sm">
-              SR
+              {currentIndustry?.shortName?.substring(0, 2).toUpperCase() || "CH"}
             </div>
             <div>
-              <h1 className="font-black text-sm tracking-tight" data-testid="text-pdca-title">SMAP READY</h1>
+              <h1 className="font-black text-sm tracking-tight" data-testid="text-pdca-title">
+                PDCA {currentIndustry?.shortName || "Generator"}
+              </h1>
               <p className="text-[10px] text-primary font-bold uppercase tracking-widest">
-                Digital Assistant v7.2
+                {currentIndustry?.name || "Compliance Hub"} v7.2
               </p>
             </div>
           </div>

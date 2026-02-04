@@ -27,8 +27,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { FileText, Plus, Eye, Download, Trash2, FileCheck, Scale, BookOpen, ClipboardList, AlertTriangle } from "lucide-react";
+import { FileText, Plus, Eye, Download, Trash2, FileCheck, Scale, BookOpen, ClipboardList, AlertTriangle, Sparkles } from "lucide-react";
 import type { Document } from "@shared/schema";
 
 const documentTemplates = [
@@ -78,9 +79,12 @@ const documentTemplates = [
 
 export default function DocumentsPage() {
   const { toast } = useToast();
+  const { currentIndustry, getAllTemplates } = useIndustry();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [generatingType, setGeneratingType] = useState<string | null>(null);
+
+  const industryTemplates = getAllTemplates();
 
   const { data: documents, isLoading } = useQuery<Document[]>({
     queryKey: ["/api/documents"],
@@ -152,9 +156,11 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">Generator Dokumen</h1>
+        <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">
+          Generator Dokumen {currentIndustry?.shortName || ""}
+        </h1>
         <p className="text-muted-foreground mt-1">
-          Buat dokumen SMAP sesuai SNI ISO 37001:2016
+          Buat dokumen kepatuhan untuk industri {currentIndustry?.shortName || "Anda"} - {industryTemplates.length} template tersedia
         </p>
       </div>
 

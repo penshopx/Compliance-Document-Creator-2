@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -495,11 +496,14 @@ const CATEGORIES = [
 
 export default function DocumentBuilder() {
   const { toast } = useToast();
+  const { currentIndustry, getAllTemplates } = useIndustry();
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedTemplate, setSelectedTemplate] = useState<typeof DOCUMENT_TEMPLATES[0] | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string>("");
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [additionalContext, setAdditionalContext] = useState("");
+
+  const industryTemplates = getAllTemplates();
 
   // Use placeholders only - no internal company data
   const companyName = "[NAMA PERUSAHAAN]";
@@ -599,9 +603,11 @@ CATATAN PENTING:
               <Wand2 className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold" data-testid="text-page-title">AI Prompt Generator SMAP</h1>
+              <h1 className="text-2xl font-bold" data-testid="text-page-title">
+                AI Document Builder {currentIndustry?.shortName || ""}
+              </h1>
               <p className="text-muted-foreground text-sm">
-                Generate prompt AI untuk membuat dokumen SMAP di dokumenttender.com
+                Generate prompt AI untuk membuat dokumen {currentIndustry?.shortName || "kepatuhan"} - {industryTemplates.length} template tersedia
               </p>
             </div>
           </div>

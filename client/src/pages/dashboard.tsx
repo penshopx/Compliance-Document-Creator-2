@@ -23,7 +23,11 @@ import {
   FileText,
   FilePlus2,
   Zap,
+  Sparkles,
+  Library,
 } from "lucide-react";
+import { useIndustry } from "@/hooks/use-industry";
+import { COMPLIANCE_DOMAINS } from "@shared/config/industry-types";
 import type { Company, Employee, Fkap, Qualification, Equipment, Project, Vendor } from "@shared/schema";
 
 interface DashboardStats {
@@ -76,9 +80,12 @@ const smapClauses = [
 ];
 
 export default function Dashboard() {
+  const { currentIndustry, getAllTemplates } = useIndustry();
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
+
+  const industryTemplates = getAllTemplates();
 
   const completionItems = [
     { label: "Profil Perusahaan", completed: !!stats?.company, url: "/company" },
@@ -95,9 +102,11 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight" data-testid="text-page-title">
+          Dashboard {currentIndustry?.shortName || ""}
+        </h1>
         <p className="text-muted-foreground mt-1">
-          Selamat datang di Compliance Hub - Generator Dokumen SMAP
+          Selamat datang di Compliance Hub - {currentIndustry?.name || "Platform Kepatuhan Indonesia"}
         </p>
       </div>
 
@@ -109,7 +118,7 @@ export default function Dashboard() {
               Mulai dengan Data Perusahaan
             </CardTitle>
             <CardDescription>
-              Untuk menggunakan generator dokumen SMAP, silakan masukkan data profil perusahaan Anda terlebih dahulu.
+              Untuk menggunakan generator dokumen {currentIndustry?.shortName || "kepatuhan"}, silakan masukkan data profil perusahaan Anda terlebih dahulu.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -122,6 +131,46 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* 5 Compliance Domains Quick Access */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Library className="h-5 w-5" />
+            5 Domain Kepatuhan
+          </CardTitle>
+          <CardDescription>
+            Akses cepat ke template dokumen berdasarkan 5 domain kepatuhan utama
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {COMPLIANCE_DOMAINS.map((domain) => {
+              const colorClasses: Record<string, { bg: string; icon: string }> = {
+                blue: { bg: "bg-blue-100 dark:bg-blue-900/30", icon: "text-blue-600 dark:text-blue-400" },
+                green: { bg: "bg-green-100 dark:bg-green-900/30", icon: "text-green-600 dark:text-green-400" },
+                amber: { bg: "bg-amber-100 dark:bg-amber-900/30", icon: "text-amber-600 dark:text-amber-400" },
+                purple: { bg: "bg-purple-100 dark:bg-purple-900/30", icon: "text-purple-600 dark:text-purple-400" },
+                cyan: { bg: "bg-cyan-100 dark:bg-cyan-900/30", icon: "text-cyan-600 dark:text-cyan-400" },
+              };
+              const colors = colorClasses[domain.color] || colorClasses.blue;
+              return (
+                <Link key={domain.id} href="/template-repository">
+                  <Card className="hover-elevate cursor-pointer h-full">
+                    <CardContent className="p-4 text-center">
+                      <div className={`mx-auto w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center mb-2`}>
+                        <Sparkles className={`h-5 w-5 ${colors.icon}`} />
+                      </div>
+                      <p className="font-medium text-sm">{domain.shortName}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{domain.examples.slice(0, 2).join(", ")}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statsCards.map((card) => (
