@@ -320,7 +320,9 @@ export default function LandingPage() {
             <div className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
               <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-0" data-testid="badge-platform">
                 <Sparkles className="h-4 w-4 mr-2" />
-                Platform Generator Dokumen AI untuk 20+ Industri
+                {industries.length > 1
+                  ? `Platform Generator Dokumen AI untuk ${industries.length}+ Industri`
+                  : "Platform Generator Dokumen AI untuk SMAP (SNI ISO 37001:2016)"}
               </Badge>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight" data-testid="text-headline">
@@ -409,7 +411,7 @@ export default function LandingPage() {
                         <div className="text-xs text-muted-foreground">Klausul</div>
                       </div>
                       <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">20</div>
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{industries.length}</div>
                         <div className="text-xs text-muted-foreground">Industri</div>
                       </div>
                     </div>
@@ -557,7 +559,11 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-muted-foreground mb-4">Semua 20 sektor industri menggunakan framework 5 domain ini</p>
+            <p className="text-muted-foreground mb-4">
+              {industries.length > 1
+                ? `Semua ${industries.length} sektor industri menggunakan framework 5 domain ini`
+                : "SMAP (SNI ISO 37001:2016) menggunakan framework 5 domain ini"}
+            </p>
             <Button variant="outline" asChild>
               <a href="#industries">Lihat Semua Industri <ChevronRight className="ml-2 h-4 w-4" /></a>
             </Button>
@@ -568,7 +574,9 @@ export default function LandingPage() {
       <section id="industries" className="py-20 px-4 bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">20 Industri Tersedia</Badge>
+            <Badge variant="outline" className="mb-4">
+              {industries.length > 1 ? `${industries.length} Industri Tersedia` : "SMAP Tersedia"}
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-industries-title">
               Solusi untuk <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Setiap Industri</span>
             </h2>

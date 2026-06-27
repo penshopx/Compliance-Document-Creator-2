@@ -1,1 +1,2 @@
 - [google-genai version pin](google-genai-pin.md) — @google/genai must stay 1.35.0; ≥1.36 pulls firewall-blocked protobufjs and breaks install.
+- [Industry availability feature flag](industry-feature-flag.md) — ENABLED_INDUSTRY_IDS gates which industries show; watch two datasets (industryConfigs + industryCompliances) + standalone routes.

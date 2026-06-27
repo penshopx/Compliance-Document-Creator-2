@@ -192,9 +192,14 @@ export default function WelcomePage() {
             </div>
 
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-2xl font-bold mb-6 text-center">20 Sektor Industri</h2>
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                {industries.length > 1 ? `${industries.length} Sektor Industri` : "Sektor Industri"}
+              </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {Object.keys(industryCompliances).map((industryId) => {
+                {industries
+                  .filter((ind) => industryCompliances[ind.id])
+                  .map((ind) => {
+                  const industryId = ind.id;
                   const industry = industryCompliances[industryId];
                   const Icon = industryIcons[industryId] || Building2;
                   const color = industryColors[industryId] || "blue";

@@ -38,6 +38,7 @@ import KnowledgeChatbot from "@/components/knowledge-chatbot";
 import CheckoutPage from "@/pages/checkout";
 import KnowledgeBasePage from "@/pages/knowledge-base";
 import PathwayPage from "@/pages/pathway";
+import { isIndustryEnabled } from "@/data/industry-configs";
 
 function Router() {
   return (
@@ -45,7 +46,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/welcome" component={WelcomePage} />
       <Route path="/checkout" component={CheckoutPage} />
-      <Route path="/pancek" component={PancekPage} />
+      {isIndustryEnabled("pancek") && <Route path="/pancek" component={PancekPage} />}
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/company" component={CompanyPage} />
       <Route path="/management" component={ManagementPage} />

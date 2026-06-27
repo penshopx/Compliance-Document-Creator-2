@@ -215,6 +215,7 @@ export function AppSidebar() {
           </div>
         </div>
         
+        {industries.length > 1 && (
         <Collapsible
           open={industriesOpen}
           onOpenChange={setIndustriesOpen}
@@ -260,6 +261,7 @@ export function AppSidebar() {
             </div>
           </CollapsibleContent>
         </Collapsible>
+        )}
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">

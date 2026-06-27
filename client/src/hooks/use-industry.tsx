@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { IndustryConfig, Template } from "@shared/config/industry-types";
-import { industryConfigs, getDefaultIndustryId, getIndustryConfig } from "@/data/industry-configs";
+import { industryConfigs, getDefaultIndustryId, getIndustryConfig, getEnabledIndustries, isIndustryEnabled } from "@/data/industry-configs";
 
 interface IndustryContextValue {
   currentIndustryId: string;
@@ -25,7 +25,7 @@ export function IndustryProvider({ children }: IndustryProviderProps) {
   const [currentIndustryId, setCurrentIndustryId] = useState<string>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored && industryConfigs[stored]) {
+      if (stored && industryConfigs[stored] && isIndustryEnabled(stored)) {
         return stored;
       }
     }
@@ -33,14 +33,14 @@ export function IndustryProvider({ children }: IndustryProviderProps) {
   });
 
   const currentIndustry = getIndustryConfig(currentIndustryId);
-  const industries = Object.values(industryConfigs).sort((a, b) => a.sortOrder - b.sortOrder);
+  const industries = getEnabledIndustries();
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, currentIndustryId);
   }, [currentIndustryId]);
 
   const setIndustry = useCallback((id: string) => {
-    if (industryConfigs[id]) {
+    if (industryConfigs[id] && isIndustryEnabled(id)) {
       setCurrentIndustryId(id);
     }
   }, []);

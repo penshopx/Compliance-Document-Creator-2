@@ -47,12 +47,25 @@ export const getIndustryConfig = (id: string): IndustryConfig | undefined => {
   return industryConfigs[id];
 };
 
+// Feature flag: which industries are currently active/visible in the app.
+// To re-enable a hidden industry later, just add its id here (e.g. "pancek").
+export const ENABLED_INDUSTRY_IDS: string[] = ["smap"];
+
+export const isIndustryEnabled = (id: string): boolean => {
+  return ENABLED_INDUSTRY_IDS.includes(id);
+};
+
 export const getAllIndustries = (): IndustryConfig[] => {
   return Object.values(industryConfigs).sort((a, b) => a.sortOrder - b.sortOrder);
 };
 
+export const getEnabledIndustries = (): IndustryConfig[] => {
+  return getAllIndustries().filter((c) => ENABLED_INDUSTRY_IDS.includes(c.id));
+};
+
 export const getDefaultIndustryId = (): string => {
-  return "smap";
+  const first = ENABLED_INDUSTRY_IDS[0];
+  return first && industryConfigs[first] ? first : "smap";
 };
 
 export { 

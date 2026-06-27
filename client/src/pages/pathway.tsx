@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { industryCompliances, domainInfo, type CompliancePathway } from "@shared/data/industry-pathways";
+import { isIndustryEnabled } from "@/data/industry-configs";
 import { useToast } from "@/hooks/use-toast";
 
 const domainIcons: Record<string, any> = {
@@ -61,7 +62,7 @@ export default function PathwayPage() {
   const industryId = params?.industryId || "";
   const domainId = params?.domainId || "";
   
-  const industryData = industryCompliances[industryId];
+  const industryData = isIndustryEnabled(industryId) ? industryCompliances[industryId] : undefined;
   const pathway = industryData?.pathways[domainId as keyof typeof industryData.pathways] as CompliancePathway | undefined;
   const domain = domainInfo[domainId as keyof typeof domainInfo];
   const colors = domainColors[domainId] || domainColors.legalitas;
