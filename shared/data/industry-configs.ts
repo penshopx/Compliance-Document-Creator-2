@@ -49,7 +49,7 @@ export const getIndustryConfig = (id: string): IndustryConfig | undefined => {
 
 // Feature flag: which industries are currently active/visible in the app.
 // To re-enable a hidden industry later, just add its id here (e.g. "pancek").
-export const ENABLED_INDUSTRY_IDS: string[] = ["smap"];
+export const ENABLED_INDUSTRY_IDS: string[] = ["smap", "pancek"];
 
 export const isIndustryEnabled = (id: string): boolean => {
   return ENABLED_INDUSTRY_IDS.includes(id);
