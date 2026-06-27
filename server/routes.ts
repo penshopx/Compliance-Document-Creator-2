@@ -600,7 +600,9 @@ PAKET SMAP (4 Fase Produk Siap):
 
 Pengetahuan Anda:
 - SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
-- Permen PUPR 08/2022 tentang SMAP di sektor konstruksi
+- Pancek KPK (Panduan Cegah Korupsi KPK) untuk BUJK Kecil & Menengah via Platform Jaga.id
+- Dokumen SMAP menjadi lampiran wajib kuesioner Pancek KPK
+- Permen PU 08/2022 sudah diganti Permen PU 06/2025 (regulasi baru belum dipublikasi)
 - Template dokumen dan checklist compliance
 - Implementasi praktis di perusahaan Indonesia
 
@@ -1299,13 +1301,14 @@ ${SMAP_DOCUMENT_FRAMEWORK}
 KONTEKS UKM — pain points dan timeline realistis:
 ${SMAP_UKM_CONTEXT}
 
-ATURAN SBU KONSTRUKSI (BUJK) — jika perusahaan bergerak di jasa konstruksi, terapkan:
-- SBU Kualifikasi Besar: max 1 tahun dari SBU terbit → dokumen SMAP/ISO cert wajib ada
-- SBU Kualifikasi Menengah: max 2 tahun dari SBU terbit
-- SBU Kualifikasi Kecil: max 3 tahun dari SBU terbit
-- Jika perusahaan sudah dekat deadline SBU, rekomendasiFase harus lebih agresif (Siap Audit Eksternal/ISO cert)
-- Regulasi tambahan konstruksi: Permen PU No. 08/2022 + SK Dirjen Bina Konstruksi No. 144/2022
-- Sebutkan deadline SBU dan regulasi PUPR dalam kesimpulan jika relevan
+ATURAN JALUR COMPLIANCE BUJK (UPDATED PER 2025) — jika perusahaan bergerak di jasa konstruksi:
+- BUJK Besar: max 1 tahun dari SBU terbit → TARGET: Sertifikat ISO 37001:2016 dari CB terakreditasi KAN
+- BUJK Menengah: TARGET: Pancek KPK (Jaga.id) — dokumen SMAP wajib sebagai lampiran kuesioner
+- BUJK Kecil: TARGET: Pancek KPK (Jaga.id) — dokumen SMAP wajib sebagai lampiran kuesioner
+- Untuk Kecil & Menengah: jangan rekomendasikan ISO cert sebagai jalur utama → arahkan ke Pancek KPK
+- Pancek KPK = Panduan Cegah Korupsi KPK; dokumen SMAP adalah lampiran wajibnya
+- Regulasi: Permen PU 08/2022 sudah diganti Permen PU 06/2025 (belum dipublikasi); SK Dirjen 144/2022 sudah diganti (belum dipublikasi)
+- Sebutkan jalur compliance yang tepat (Pancek KPK vs ISO cert) dalam kesimpulan roadmap
 
 DIALOG:
 ${conversationText}
@@ -1778,23 +1781,29 @@ TAHAP ANALISIS (gunakan urutan ini):
    → Estimasi waktu untuk mencapai level Siap Sertifikasi
    → REKOMENDASI JALUR: apakah lebih tepat dengan ISO cert (via CB terakreditasi KAN) atau Dokumen SMAP self-made?
 
-JALUR SERTIFIKASI — BANTU KLIEN PILIH:
-A. ISO 37001:2016 (via CB Terakreditasi KAN): 
-   → Cocok untuk: BUJK Besar, perusahaan BUMN, tender besar, komitmen jangka panjang
+JALUR COMPLIANCE SMAP — BANTU KLIEN PILIH (UPDATED PER 2025):
+
+A. ISO 37001:2016 (via CB Terakreditasi KAN) — UNTUK BUJK BESAR & NON-KONSTRUKSI:
+   → Cocok untuk: BUJK Besar, perusahaan BUMN, perusahaan non-konstruksi, tender nilai besar, komitmen jangka panjang
    → Lembaga: PT TUV NORD, PT BSI Group, PT SGS, PT Mutu Agung Lestari, dll.
    → Proses: Aplikasi → Stage 1 (Doc Review) → Stage 2 (On-site) → Sertifikat (3 tahun)
    → Biaya: umumnya Rp 20-80 juta tergantung ukuran perusahaan
 
-B. Dokumen SMAP (Self-made + verifikasi LSBU):
-   → Cocok untuk: BUJK Menengah/Kecil, kebutuhan SBU saja, anggaran terbatas
-   → Proses: Susun 16 dokumen → Submit ke LSBU → Verifikasi & Validasi (VACS) → Accepted
-   → Biaya: lebih terjangkau (biaya konsultansi penyusunan saja)
+B. Pancek KPK via Platform Jaga.id — UNTUK BUJK KECIL & MENENGAH (JALUR UTAMA):
+   → Pancek KPK = Panduan Cegah Korupsi dari KPK, berdasarkan UU Tindak Pidana Korupsi
+   → Dokumen SMAP (16 komponen) WAJIB dibuat → menjadi LAMPIRAN MATERIAL kuesioner Pancek KPK
+   → Tanpa dokumen SMAP, kuesioner Pancek KPK di Jaga.id tidak dapat dilengkapi
+   → Proses: Susun dokumen SMAP → Lengkapi kuesioner Pancek KPK di Jaga.id → Verifikasi KPK → Terverifikasi
+   → Biaya: lebih terjangkau (tidak perlu audit CB eksternal)
+   → ⚠️ Ini adalah jalur UTAMA untuk BUJK Kecil & Menengah per kebijakan terbaru
 
 C. Surat Pernyataan Komitmen:
    → Hanya sebagai BRIDGE sementara — wajib dipenuhi sesuai deadline kualifikasi
-   → Bukan solusi permanen
+   → Bukan solusi permanen, harus segera dilanjutkan ke jalur A atau B
 
-OUTPUT AKHIR: Beri skor kesiapan, identifikasi 3 gap kritis yang harus dipenuhi SEGERA, dan rekomendasikan jalur yang paling sesuai dengan kondisi klien.${ctx}`,
+⚠️ CATATAN REGULASI: Permen PU 08/2022 + SK Dirjen 144/2022 sudah diganti, namun regulasi penggantinya belum dipublikasi secara luas. SNI ISO 37001:2016 tetap berlaku sebagai standar inti.
+
+OUTPUT AKHIR: Beri skor kesiapan, identifikasi 3 gap kritis yang harus dipenuhi SEGERA, dan rekomendasikan jalur yang paling sesuai — Pancek KPK (untuk Kecil/Menengah) atau ISO cert (untuk Besar).${ctx}`,
 
         sertifikasi_mock: `Anda adalah SUB-AGEN MOCK AUDIT (Simulasi Auditor Eksternal) dari tim Gustafta Collab. Spesialisasi TUNGGAL: mensimulasikan pertanyaan dan teknik audit auditor eksternal SNI ISO 37001:2016.
 
@@ -2849,7 +2858,7 @@ SOP ini berlaku untuk:
 
 3. REFERENSI
 • SNI ISO 37001:2016 Klausul 8.2
-• Permen PUPR No. 08 Tahun 2022
+• Permen PU No. 06 Tahun 2025 (menggantikan Permen PU No. 08 Tahun 2022 — detail implementasi dalam proses publikasi)
 • Kebijakan Anti Penyuapan ${companyName}
 
 4. DEFINISI

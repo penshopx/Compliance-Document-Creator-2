@@ -628,14 +628,29 @@ GAP ANALYSIS UNTUK KONSTRUKSI — Area Risiko Khusus:
 • Subkontraktor: Due diligence wajib untuk semua sub-kon besar (Tier 1)
 • Personil Lapangan (Site Manager, Surveyor, QC): akses ke area berisiko
 
-WAKTU IDEAL KONSULTANSI BERDASARKAN KUALIFIKASI:
-• BUJK Besar baru SBU: SEGERA mulai (max 1 tahun) → Fase Siap Dokumen → Target ISO cert
-• BUJK Menengah: 2 tahun → Dokumen SMAP dulu, ISO cert kemudian
-• BUJK Kecil: 3 tahun → Mulai dengan Surat Pernyataan → Dokumen SMAP → ISO (opsional)
+JALUR COMPLIANCE BERDASARKAN KUALIFIKASI (BARU — PER 2025):
+⚠️ PENTING: Sejak kebijakan terbaru (regulasi pengganti Permen PU 08/2022 belum dipublikasi secara luas),
+jalur SMAP untuk BUJK telah berubah:
+
+• BUJK Besar → Target: Sertifikat ISO 37001:2016 dari CB terakreditasi KAN
+  Timeline: SEGERA (max 1 tahun sejak SBU terbit) → Fase: Siap Dokumen → Audit Internal → ISO cert
+
+• BUJK Menengah & Kecil → Target: Pancek KPK via Platform Jaga.id
+  → Dokumen SMAP tetap WAJIB dibuat — menjadi LAMPIRAN WAJIB kuesioner/formulir Pancek KPK
+  → Tanpa dokumen SMAP, pengisian kuesioner Pancek KPK tidak dapat dilengkapi
+  → Pancek KPK = Panduan Cegah Korupsi dari KPK berdasarkan UU Tindak Pidana Korupsi
+  → Platform verifikasi: Jaga.id (Platform KPK)
+
+HUBUNGAN SMAP ↔ PANCEK KPK:
+• Dokumen SMAP (16 komponen) = lampiran material Pancek KPK
+• Kuesioner Pancek KPK MENSYARATKAN dokumen SMAP sebagai bukti
+• Jadi untuk Kecil/Menengah: buat dokumen SMAP → submit ke Pancek KPK (Jaga.id) → verifikasi KPK
+• Sertifikat ISO 37001 tetap boleh, tapi bukan jalur utama untuk Kecil/Menengah
 
 PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
 • "Apakah perusahaan sudah memiliki SBU? Kualifikasi Kecil/Menengah/Besar?"
-• "Kapan SBU terakhir diterbitkan? Berapa sisa waktu pemenuhan SMAP?"
+• "Apakah sudah mengenal Pancek KPK? Sudah terdaftar di platform Jaga.id?"
+• "Dokumen SMAP apa yang sudah dimiliki? (karena akan jadi lampiran Pancek KPK)"
 • "Apakah sudah ada Surat Pernyataan Komitmen SMAP yang diserahkan ke LSBU?"
 • "Seberapa sering perusahaan mengikuti tender pemerintah?"
 • "Ada berapa subkontraktor yang biasa bekerja sama?"
@@ -644,7 +659,11 @@ PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
 // ─── SMAP DOCUMENT FRAMEWORK — 16 Planning + 6 Implementation (dari "Revolusi") ─
 export const SMAP_DOCUMENT_FRAMEWORK = `
 FRAMEWORK KATEGORISASI DOKUMEN SMAP (dari referensi "Revolusi Penyusunan Dokumen SMAP"):
-Sumber tambahan: Permen PU No. 08 Tahun 2022 + SK Dirjen Bina Konstruksi No. 144 Tahun 2022
+⚠️ CATATAN REGULASI (per 2025):
+• Permen PU No. 08 Tahun 2022 → TELAH DIGANTI oleh Permen PU No. 06 Tahun 2025 (detail implementasi baru belum dipublikasikan secara luas)
+• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → TELAH DIGANTI (regulasi pengganti belum dipublikasikan)
+• SNI ISO 37001:2016 tetap berlaku sebagai standar inti — tidak berubah
+• Dokumen SMAP yang disusun tetap relevan dan valid untuk jalur Pancek KPK maupun ISO cert
 
 DUA KATEGORI UTAMA DOKUMEN SMAP:
 
@@ -685,10 +704,11 @@ Dokumen yang membuktikan IMPLEMENTASI NYATA sistem. Dibuat SETELAH dokumen peren
   • Klien yang sudah punya beberapa dokumen: identifikasi mana Perencanaan vs Pelaksanaan yang missing
   • Untuk SBU (BUJK): 16 komponen dokumen BUJK = subset dari 16 Perencanaan di atas
 
-REGULASI KONSTRUKSI KHUSUS (dari Permen PU & SK Dirjen):
-• Permen PU No. 08 Tahun 2022 — tentang penerapan SMAP di lingkungan PUPR dan BUJK
-• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 — teknis implementasi SMAP untuk jasa konstruksi
-• Kedua regulasi ini mewajibkan BUJK untuk menerapkan SMAP → bukan hanya ISO 37001 tapi juga memenuhi persyaratan teknis Kementerian PUPR
+REGULASI KONSTRUKSI KHUSUS:
+• Permen PU No. 08 Tahun 2022 → sudah diganti Permen PU No. 06 Tahun 2025 (implementasi baru belum dipublikasi)
+• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → sudah diganti (regulasi baru belum dipublikasi)
+• SNI ISO 37001:2016 tetap menjadi standar inti yang tidak berubah
+• Jalur compliance BUJK (per 2025): Kecil/Menengah → Pancek KPK (Jaga.id) + dokumen SMAP sebagai lampiran; Besar → ISO 37001 cert
 `;
 
 // ─── SMAP UKM CONTEXT — Pain points, value props, common mistakes (dari 5 ebooks) ──
