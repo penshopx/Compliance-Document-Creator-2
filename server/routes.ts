@@ -942,44 +942,57 @@ Gaya komunikasi: Ramah, supportif, menggunakan contoh praktis.`;
       const userId = (req.user as { id: string }).id;
       const validated = helpChatSchema.parse(req.body);
       
-      const systemPrompt = `Anda adalah Help Bot untuk Platform Generator Dokumen Multi-Industri. Tugas Anda adalah membantu pengguna memahami cara menggunakan aplikasi ini.
+      const systemPrompt = `Anda adalah Help Bot untuk Compliance Hub — Platform Generator Dokumen Kepatuhan Multi-Industri untuk bisnis Indonesia.
 
-Platform ini mendukung 20 industri: SMAP, Pancek, Konstruksi, Energi, Migas, Lingkungan, UMKM, ISO, K3, Tender, Keuangan, Kesehatan, Pendidikan, Teknologi, Pertanian, Manufaktur, Properti, Logistik, Pariwisata, dan Telekomunikasi.
+Fitur utama yang tersedia:
+1. Dashboard SMAP & Pancek — ringkasan data perusahaan, statistik kepatuhan
+2. Profil Perusahaan — input data perusahaan untuk mengisi template dokumen
+3. Prompt Generator Dokumen — pilih template, salin prompt, tempel di Gemini/Qwen/ChatGPT untuk mendapatkan dokumen lengkap (gratis)
+4. PDCA Generator — generate dokumen SMAP berdasarkan 51 klausul ISO 37001
+5. Referensi SMAP — 46 dokumen referensi standar SMAP
+6. Template Repository — 270+ template dokumen SMAP
+7. Produk Siap SMAP — panduan 4 fase implementasi SMAP
+8. Pengaturan AI — simpan API key Gemini/Qwen/OpenAI untuk fitur tambahan
+9. Tombol ✦ kiri bawah — pilih AI (Gemini/Qwen) untuk tanya langsung
 
-Fitur utama aplikasi:
-1. Dashboard - Ringkasan data perusahaan dan statistik
-2. Profil Perusahaan - Input data perusahaan untuk template
-3. Template Dokumen - Library template dokumen per industri
-4. AI Generator - Membuat dokumen otomatis dengan AI
-5. Chatbot Mentor - AI ahli per industri untuk konsultasi
-6. Knowledge Base - Akses knowledge base dari dokumentender.com
-7. Pengaturan Industri - Beralih antar industri
+Industri yang aktif: SMAP (SNI ISO 37001:2016) dan Pancek (Panduan KPK).
 
-Panduan navigasi:
-- Sidebar kiri untuk navigasi menu
-- Icon chat di pojok kanan bawah untuk chatbot
-- Tombol profil di header untuk akun
+Cara pakai Prompt Generator:
+- Buka "Document Builder" di sidebar
+- Pilih template dokumen
+- Salin prompt yang muncul → tempel di Gemini atau Qwen
+- Dokumen lengkap siap dihasilkan oleh AI
 
-Berikan jawaban yang singkat, jelas, dan membantu dalam Bahasa Indonesia.`;
+Berikan jawaban singkat, jelas, dan membantu dalam Bahasa Indonesia. Jika ditanya soal teknis compliance SMAP/Pancek, jawab berdasarkan SNI ISO 37001:2016 dan panduan KPK.`;
 
-      const cred = await storage.getActiveAiCredential(userId);
-      if (!cred) {
-        return res.json({
-          response:
-            "Untuk menggunakan chat AI, tambahkan API key akun AI Anda sendiri (Gemini, OpenAI, OpenRouter, DeepSeek, atau Qwen) di menu Pengaturan AI. Biaya token ditanggung oleh akun Anda.",
-        });
-      }
-
-      const apiKey = decryptSecret(cred.apiKey);
       const history = (validated.history || []).map((h) => ({
         role: h.role === "user" ? ("user" as const) : ("assistant" as const),
         content: h.content,
       }));
 
+      // Use app's own Gemini key first, fall back to user's saved key
+      const appGeminiKey = process.env.GEMINI_API_KEY;
+      let provider = "gemini";
+      let apiKey = appGeminiKey || "";
+      let model: string | null = "gemini-2.5-flash";
+
+      if (!appGeminiKey) {
+        const cred = await storage.getActiveAiCredential(userId);
+        if (!cred) {
+          return res.json({
+            response:
+              "Chatbot AI sedang tidak tersedia. Silakan hubungi admin atau coba lagi nanti.",
+          });
+        }
+        provider = cred.provider;
+        apiKey = decryptSecret(cred.apiKey);
+        model = cred.model;
+      }
+
       const response = await chatWithProvider({
-        provider: cred.provider,
+        provider,
         apiKey,
-        model: cred.model,
+        model,
         systemPrompt,
         history,
         message: validated.message,

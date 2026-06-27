@@ -297,7 +297,7 @@ export default function HelpDeskChatbot() {
             <div className="flex items-center justify-center gap-2 mt-2">
               <Badge variant="secondary" className="text-xs">
                 <Sparkles className="h-3 w-3 mr-1" />
-                Powered by AI
+                Gemini AI
               </Badge>
             </div>
           </div>
