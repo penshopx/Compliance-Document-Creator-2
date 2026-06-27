@@ -230,6 +230,31 @@ export default function LandingPage() {
   const { data: plans } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/subscription-plans"],
   });
+
+  const { data: paymentConfig } = useQuery<{
+    whatsapp: string;
+    accountHolder: string;
+    banks: { bca: string; mandiri: string; bri: string; bni: string };
+    qrisImageUrl: string;
+  }>({
+    queryKey: ["/api/payment-config"],
+  });
+
+  const configuredBanks = paymentConfig
+    ? [
+        { name: "BCA", account: paymentConfig.banks.bca },
+        { name: "Mandiri", account: paymentConfig.banks.mandiri },
+        { name: "BRI", account: paymentConfig.banks.bri },
+        { name: "BNI", account: paymentConfig.banks.bni },
+      ].filter(b => b.account)
+    : [];
+
+  const waNumber = paymentConfig?.whatsapp || "";
+  const openWA = () => {
+    const msg = encodeURIComponent("Halo, saya tertarik dengan Compliance Hub. Bisa ceritakan lebih lanjut?");
+    const dest = waNumber ? `https://wa.me/${waNumber}?text=${msg}` : `https://wa.me/?text=${msg}`;
+    window.open(dest, "_blank");
+  };
   
   const smapPlans = plans?.filter(p => p.category === "smap") || [];
   const pancekPlans = plans?.filter(p => p.category === "pancek") || [];
@@ -357,19 +382,19 @@ export default function LandingPage() {
                   <div className="h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center">
                     <CheckCircle2 className="h-3 w-3 text-green-600" />
                   </div>
-                  <span>Gratis 14 hari trial</span>
+                  <span>270+ template siap pakai</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <div className="h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center">
                     <CheckCircle2 className="h-3 w-3 text-green-600" />
                   </div>
-                  <span>Tanpa kartu kredit</span>
+                  <span>Support Bahasa Indonesia</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <div className="h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center">
                     <CheckCircle2 className="h-3 w-3 text-green-600" />
                   </div>
-                  <span>Setup 5 menit</span>
+                  <span>SNI ISO 37001:2016</span>
                 </div>
               </div>
             </div>
@@ -897,52 +922,54 @@ export default function LandingPage() {
             </TabsContent>
           </Tabs>
 
-          <Card className="mt-12 max-w-4xl mx-auto overflow-hidden">
-            <CardContent className="p-0">
-              <div className="grid sm:grid-cols-2">
-                <div className="p-6 space-y-4">
-                  <h3 className="font-bold text-lg flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                    Transfer Bank
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { name: "BCA", account: "1234567890" },
-                      { name: "Mandiri", account: "1234567890123" },
-                      { name: "BRI", account: "123456789012345" },
-                      { name: "BNI", account: "1234567890" },
-                    ].map((bank) => (
-                      <div key={bank.name} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
-                          <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">{bank.name}</div>
-                          <div className="text-xs text-muted-foreground">{bank.account}</div>
-                        </div>
+          {(configuredBanks.length > 0 || paymentConfig?.qrisImageUrl) && (
+            <Card className="mt-12 max-w-4xl mx-auto overflow-hidden">
+              <CardContent className="p-0">
+                <div className="grid sm:grid-cols-2">
+                  {configuredBanks.length > 0 && (
+                    <div className="p-6 space-y-4">
+                      <h3 className="font-bold text-lg flex items-center gap-2">
+                        <Building2 className="h-5 w-5 text-blue-600" />
+                        Transfer Bank
+                      </h3>
+                      <p className="text-xs text-muted-foreground">a.n. {paymentConfig?.accountHolder}</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {configuredBanks.map((bank) => (
+                          <div key={bank.name} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                              <Building className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium">{bank.name}</div>
+                              <div className="text-xs font-mono text-muted-foreground">{bank.account}</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  )}
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-slate-800 dark:to-slate-700 space-y-4">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <CreditCard className="h-5 w-5 text-cyan-600" />
+                      E-Wallet & QRIS
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {["GoPay", "OVO", "Dana", "ShopeePay", "QRIS"].map((wallet) => (
+                        <Badge key={wallet} variant="secondary" className="text-sm">
+                          {wallet}
+                        </Badge>
+                      ))}
+                    </div>
+                    {paymentConfig?.qrisImageUrl ? (
+                      <img src={paymentConfig.qrisImageUrl} alt="QRIS" className="max-w-[160px] rounded-lg mx-auto" />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Scan QRIS untuk pembayaran instan</p>
+                    )}
                   </div>
                 </div>
-                <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-slate-800 dark:to-slate-700 space-y-4">
-                  <h3 className="font-bold text-lg flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-cyan-600" />
-                    E-Wallet & QRIS
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {["GoPay", "OVO", "Dana", "ShopeePay", "QRIS"].map((wallet) => (
-                      <Badge key={wallet} variant="secondary" className="text-sm">
-                        {wallet}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Scan QRIS untuk pembayaran instan
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 
@@ -954,21 +981,21 @@ export default function LandingPage() {
                 Siap Memulai Perjalanan Compliance Anda?
               </h2>
               <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-                Bergabung dengan 500+ perusahaan yang sudah mempercayai Compliance Hub untuk kepatuhan bisnis mereka
+                Konsultasikan kebutuhan SMAP atau Pancek Anda bersama tim kami — kami siap membantu dari nol hingga sertifikasi.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-white text-blue-600" asChild>
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50" asChild>
                   <a href="/api/login">
                     <Rocket className="mr-2 h-5 w-5" />
-                    Mulai Gratis 14 Hari
+                    Coba Sekarang
                   </a>
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/50 text-white" asChild>
-                  <a href="mailto:info@compliancehub.id">
-                    <Mail className="mr-2 h-5 w-5" />
-                    Hubungi Sales
-                  </a>
-                </Button>
+                {waNumber && (
+                  <Button size="lg" variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={openWA} data-testid="button-wa-cta">
+                    <MessageSquare className="mr-2 h-5 w-5" />
+                    Hubungi via WhatsApp
+                  </Button>
+                )}
               </div>
               <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-white/70">
                 <div className="flex items-center gap-2">
@@ -977,11 +1004,11 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Support Indonesia</span>
+                  <span>Support Bahasa Indonesia</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Garansi 30 hari</span>
+                  <span>270+ template siap pakai</span>
                 </div>
               </div>
             </CardContent>
@@ -997,9 +1024,19 @@ export default function LandingPage() {
                 <Shield className="h-6 w-6 text-blue-400" />
                 <span className="font-bold text-lg">Compliance Hub</span>
               </div>
-              <p className="text-sm text-slate-400">
-                Platform Generator Dokumen AI untuk kepatuhan bisnis Indonesia
+              <p className="text-sm text-slate-400 mb-4">
+                Platform Generator Dokumen AI untuk kepatuhan bisnis Indonesia — SMAP & Pancek.
               </p>
+              {waNumber && (
+                <button
+                  onClick={openWA}
+                  className="flex items-center gap-2 text-sm text-green-400 hover:text-green-300 transition-colors"
+                  data-testid="button-footer-wa"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Chat via WhatsApp
+                </button>
+              )}
             </div>
             <div>
               <h4 className="font-semibold mb-4">Produk</h4>
@@ -1007,28 +1044,35 @@ export default function LandingPage() {
                 <li><a href="#features" className="hover:text-white transition-colors">Fitur</a></li>
                 <li><a href="#pricing" className="hover:text-white transition-colors">Harga</a></li>
                 <li><a href="#industries" className="hover:text-white transition-colors">Industri</a></li>
+                <li><a href="#testimonials" className="hover:text-white transition-colors">Testimoni</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Perusahaan</h4>
+              <h4 className="font-semibold mb-4">Layanan</h4>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">Tentang Kami</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Karir</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+                <li>SMAP (SNI ISO 37001:2016)</li>
+                <li>Pancek (Panduan KPK)</li>
+                <li>270+ Template Dokumen</li>
+                <li>Konsultasi Compliance</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Kontak</h4>
               <ul className="space-y-2 text-sm text-slate-400">
-                <li>info@compliancehub.id</li>
-                <li>0812-3456-7890</li>
+                {waNumber && (
+                  <li>
+                    <button onClick={openWA} className="hover:text-white transition-colors text-left">
+                      WA: +{waNumber}
+                    </button>
+                  </li>
+                )}
                 <li>Jakarta, Indonesia</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-slate-400">
-              © 2024 Compliance Hub. All rights reserved.
+              © {new Date().getFullYear()} Compliance Hub. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm text-slate-400">
               <a href="#" className="hover:text-white transition-colors">Kebijakan Privasi</a>
