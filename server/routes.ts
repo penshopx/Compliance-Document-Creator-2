@@ -19,6 +19,8 @@ import {
   DOCUMENT_GENERATION_MATRIX,
   BUJK_ASSESSOR_KNOWLEDGE,
   KONSTRUKSI_RISK_PROFILE,
+  SMAP_DOCUMENT_FRAMEWORK,
+  SMAP_UKM_CONTEXT,
 } from "./smap-knowledge";
 import { z } from "zod";
 import {
@@ -1195,9 +1197,12 @@ ${GUSTAFTA_SMAP_KNOWLEDGE}
 
 ${BUJK_ASSESSOR_KNOWLEDGE}
 
+${SMAP_UKM_CONTEXT}
+
 ALUR DIALOG:
 - Mulai dengan sapaan singkat dan pertanyaan tentang profil perusahaan
 - Jika teridentifikasi perusahaan KONSTRUKSI, gali Area 3 (SBU) lebih dalam — ini menentukan urgency nyata
+- Jika klien tampak overwhelmed atau baru pertama kali, gunakan pendekatan empati dari SMAP_UKM_CONTEXT — normalkan perasaan mereka, tunjukkan bahwa ada jalur yang terjangkau
 - Jelajahi area secara natural mengikuti alur percakapan
 - Setelah semua area tergali (sekitar 10-15 pertukaran), tutup dengan:
   "Terima kasih atas informasinya. Saya sudah mendapat gambaran yang cukup komprehensif untuk menyusun Blueprint SMAP Anda. Silakan klik tombol **Generate Blueprint** untuk mendapatkan peta jalan implementasi yang dipersonalisasi."
@@ -1288,12 +1293,19 @@ Audit: ${SMAP_DOCUMENT_CATALOG.audit.map(d => `"${d.nama}" (${d.klausul})`).join
 Tinjauan: ${SMAP_DOCUMENT_CATALOG.tinjauan.map(d => `"${d.nama}" (${d.klausul})`).join(", ")}
 Pelatihan: ${SMAP_DOCUMENT_CATALOG.pelatihan.map(d => `"${d.nama}" (${d.klausul})`).join(", ")}
 
+FRAMEWORK KATEGORISASI DOKUMEN (16 Perencanaan + 6 Pelaksanaan):
+${SMAP_DOCUMENT_FRAMEWORK}
+
+KONTEKS UKM — pain points dan timeline realistis:
+${SMAP_UKM_CONTEXT}
+
 ATURAN SBU KONSTRUKSI (BUJK) — jika perusahaan bergerak di jasa konstruksi, terapkan:
 - SBU Kualifikasi Besar: max 1 tahun dari SBU terbit → dokumen SMAP/ISO cert wajib ada
 - SBU Kualifikasi Menengah: max 2 tahun dari SBU terbit
 - SBU Kualifikasi Kecil: max 3 tahun dari SBU terbit
 - Jika perusahaan sudah dekat deadline SBU, rekomendasiFase harus lebih agresif (Siap Audit Eksternal/ISO cert)
-- Sebutkan deadline SBU dalam kesimpulan jika relevan
+- Regulasi tambahan konstruksi: Permen PU No. 08/2022 + SK Dirjen Bina Konstruksi No. 144/2022
+- Sebutkan deadline SBU dan regulasi PUPR dalam kesimpulan jika relevan
 
 DIALOG:
 ${conversationText}

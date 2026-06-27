@@ -641,6 +641,105 @@ PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
 • "Ada berapa subkontraktor yang biasa bekerja sama?"
 `;
 
+// ─── SMAP DOCUMENT FRAMEWORK — 16 Planning + 6 Implementation (dari "Revolusi") ─
+export const SMAP_DOCUMENT_FRAMEWORK = `
+FRAMEWORK KATEGORISASI DOKUMEN SMAP (dari referensi "Revolusi Penyusunan Dokumen SMAP"):
+Sumber tambahan: Permen PU No. 08 Tahun 2022 + SK Dirjen Bina Konstruksi No. 144 Tahun 2022
+
+DUA KATEGORI UTAMA DOKUMEN SMAP:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KATEGORI A — DOKUMEN PERENCANAAN (16 Klausul)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Dokumen yang mendeskripsikan RENCANA dan KEBIJAKAN sistem. Dibuat LEBIH DULU.
+1.  Kebijakan Anti Penyuapan                 → Klausul 5.2
+2.  Identifikasi Risiko (Konteks Organisasi)  → Klausul 4.1; 4.5
+3.  Memahami Konteks dan Isu Organisasi       → Klausul 4.1
+4.  Sasaran Anti Penyuapan & Rencana Pencapaian → Klausul 6.2
+5.  Sumber Daya, Struktur & Pertanggungjawaban → Klausul 7.1; 5.3
+6.  Kompetensi, Pelatihan dan Kepedulian      → Klausul 7.2; 7.3
+7.  Komunikasi, Partisipasi dan Konsultasi    → Klausul 7.4
+8.  Dokumentasi (Informasi Terdokumentasi)    → Klausul 7.5
+9.  Pengendalian Dokumen                      → Klausul 7.5.3
+10. Pengendalian Operasional                  → Klausul 8.1
+11. Kesiagaan dan Tanggap Darurat             → Klausul 8.8; 8.10
+12. Pengukuran dan Pemantauan                 → Klausul 9.1
+13. Tinjauan Fungsi Kepatuhan Anti Penyuapan  → Klausul 9.4
+14. Pengendalian Informasi Terdokumentasi     → Klausul 7.5.3
+15. Audit Internal                            → Klausul 9.2
+16. Tinjauan Manajemen                        → Klausul 9.3
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KATEGORI B — DOKUMEN PELAKSANAAN (6 Klausul)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Dokumen yang membuktikan IMPLEMENTASI NYATA sistem. Dibuat SETELAH dokumen perencanaan.
+1.  Kepemimpinan dan Komitmen (bukti nyata)   → Klausul 5.1
+2.  Komitmen Anti Penyuapan (tanda tangan)    → Klausul 8.6
+3.  Penilaian Risiko Penyuapan (hasil assessment) → Klausul 4.5
+4.  Informasi Terdokumentasi (records)        → Klausul 7.5
+5.  Pemantauan, Pengukuran, Analisis, Evaluasi → Klausul 9.1
+6.  Laporan Hasil Audit Internal              → Klausul 9.2
+
+→ IMPLIKASI KONSULTANSI:
+  • Klien yang belum punya APAPUN: mulai dari 16 Perencanaan → lanjut 6 Pelaksanaan
+  • Klien yang sudah punya beberapa dokumen: identifikasi mana Perencanaan vs Pelaksanaan yang missing
+  • Untuk SBU (BUJK): 16 komponen dokumen BUJK = subset dari 16 Perencanaan di atas
+
+REGULASI KONSTRUKSI KHUSUS (dari Permen PU & SK Dirjen):
+• Permen PU No. 08 Tahun 2022 — tentang penerapan SMAP di lingkungan PUPR dan BUJK
+• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 — teknis implementasi SMAP untuk jasa konstruksi
+• Kedua regulasi ini mewajibkan BUJK untuk menerapkan SMAP → bukan hanya ISO 37001 tapi juga memenuhi persyaratan teknis Kementerian PUPR
+`;
+
+// ─── SMAP UKM CONTEXT — Pain points, value props, common mistakes (dari 5 ebooks) ──
+export const SMAP_UKM_CONTEXT = `
+KONTEKS UKM/KONTRAKTOR KECIL-MENENGAH DALAM IMPLEMENTASI SMAP:
+(Sintesis dari: SMAPGuide, Lepas dari Jerat, AntiBribe, Revolusi SMAP, Panduan Komitmen)
+
+PAIN POINTS UTAMA (yang sering diungkap klien dalam dialog):
+1. "Tidak tahu dari mana harus mulai" — bingung dengan kompleksitas dan banyaknya dokumen
+2. "Tidak punya orang yang paham SMAP" — tidak ada staf compliance, SDM sangat terbatas
+3. "Terlalu mahal jika harus pakai konsultan" — budget terbatas, takut biaya tinggi
+4. "Karyawan tidak mau berubah" — resistensi internal, merasa dokumen baru = beban kerja
+5. "Sudah deadline SBU tapi belum mulai" — panic mode, butuh solusi cepat
+6. "Hanya untuk syarat SBU saja" — belum paham nilai strategis SMAP
+
+CARA GUSTAFTA MERESPONS PAIN POINTS:
+• "Tidak tahu mulai dari mana" → validasi perasaan, lalu tunjukkan bahwa 16 dokumen bisa dikerjakan bertahap
+• "Tidak punya orang" → tanyakan siapa yang paling paham operasional (calon FKAP), bukan harus orang compliance
+• "Mahal" → jelaskan bahwa dokumen SMAP self-made lebih hemat, AI bisa membantu drafting
+• "Resistensi karyawan" → tanyakan apakah Direktur sudah bicara langsung tentang komitmen
+• "Deadline mepet" → hitung sisa waktu, tawarkan prioritisasi 4-8 dokumen kritis terlebih dahulu
+• "Hanya untuk syarat" → perlahan perkenalkan nilai nyata: tender kompetitif, reputasi, perlindungan hukum
+
+NILAI STRATEGIS SMAP (bahasa yang mudah dipahami UKM):
+• Syarat SBU → tanpa SMAP = berisiko SBU tidak diperpanjang atau ditolak
+• Keunggulan tender → SMAP menunjukkan komitmen integritas = nilai tambah saat evaluasi
+• Perlindungan hukum → ada proses yang jelas = bukti bahwa perusahaan tidak terlibat penyuapan
+• Reputasi bisnis → klien swasta besar semakin menuntut vendor yang punya governance baik
+• Budaya organisasi → karyawan yang paham etika = risiko fraud internal lebih rendah
+
+QUICK-START TIMELINE (untuk klien UKM dengan deadline atau budget ketat):
+Opsi A — "4 Minggu Dasar" (untuk kebutuhan SBU segera):
+  Minggu 1: Identifikasi risiko + Kebijakan Anti Penyuapan
+  Minggu 2: SK FKAP + Prosedur kritis (WBS, Uji Tuntas)
+  Minggu 3: Program Pelatihan + Tabel Komunikasi + Register Risiko
+  Minggu 4: Review, finalisasi, siap submit ke LSBU
+
+Opsi B — "3-6 Bulan Komprehensif" (untuk target ISO 37001 cert):
+  Bulan 1-2: Semua 16 dokumen perencanaan
+  Bulan 3-4: 6 dokumen pelaksanaan + implementasi nyata
+  Bulan 5-6: Audit internal + persiapan Stage 1 & 2 CB
+
+KESALAHAN UMUM YANG HARUS DIHINDARI:
+• Membuat dokumen "copy-paste template" tanpa disesuaikan nama/bidang usaha → gagal validasi VACS
+• Tidak melibatkan Direktur (hanya tim administrasi) → dokumen tidak punya legitimasi
+• WBS hanya "ada kotak saran" tanpa mekanisme anonim → tidak memenuhi Klausul 8.9
+• Uji tuntas mitra hanya formalitas checklist tanpa investigasi nyata → temuan NCR audit
+• Register risiko berisi risiko generik (copy-paste dari internet) → tidak relevan secara industri
+• Membuat semua dokumen sekaligus tanpa prioritas → overwhelmed, tidak selesai
+`;
+
 // ─── KONSTRUKSI RISK PROFILE — Sector-specific risk factors ──────────────────
 export const KONSTRUKSI_RISK_PROFILE = `
 PROFIL RISIKO PENYUAPAN — SEKTOR KONSTRUKSI (Untuk Register Risiko & Blueprint):
