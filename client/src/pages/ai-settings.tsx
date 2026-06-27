@@ -24,6 +24,10 @@ import {
   ShieldCheck,
   Info,
   Star,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 
 interface SavedKey {
@@ -36,6 +40,7 @@ interface SavedKey {
 export default function AiSettingsPage() {
   const { toast } = useToast();
   const [selectedProvider, setSelectedProvider] = useState(AI_PROVIDERS[0].id);
+  const [guideOpen, setGuideOpen] = useState(true);
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState(AI_PROVIDERS[0].defaultModel);
 
@@ -125,6 +130,128 @@ export default function AiSettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Step-by-step guide */}
+        <Card className="mb-6 border-green-200 dark:border-green-800">
+          <CardHeader className="pb-2 cursor-pointer" onClick={() => setGuideOpen((v) => !v)}>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
+                Panduan: Cara Mendapatkan &amp; Memakai API Key (Gratis)
+              </CardTitle>
+              {guideOpen ? (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              )}
+            </div>
+            <CardDescription>
+              Gemini &amp; Qwen menyediakan tier gratis yang cukup untuk pembuatan dokumen compliance
+            </CardDescription>
+          </CardHeader>
+          {guideOpen && (
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* Gemini Guide */}
+                <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-blue-900 dark:text-blue-100">Google Gemini</p>
+                      <span className="text-xs text-green-700 dark:text-green-400 font-medium bg-green-100 dark:bg-green-900/40 px-1.5 py-0.5 rounded">
+                        ✓ GRATIS — 15 req/menit
+                      </span>
+                    </div>
+                  </div>
+                  <ol className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-bold">1</span>
+                      <span>Buka{" "}
+                        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 underline font-medium">
+                          aistudio.google.com/apikey
+                        </a>
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-bold">2</span>
+                      <span>Login dengan <strong>akun Google</strong> Anda (Gmail)</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-bold">3</span>
+                      <span>Klik tombol <strong>"Create API key"</strong></span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-bold">4</span>
+                      <span>Pilih project Google (atau buat baru), klik <strong>"Create API key in existing project"</strong></span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 flex items-center justify-center text-xs font-bold">5</span>
+                      <span>Copy API key (diawali <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded text-xs">AIza...</code>) → paste di form di bawah</span>
+                    </li>
+                  </ol>
+                  <div className="mt-3 p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg text-xs text-blue-700 dark:text-blue-300">
+                    <strong>Cara pakai:</strong> Pilih provider <em>Google Gemini</em>, tempel key, simpan. Lalu buka Document Builder → pilih template → klik "Buka di Gemini".
+                  </div>
+                </div>
+
+                {/* Qwen Guide */}
+                <div className="rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/30 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-purple-900 dark:text-purple-100">Qwen (Alibaba)</p>
+                      <span className="text-xs text-green-700 dark:text-green-400 font-medium bg-green-100 dark:bg-green-900/40 px-1.5 py-0.5 rounded">
+                        ✓ GRATIS — quota awal tersedia
+                      </span>
+                    </div>
+                  </div>
+                  <ol className="space-y-2 text-sm text-purple-800 dark:text-purple-200">
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 flex items-center justify-center text-xs font-bold">1</span>
+                      <span>Buka{" "}
+                        <a href="https://bailian.console.aliyun.com/" target="_blank" rel="noreferrer" className="text-purple-600 dark:text-purple-400 underline font-medium">
+                          bailian.console.aliyun.com
+                        </a>
+                      </span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 flex items-center justify-center text-xs font-bold">2</span>
+                      <span>Daftar / Login akun <strong>Alibaba Cloud</strong> (bisa pakai email)</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 flex items-center justify-center text-xs font-bold">3</span>
+                      <span>Di menu kiri, klik <strong>"API-KEY"</strong></span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 flex items-center justify-center text-xs font-bold">4</span>
+                      <span>Klik <strong>"Create API Key"</strong> → beri nama → Create</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 flex items-center justify-center text-xs font-bold">5</span>
+                      <span>Copy API key (diawali <code className="bg-purple-100 dark:bg-purple-900 px-1 rounded text-xs">sk-...</code>) → paste di form di bawah</span>
+                    </li>
+                  </ol>
+                  <div className="mt-3 p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg text-xs text-purple-700 dark:text-purple-300">
+                    <strong>Cara pakai:</strong> Pilih provider <em>Qwen (Alibaba)</em>, tempel key, simpan. Lalu buka Document Builder → pilih template → klik "Buka di Qwen".
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3">
+                <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Catatan:</strong> API key di sini hanya digunakan untuk fitur tambahan di dalam aplikasi. Untuk penggunaan prompt biasa, Anda tidak perlu API key — cukup klik "Buka di Gemini" / "Buka di Qwen" di halaman Document Builder dan tempel prompt langsung di chat AI.
+                </span>
+              </div>
+            </CardContent>
+          )}
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Add / update key */}

@@ -1,12 +1,8 @@
 import { useState, useCallback } from "react";
-import { Link } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/hooks/use-industry";
@@ -26,11 +22,8 @@ import {
   FileWarning,
   Briefcase,
   Shield,
-  Wand2,
   Info,
-  Download,
-  Loader2,
-  FileSignature,
+  ExternalLink,
 } from "lucide-react";
 
 const DOCUMENT_TEMPLATES = [
@@ -506,46 +499,8 @@ export default function DocumentBuilder() {
   const [generatedPrompt, setGeneratedPrompt] = useState<string>("");
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [additionalContext, setAdditionalContext] = useState("");
-  const [generatedDocument, setGeneratedDocument] = useState<string>("");
-  const [copiedDocument, setCopiedDocument] = useState(false);
-  const [activeView, setActiveView] = useState<"document" | "prompt">("prompt");
-  const [outputMode, setOutputMode] = useState<"prompt" | "document">("prompt");
 
   const industryTemplates = getAllTemplates();
-
-  const { data: aiKeys = [] } = useQuery<
-    { provider: string; model: string | null; isActive: boolean; maskedKey: string }[]
-  >({
-    queryKey: ["/api/ai/keys"],
-  });
-  const activeKey = aiKeys.find((k) => k.isActive);
-
-  const generateDocMutation = useMutation({
-    mutationFn: async (prompt: string) => {
-      const res = await apiRequest("POST", "/api/ai/generate", { prompt });
-      return (await res.json()) as { content: string };
-    },
-    onSuccess: (data) => {
-      setGeneratedDocument(data.content || "");
-      setActiveView("document");
-      toast({
-        title: "Dokumen berhasil dibuat!",
-        description: "Dokumen lengkap siap disalin atau diunduh.",
-      });
-    },
-    onError: (error: Error) => {
-      const noKey =
-        error.message.includes("NO_AI_KEY") ||
-        error.message.toLowerCase().includes("api key");
-      toast({
-        title: noKey ? "Belum ada API key AI" : "Gagal membuat dokumen",
-        description: noKey
-          ? "Tambahkan API key Anda di menu Pengaturan AI untuk mulai membuat dokumen."
-          : error.message || "Terjadi kesalahan saat menghubungi AI.",
-        variant: "destructive",
-      });
-    },
-  });
 
   // Use placeholders only - no internal company data
   const companyName = "[NAMA PERUSAHAAN]";
@@ -619,53 +574,34 @@ CATATAN PENTING:
 
     setGeneratedPrompt(fullPrompt);
     setSelectedTemplate(template);
-    setGeneratedDocument("");
     return fullPrompt;
   }, [companyName, director, ketuaFKAP, companyCode, companyAddress, currentDate, currentYear, additionalContext]);
 
   const handleSelectTemplate = useCallback((template: typeof DOCUMENT_TEMPLATES[0]) => {
     generatePrompt(template);
-    setActiveView(outputMode);
-  }, [generatePrompt, outputMode]);
-
-  const handleCopyDocument = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(generatedDocument);
-      setCopiedDocument(true);
-      toast({ title: "Dokumen disalin!", description: "Tempelkan ke Word atau editor Anda." });
-      setTimeout(() => setCopiedDocument(false), 3000);
-    } catch {
-      toast({ title: "Gagal menyalin", variant: "destructive" });
-    }
-  }, [generatedDocument, toast]);
-
-  const handleDownloadDocument = useCallback(() => {
-    if (!generatedDocument) return;
-    const blob = new Blob([generatedDocument], { type: "application/msword" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const fileName = (selectedTemplate?.code || "dokumen-smap").toLowerCase();
-    link.href = url;
-    link.download = `${fileName}.doc`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast({ title: "Dokumen diunduh!", description: "File .doc dapat dibuka di Microsoft Word." });
-  }, [generatedDocument, selectedTemplate, toast]);
+  }, [generatePrompt]);
 
   const handleCopyPrompt = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopiedPrompt(true);
-      toast({ 
-        title: "Prompt disalin!", 
-        description: "Tempelkan di dokumenttender.com atau AI model lainnya" 
-      });
+      toast({ title: "Prompt disalin!", description: "Tempel di Gemini, Qwen, atau AI pilihan Anda." });
       setTimeout(() => setCopiedPrompt(false), 3000);
     } catch {
       toast({ title: "Gagal menyalin", variant: "destructive" });
     }
+  }, [generatedPrompt, toast]);
+
+  const handleOpenGemini = useCallback(async () => {
+    try { await navigator.clipboard.writeText(generatedPrompt); } catch { /* ignore */ }
+    window.open("https://gemini.google.com", "_blank");
+    toast({ title: "Gemini dibuka!", description: "Tempel prompt (Ctrl+V) di kotak chat Gemini." });
+  }, [generatedPrompt, toast]);
+
+  const handleOpenQwen = useCallback(async () => {
+    try { await navigator.clipboard.writeText(generatedPrompt); } catch { /* ignore */ }
+    window.open("https://chat.qwenlm.ai", "_blank");
+    toast({ title: "Qwen dibuka!", description: "Tempel prompt (Ctrl+V) di kotak chat Qwen." });
   }, [generatedPrompt, toast]);
 
   return (
@@ -674,104 +610,39 @@ CATATAN PENTING:
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Wand2 className="w-6 h-6 text-primary" />
+              <Copy className="w-6 h-6 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold" data-testid="text-page-title">
-                AI Document Builder {currentIndustry?.shortName || ""}
+                Prompt Generator Dokumen {currentIndustry?.shortName || ""}
               </h1>
               <p className="text-muted-foreground text-sm">
-                Buat dokumen {currentIndustry?.shortName || "kepatuhan"} lengkap langsung dengan AI - {industryTemplates.length} template tersedia
+                Generate prompt siap pakai — {industryTemplates.length} template tersedia. Tempel di Gemini atau Qwen untuk mendapatkan dokumen lengkap.
               </p>
             </div>
           </div>
-          
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              onClick={() => { setOutputMode("prompt"); setActiveView("prompt"); }}
-              className={`p-4 rounded-xl border-2 text-left transition-all focus:outline-none ${
-                outputMode === "prompt"
-                  ? "border-primary bg-primary/5 shadow-sm"
-                  : "border-border hover:border-primary/40 bg-card"
-              }`}
-              data-testid="button-mode-prompt"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`p-1.5 rounded-lg ${outputMode === "prompt" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                  <Copy className="w-4 h-4" />
+
+          <Card className="mt-4 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3 text-sm">
+                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                <div className="text-blue-800 dark:text-blue-200">
+                  <p className="font-semibold mb-1">Cara menggunakan:</p>
+                  <ol className="space-y-0.5 text-blue-700 dark:text-blue-300 list-decimal list-inside">
+                    <li>Pilih template dokumen di sebelah kiri</li>
+                    <li>Prompt otomatis terbuat di panel kanan</li>
+                    <li>Klik <span className="font-medium">"Buka di Gemini"</span> atau <span className="font-medium">"Buka di Qwen"</span> — prompt otomatis tersalin &amp; AI-nya terbuka</li>
+                    <li>Tempel prompt (Ctrl+V) di kotak chat AI, dokumen lengkap siap dihasilkan</li>
+                  </ol>
                 </div>
-                <span className="font-semibold text-sm">Mode Prompt</span>
-                {outputMode === "prompt" && <Badge className="text-xs ml-auto">Aktif</Badge>}
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Hasilkan teks prompt — salin &amp; tempel ke ChatGPT, Gemini, Claude, atau AI eksternal lainnya. <span className="font-medium text-foreground">Gratis, tanpa API key.</span>
-              </p>
-            </button>
-
-            <button
-              onClick={() => { setOutputMode("document"); setActiveView("document"); }}
-              className={`p-4 rounded-xl border-2 text-left transition-all focus:outline-none ${
-                outputMode === "document"
-                  ? "border-primary bg-primary/5 shadow-sm"
-                  : "border-border hover:border-primary/40 bg-card"
-              }`}
-              data-testid="button-mode-document"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`p-1.5 rounded-lg ${outputMode === "document" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                  <Wand2 className="w-4 h-4" />
-                </div>
-                <span className="font-semibold text-sm">Mode Dokumen AI</span>
-                {outputMode === "document" && <Badge className="text-xs ml-auto">Aktif</Badge>}
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Generate dokumen lengkap langsung di aplikasi. <span className="font-medium text-foreground">Butuh API key AI</span> — biaya token ke akun Anda sendiri.
-              </p>
-            </button>
-          </div>
-
-          {!activeKey && (
-            <Card className="mt-3 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div className="flex items-start gap-3 text-sm">
-                    <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                    <div className="text-amber-800 dark:text-amber-300">
-                      <p className="font-medium">Belum ada API key AI aktif</p>
-                      <p className="text-amber-700 dark:text-amber-400 mt-0.5">
-                        Tambahkan API key akun AI Anda sendiri (Gemini, OpenAI, OpenRouter, DeepSeek, atau Qwen).
-                        Biaya token ditanggung oleh akun Anda. Anda tetap bisa menyalin Prompt secara gratis.
-                      </p>
-                    </div>
-                  </div>
-                  <Button asChild size="sm" className="gap-2" data-testid="button-go-ai-settings">
-                    <Link href="/ai-settings">
-                      <Wand2 className="w-4 h-4" />
-                      Tambah API Key
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeKey && (
-            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground" data-testid="text-active-provider">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>
-                AI aktif: <span className="font-medium text-foreground">{activeKey.provider}</span>
-                {activeKey.model ? ` · ${activeKey.model}` : ""}
-              </span>
-              <Link href="/ai-settings" className="text-primary hover:underline ml-1" data-testid="link-change-provider">
-                Ubah
-              </Link>
-            </div>
-          )}
+            </CardContent>
+          </Card>
 
           <div className="flex items-center gap-2 mt-3 p-3 bg-muted/50 rounded-lg">
             <Building2 className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm">
-              Template menggunakan placeholder (ganti sesuai data perusahaan Anda)
+              Template menggunakan placeholder — ganti sesuai data perusahaan Anda di dalam chat AI
             </span>
           </div>
         </div>
@@ -875,148 +746,67 @@ CATATAN PENTING:
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <FileSignature className="w-5 h-5" />
-                    Dokumen yang Dihasilkan
+                    <FileText className="w-5 h-5" />
+                    Prompt Siap Pakai
                   </CardTitle>
-                  {selectedTemplate && (
-                    <div className="flex items-center gap-2">
-                      {activeView === "document" && generatedDocument && !generateDocMutation.isPending && (
-                        <>
-                          <Button
-                            onClick={handleCopyDocument}
-                            className="gap-2"
-                            data-testid="button-copy-document"
-                          >
-                            {copiedDocument ? (
-                              <>
-                                <Check className="w-4 h-4" />
-                                Tersalin!
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-4 h-4" />
-                                Salin
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={handleDownloadDocument}
-                            className="gap-2"
-                            data-testid="button-download-document"
-                          >
-                            <Download className="w-4 h-4" />
-                            Unduh .doc
-                          </Button>
-                        </>
-                      )}
-                      {activeView === "prompt" && generatedPrompt && (
-                        <Button
-                          onClick={handleCopyPrompt}
-                          variant="outline"
-                          className="gap-2"
-                          data-testid="button-copy-prompt"
-                        >
-                          {copiedPrompt ? (
-                            <>
-                              <Check className="w-4 h-4" />
-                              Tersalin!
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-4 h-4" />
-                              Salin Prompt
-                            </>
-                          )}
-                        </Button>
-                      )}
+                  {selectedTemplate && generatedPrompt && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button
+                        onClick={handleCopyPrompt}
+                        variant="outline"
+                        className="gap-2"
+                        data-testid="button-copy-prompt"
+                      >
+                        {copiedPrompt ? (
+                          <><Check className="w-4 h-4" />Tersalin!</>
+                        ) : (
+                          <><Copy className="w-4 h-4" />Salin Prompt</>
+                        )}
+                      </Button>
+                      <Button
+                        onClick={handleOpenGemini}
+                        className="gap-2"
+                        data-testid="button-open-gemini"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Buka di Gemini
+                      </Button>
+                      <Button
+                        onClick={handleOpenQwen}
+                        variant="secondary"
+                        className="gap-2"
+                        data-testid="button-open-qwen"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Buka di Qwen
+                      </Button>
                     </div>
                   )}
                 </div>
-                {selectedTemplate && (
+                {selectedTemplate ? (
                   <CardDescription>
-                    Template: {selectedTemplate.title} (Klausul {selectedTemplate.clause})
+                    Template: {selectedTemplate.title} · Klausul {selectedTemplate.clause} — salin atau buka langsung di AI pilihan Anda
+                  </CardDescription>
+                ) : (
+                  <CardDescription>
+                    Pilih template di sebelah kiri untuk melihat prompt siap pakai
                   </CardDescription>
                 )}
               </CardHeader>
               <CardContent>
                 {selectedTemplate ? (
-                  <Tabs value={activeView} onValueChange={(v) => setActiveView(v as "document" | "prompt")}>
-                    <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                      <TabsList data-testid="tabs-output">
-                        <TabsTrigger value="document" className="gap-1.5" data-testid="tab-document">
-                          <FileSignature className="w-4 h-4" />
-                          Dokumen AI
-                        </TabsTrigger>
-                        <TabsTrigger value="prompt" className="gap-1.5" data-testid="tab-prompt">
-                          <Sparkles className="w-4 h-4" />
-                          Prompt
-                        </TabsTrigger>
-                      </TabsList>
-                      {generatedDocument && !generateDocMutation.isPending && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => generateDocMutation.mutate(generatedPrompt)}
-                          className="gap-2"
-                          data-testid="button-regenerate-document"
-                        >
-                          <Wand2 className="w-4 h-4" />
-                          Buat Ulang
-                        </Button>
-                      )}
-                    </div>
-
-                    <TabsContent value="document" className="mt-0">
-                      {generateDocMutation.isPending ? (
-                        <div className="h-[560px] rounded-lg border bg-muted/30 flex items-center justify-center">
-                          <div className="text-center text-muted-foreground p-8">
-                            <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
-                            <p className="font-medium">AI sedang menyusun dokumen...</p>
-                            <p className="text-sm mt-2">
-                              Mohon tunggu beberapa saat, dokumen lengkap sedang dibuat.
-                            </p>
-                          </div>
-                        </div>
-                      ) : generatedDocument ? (
-                        <ScrollArea className="h-[560px] rounded-lg border bg-background p-6">
-                          <div className="text-sm whitespace-pre-wrap leading-relaxed" data-testid="text-generated-document">
-                            {generatedDocument}
-                          </div>
-                        </ScrollArea>
-                      ) : (
-                        <div className="h-[560px] rounded-lg border bg-muted/30 flex items-center justify-center">
-                          <div className="text-center text-muted-foreground p-8">
-                            <FileSignature className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                            <p className="font-medium">Dokumen belum dibuat</p>
-                            <Button
-                              onClick={() => generateDocMutation.mutate(generatedPrompt)}
-                              className="gap-2 mt-4"
-                              data-testid="button-generate-document"
-                            >
-                              <Wand2 className="w-4 h-4" />
-                              Buat Dokumen Sekarang
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </TabsContent>
-
-                    <TabsContent value="prompt" className="mt-0">
-                      <ScrollArea className="h-[560px] rounded-lg border bg-muted/30 p-4">
-                        <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed" data-testid="text-generated-prompt">
-                          {generatedPrompt}
-                        </pre>
-                      </ScrollArea>
-                    </TabsContent>
-                  </Tabs>
+                  <ScrollArea className="h-[590px] rounded-lg border bg-muted/30 p-4">
+                    <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed" data-testid="text-generated-prompt">
+                      {generatedPrompt}
+                    </pre>
+                  </ScrollArea>
                 ) : (
-                  <div className="h-[600px] rounded-lg border bg-muted/30 flex items-center justify-center">
+                  <div className="h-[590px] rounded-lg border bg-muted/30 flex items-center justify-center">
                     <div className="text-center text-muted-foreground p-8">
-                      <Wand2 className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                      <p className="font-medium">Pilih template untuk membuat dokumen</p>
-                      <p className="text-sm mt-2">
-                        Klik template di sebelah kiri dan AI akan langsung membuat dokumen lengkap untuk Anda
+                      <FileText className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                      <p className="font-medium text-base">Pilih template untuk lihat prompt</p>
+                      <p className="text-sm mt-2 max-w-xs mx-auto">
+                        Klik template di sebelah kiri — prompt siap pakai akan otomatis muncul di sini
                       </p>
                     </div>
                   </div>
