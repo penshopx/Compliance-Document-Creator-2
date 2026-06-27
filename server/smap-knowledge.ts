@@ -628,32 +628,34 @@ GAP ANALYSIS UNTUK KONSTRUKSI — Area Risiko Khusus:
 • Subkontraktor: Due diligence wajib untuk semua sub-kon besar (Tier 1)
 • Personil Lapangan (Site Manager, Surveyor, QC): akses ke area berisiko
 
-JALUR COMPLIANCE BERDASARKAN KUALIFIKASI (BARU — PER 2025):
-⚠️ PENTING: Sejak kebijakan terbaru (regulasi pengganti Permen PU 08/2022 belum dipublikasi secara luas),
-jalur SMAP untuk BUJK telah berubah:
+JALUR COMPLIANCE BERDASARKAN KUALIFIKASI (PER 2025):
 
 • BUJK Besar → Target: Sertifikat ISO 37001:2016 dari CB terakreditasi KAN
   Timeline: SEGERA (max 1 tahun sejak SBU terbit) → Fase: Siap Dokumen → Audit Internal → ISO cert
 
-• BUJK Menengah & Kecil → Target: Pancek KPK via Platform Jaga.id
-  → Dokumen SMAP tetap WAJIB dibuat — menjadi LAMPIRAN WAJIB kuesioner/formulir Pancek KPK
-  → Tanpa dokumen SMAP, pengisian kuesioner Pancek KPK tidak dapat dilengkapi
-  → Pancek KPK = Panduan Cegah Korupsi dari KPK berdasarkan UU Tindak Pidana Korupsi
-  → Platform verifikasi: Jaga.id (Platform KPK)
+• BUJK Menengah → Target: Sertifikat ISO 37001:2016 atau Pancek KPK (Jaga.id)
+  → Dokumen SMAP tetap WAJIB dibuat sebagai dasar compliance
 
-HUBUNGAN SMAP ↔ PANCEK KPK:
-• Dokumen SMAP (16 komponen) = lampiran material Pancek KPK
-• Kuesioner Pancek KPK MENSYARATKAN dokumen SMAP sebagai bukti
-• Jadi untuk Kecil/Menengah: buat dokumen SMAP → submit ke Pancek KPK (Jaga.id) → verifikasi KPK
-• Sertifikat ISO 37001 tetap boleh, tapi bukan jalur utama untuk Kecil/Menengah
+• BUJK Kecil → SMAP masih SEPENUHNYA RELEVAN dan berlaku saat ini
+  → Target saat ini (sebelum 2027): Dokumen SMAP (bisa untuk SBU dan sebagai persiapan Pancek KPK)
+  → Mulai 2027: Pancek KPK via Jaga.id menjadi jalur WAJIB untuk kualifikasi Kecil
+  → ⚠️ Penting: dokumen SMAP yang disusun sekarang akan menjadi LAMPIRAN WAJIB kuesioner Pancek KPK
+  → Jadi membangun dokumen SMAP sekarang = investasi yang tidak terbuang (dipakai dua jalur)
+
+POSISI PANCEK KPK DALAM EKOSISTEM:
+• Pancek KPK = Panduan Cegah Korupsi dari KPK, berdasarkan UU Tindak Pidana Korupsi
+• Platform verifikasi: Jaga.id (Platform KPK)
+• Pancek KPK memiliki kuesioner/formulir tersendiri — dikelola di section TERPISAH dari SMAP
+• Dokumen SMAP (16 komponen) menjadi LAMPIRAN MATERIAL kuesioner Pancek KPK
+• Jangan campur pembahasan Pancek KPK ke dalam sesi konsultansi SMAP — arahkan ke section Pancek
 
 PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
 • "Apakah perusahaan sudah memiliki SBU? Kualifikasi Kecil/Menengah/Besar?"
-• "Apakah sudah mengenal Pancek KPK? Sudah terdaftar di platform Jaga.id?"
-• "Dokumen SMAP apa yang sudah dimiliki? (karena akan jadi lampiran Pancek KPK)"
+• "Kapan SBU terakhir diterbitkan? Berapa sisa waktu pemenuhan SMAP?"
 • "Apakah sudah ada Surat Pernyataan Komitmen SMAP yang diserahkan ke LSBU?"
 • "Seberapa sering perusahaan mengikuti tender pemerintah?"
 • "Ada berapa subkontraktor yang biasa bekerja sama?"
+• Untuk BUJK Kecil: "Sudah tahu bahwa mulai 2027 wajib Pancek KPK? Dokumen SMAP yang kita buat sekarang akan dipakai sebagai lampiran Pancek nanti."
 `;
 
 // ─── SMAP DOCUMENT FRAMEWORK — 16 Planning + 6 Implementation (dari "Revolusi") ─
