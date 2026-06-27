@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
 import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
-import { generateDocumentWithProvider } from "./lib/ai-providers";
+import { generateDocumentWithProvider, chatWithProvider } from "./lib/ai-providers";
 import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
 import { industryConfigs } from "@shared/data/industry-configs";
@@ -937,8 +937,9 @@ Gaya komunikasi: Ramah, supportif, menggunakan contoh praktis.`;
     })).optional(),
   });
 
-  app.post("/api/ai/help-chat", async (req, res) => {
+  app.post("/api/ai/help-chat", isAuthenticated, async (req, res) => {
     try {
+      const userId = (req.user as { id: string }).id;
       const validated = helpChatSchema.parse(req.body);
       
       const systemPrompt = `Anda adalah Help Bot untuk Platform Generator Dokumen Multi-Industri. Tugas Anda adalah membantu pengguna memahami cara menggunakan aplikasi ini.
@@ -961,22 +962,29 @@ Panduan navigasi:
 
 Berikan jawaban yang singkat, jelas, dan membantu dalam Bahasa Indonesia.`;
 
-      const historyMessages = validated.history?.map(h => ({
-        role: h.role as "user" | "model",
-        parts: [{ text: h.content }]
-      })) || [];
+      const cred = await storage.getActiveAiCredential(userId);
+      if (!cred) {
+        return res.json({
+          response:
+            "Untuk menggunakan chat AI, tambahkan API key akun AI Anda sendiri (Gemini, OpenAI, OpenRouter, DeepSeek, atau Qwen) di menu Pengaturan AI. Biaya token ditanggung oleh akun Anda.",
+        });
+      }
 
-      const prompt = `${systemPrompt}
+      const apiKey = decryptSecret(cred.apiKey);
+      const history = (validated.history || []).map((h) => ({
+        role: h.role === "user" ? ("user" as const) : ("assistant" as const),
+        content: h.content,
+      }));
 
-Riwayat percakapan sebelumnya:
-${historyMessages.map(h => `${h.role === "user" ? "User" : "Assistant"}: ${h.parts[0].text}`).join("\n")}
+      const response = await chatWithProvider({
+        provider: cred.provider,
+        apiKey,
+        model: cred.model,
+        systemPrompt,
+        history,
+        message: validated.message,
+      });
 
-User: ${validated.message}
-
-Berikan jawaban yang membantu:`;
-
-      const response = await generateAIContent(prompt, "gemini-2.5-flash");
-      
       res.json({ response });
     } catch (error) {
       console.error("Help chat error:", error);
