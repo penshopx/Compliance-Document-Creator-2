@@ -1135,6 +1135,199 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
     }
   });
 
+  // ============ GUSTAFTA DIALOG ROUTES ============
+
+  // POST /api/gustafta/chat - SSE streaming Socratic dialogue
+  app.post("/api/gustafta/chat", isAuthenticated, async (req, res) => {
+    try {
+      const schema = z.object({
+        messages: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })),
+        companyName: z.string().optional(),
+      });
+      const validated = schema.parse(req.body);
+
+      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "AI tidak tersedia. Hubungi administrator." });
+      }
+
+      const GUSTAFTA_PROMPT = `Anda adalah GUSTAFTA — fasilitator dialog Socratic khusus untuk pemetaan kebutuhan Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan SNI ISO 37001:2016.
+
+MISI ANDA:
+Menggali profil, potensi, dan kebutuhan SMAP perusahaan melalui dialog reflektif, bukan ceramah atau penjelasan panjang.
+
+CARA BERDIALOG:
+- Satu pertanyaan per giliran — jangan bombardir dengan banyak pertanyaan sekaligus
+- Respons singkat: 2-3 kalimat konteks/afirmasi + 1 pertanyaan
+- Gunakan jawaban sebelumnya untuk memperdalam dengan pertanyaan lanjutan yang relevan
+- Jika jawaban kurang jelas, pancing dengan pertanyaan klarifikasi
+- Nada: hangat, profesional, tidak menghakimi
+
+6 AREA YANG HARUS DIGALI (secara natural):
+1. Profil Organisasi — jenis badan usaha, skala, jumlah karyawan, struktur organisasi
+2. Bidang Usaha & Eksposur Risiko — sektor bisnis, proyek pemerintah, pengadaan, perizinan
+3. Kondisi Dokumen Eksisting — kebijakan, SOP, ISO, sistem manajemen yang sudah ada
+4. SDM & Kompetensi — PIC compliance, pelatihan, kesadaran staf tentang anti-penyuapan
+5. Komitmen Pimpinan — dukungan top management, siapa sponsor SMAP
+6. Target & Timeline — tujuan sertifikasi, deadline, konteks (tender/kontrak/regulasi)
+
+ALUR DIALOG:
+- Mulai dengan sapaan singkat dan pertanyaan tentang profil perusahaan
+- Jelajahi area secara natural mengikuti alur percakapan
+- Setelah semua area tergali (sekitar 10-15 pertukaran), tutup dengan:
+  "Terima kasih atas informasinya. Saya sudah mendapat gambaran yang cukup komprehensif untuk menyusun Blueprint SMAP Anda. Silakan klik tombol **Generate Blueprint** untuk mendapatkan peta jalan implementasi yang dipersonalisasi."
+
+${validated.companyName ? `PERUSAHAAN: ${validated.companyName}` : ''}
+
+Gunakan bahasa Indonesia yang natural dan profesional.`;
+
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const genAI = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          apiVersion: "",
+          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
+        },
+      });
+
+      // Build conversation history for Gemini (must alternate user/model)
+      const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
+        { role: "user", parts: [{ text: GUSTAFTA_PROMPT }] },
+        { role: "model", parts: [{ text: "Siap. Saya akan memulai dialog Gustafta untuk memetakan kebutuhan SMAP perusahaan Anda." }] },
+      ];
+
+      for (const msg of validated.messages) {
+        contents.push({
+          role: msg.role === "assistant" ? "model" : "user",
+          parts: [{ text: msg.content }],
+        });
+      }
+
+      const stream = await genAI.models.generateContentStream({
+        model: "gemini-2.5-flash",
+        contents,
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.text || "";
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      }
+
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    } catch (error) {
+      console.error("Gustafta chat error:", error);
+      if (res.headersSent) {
+        res.write(`data: ${JSON.stringify({ error: "Terjadi kesalahan. Silakan coba lagi." })}\n\n`);
+        res.end();
+      } else {
+        res.status(500).json({ error: "Failed to process Gustafta dialog" });
+      }
+    }
+  });
+
+  // POST /api/gustafta/blueprint - Generate structured SMAP blueprint
+  app.post("/api/gustafta/blueprint", isAuthenticated, async (req, res) => {
+    try {
+      const schema = z.object({
+        messages: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })),
+        companyName: z.string().optional(),
+      });
+      const validated = schema.parse(req.body);
+
+      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "AI tidak tersedia." });
+      }
+
+      const conversationText = validated.messages
+        .map(m => `${m.role === "user" ? "Perusahaan" : "Gustafta"}: ${m.content}`)
+        .join("\n\n");
+
+      const blueprintPrompt = `Anda adalah analis SMAP senior. Berdasarkan dialog Socratic berikut, susun Blueprint Implementasi SMAP dalam format JSON terstruktur.
+
+DIALOG:
+${conversationText}
+
+Hasilkan HANYA JSON murni (tanpa markdown, tanpa teks tambahan):
+{
+  "profilRisiko": {
+    "level": "Rendah|Sedang|Tinggi|Sangat Tinggi",
+    "skor": <angka 1-10>,
+    "faktorUtama": ["faktor1", "faktor2", "faktor3"]
+  },
+  "kondisiEksisting": {
+    "kekuatan": ["kekuatan1", "kekuatan2"],
+    "kelemahan": ["kelemahan1", "kelemahan2"],
+    "peluang": ["peluang1", "peluang2"]
+  },
+  "dokumenPrioritas": [
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Kritis|Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Kritis|Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Kritis|Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Kritis|Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Kritis|Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Tinggi|Sedang" },
+    { "nama": "nama dokumen", "klausul": "ISO 37001:2016 Klausul X.X", "prioritas": "Sedang" }
+  ],
+  "rekomendasiFase": {
+    "fase": "Siap Dokumen SMAP|Siap Audit Internal|Siap Audit Eksternal|Siap Surveilance",
+    "alasan": "penjelasan singkat 2-3 kalimat mengapa fase ini direkomendasikan",
+    "estimasiWaktu": "X-Y bulan"
+  },
+  "roadmap": [
+    { "periode": "Bulan 1-2", "kegiatan": "deskripsi kegiatan utama" },
+    { "periode": "Bulan 3-4", "kegiatan": "deskripsi kegiatan utama" },
+    { "periode": "Bulan 5-6", "kegiatan": "deskripsi kegiatan utama" },
+    { "periode": "Bulan 7-8", "kegiatan": "deskripsi kegiatan utama" }
+  ],
+  "kesimpulan": "paragraf kesimpulan 3-4 kalimat yang merangkum kondisi perusahaan dan langkah selanjutnya",
+  "namaPerusahaan": "${validated.companyName || 'Perusahaan'}"
+}
+
+Pastikan rekomendasi realistis sesuai informasi yang digali dari dialog. Jika informasi kurang, buat asumsi yang reasonable dan sebutkan dalam kesimpulan.`;
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const genAI = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          apiVersion: "",
+          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
+        },
+      });
+
+      const response = await genAI.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: [{ role: "user", parts: [{ text: blueprintPrompt }] }],
+      });
+
+      const rawText = response.text || "";
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return res.status(500).json({ error: "Gagal menghasilkan blueprint. Coba lagi." });
+      }
+
+      const blueprint = JSON.parse(jsonMatch[0]);
+      res.json({ blueprint });
+    } catch (error) {
+      console.error("Gustafta blueprint error:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to generate blueprint" });
+    }
+  });
+
   // ============ PAYMENT ROUTES ============
 
   // Get all subscription plans

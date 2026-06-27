@@ -39,6 +39,7 @@ import CheckoutPage from "@/pages/checkout";
 import KnowledgeBasePage from "@/pages/knowledge-base";
 import PathwayPage from "@/pages/pathway";
 import AdminPaymentsPage from "@/pages/admin-payments";
+import GustafdaDialog from "@/pages/gustafta-dialog";
 import { isIndustryEnabled } from "@/data/industry-configs";
 
 function Router() {
@@ -70,6 +71,7 @@ function Router() {
       <Route path="/knowledge-base" component={KnowledgeBasePage} />
       <Route path="/pathway/:industryId/:domainId" component={PathwayPage} />
       <Route path="/admin/payments" component={AdminPaymentsPage} />
+      <Route path="/gustafta-dialog" component={GustafdaDialog} />
       <Route component={NotFound} />
     </Switch>
   );
