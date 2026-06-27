@@ -83,7 +83,8 @@ export const smapConfig: IndustryConfig = {
     {
       label: "Blueprint SMAP",
       items: [
-        { title: "Gustafta Dialog", url: "/gustafta-dialog", icon: "MessageSquare", badge: "Baru" }
+        { title: "Gustafta Dialog", url: "/gustafta-dialog", icon: "MessageSquare", badge: "Baru" },
+        { title: "Gustafta Collab", url: "/gustafta-collab", icon: "Users", badge: "Baru" }
       ]
     },
     {
