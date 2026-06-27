@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
+import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
+import { generateDocumentWithProvider } from "./lib/ai-providers";
+import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
 import { industryConfigs } from "@shared/data/industry-configs";
 import { z } from "zod";
@@ -21,8 +24,14 @@ import {
 
 // AI Request Validation Schemas
 const aiGenerateSchema = z.object({
-  prompt: z.string().min(1).max(10000),
-  model: z.enum(["gemini-2.5-flash", "gemini-2.5-pro"]).default("gemini-2.5-flash"),
+  prompt: z.string().min(1).max(20000),
+  model: z.string().max(100).optional(),
+});
+
+const saveAiKeySchema = z.object({
+  provider: z.enum(AI_PROVIDER_IDS as [string, ...string[]]),
+  apiKey: z.string().min(8).max(400),
+  model: z.string().max(100).optional(),
 });
 
 const smapGenerateSchema = z.object({
@@ -776,11 +785,100 @@ Gaya komunikasi: Ramah, supportif, menggunakan contoh praktis.`;
   });
 
   // Gemini AI Document Generation
-  app.post("/api/ai/generate", async (req, res) => {
+  // List the current user's saved AI providers (keys are never returned in full)
+  app.get("/api/ai/keys", isAuthenticated, async (req, res) => {
     try {
+      const userId = (req.user as { id: string }).id;
+      const creds = await storage.getAiCredentials(userId);
+      const result = creds.map((c) => {
+        let maskedKey = "";
+        try {
+          maskedKey = maskSecret(decryptSecret(c.apiKey));
+        } catch {
+          maskedKey = "••••";
+        }
+        return {
+          provider: c.provider,
+          model: c.model,
+          isActive: c.isActive,
+          maskedKey,
+        };
+      });
+      res.json(result);
+    } catch (error) {
+      console.error("List AI keys error:", error);
+      res.status(500).json({ error: "Gagal memuat API key" });
+    }
+  });
+
+  // Save or update an AI provider key for the current user
+  app.post("/api/ai/keys", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const validated = saveAiKeySchema.parse(req.body);
+      const encrypted = encryptSecret(validated.apiKey.trim());
+      const model = validated.model?.trim() || getProviderMeta(validated.provider)?.defaultModel || null;
+      const cred = await storage.upsertAiCredential(userId, validated.provider, encrypted, model);
+      res.json({ provider: cred.provider, model: cred.model, isActive: cred.isActive });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Data tidak valid", details: error.errors });
+      }
+      console.error("Save AI key error:", error);
+      res.status(500).json({ error: "Gagal menyimpan API key" });
+    }
+  });
+
+  // Set the active provider used for generation
+  app.post("/api/ai/keys/:provider/activate", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const { provider } = req.params;
+      const creds = await storage.getAiCredentials(userId);
+      if (!creds.some((c) => c.provider === provider)) {
+        return res.status(404).json({ error: "Provider belum memiliki API key" });
+      }
+      await storage.setActiveAiCredential(userId, provider);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Activate AI key error:", error);
+      res.status(500).json({ error: "Gagal mengaktifkan provider" });
+    }
+  });
+
+  // Remove a provider key
+  app.delete("/api/ai/keys/:provider", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      await storage.deleteAiCredential(userId, req.params.provider);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete AI key error:", error);
+      res.status(500).json({ error: "Gagal menghapus API key" });
+    }
+  });
+
+  app.post("/api/ai/generate", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
       const validated = aiGenerateSchema.parse(req.body);
-      const content = await generateAIContent(validated.prompt, validated.model);
-      res.json({ content });
+
+      const cred = await storage.getActiveAiCredential(userId);
+      if (!cred) {
+        return res.status(400).json({
+          error: "Belum ada API key AI yang aktif. Tambahkan API key Anda di menu Pengaturan AI.",
+          code: "NO_AI_KEY",
+        });
+      }
+
+      const apiKey = decryptSecret(cred.apiKey);
+      const content = await generateDocumentWithProvider({
+        provider: cred.provider,
+        apiKey,
+        model: validated.model || cred.model,
+        prompt: validated.prompt,
+      });
+      res.json({ content, provider: cred.provider, model: validated.model || cred.model });
     } catch (error) {
       console.error("AI generation error:", error);
       if (error instanceof z.ZodError) {

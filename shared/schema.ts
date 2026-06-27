@@ -338,3 +338,4 @@ export type UserSubscription = typeof userSubscriptions.$inferSelect;
 
 // Export auth models
 export * from "./models/auth";
+export * from "./models/ai-keys";

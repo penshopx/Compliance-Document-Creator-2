@@ -32,6 +32,7 @@ import SMAPChecklist from "@/pages/smap-checklist";
 import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
 import IndustrySettingsPage from "@/pages/industry-settings";
+import AiSettingsPage from "@/pages/ai-settings";
 import HelpDeskChatbot from "@/components/help-desk-chatbot";
 import KnowledgeChatbot from "@/components/knowledge-chatbot";
 import CheckoutPage from "@/pages/checkout";
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/smap-checklist" component={SMAPChecklist} />
       <Route path="/produk-siap" component={ProdukSiap} />
       <Route path="/industry-settings" component={IndustrySettingsPage} />
+      <Route path="/ai-settings" component={AiSettingsPage} />
       <Route path="/knowledge-base" component={KnowledgeBasePage} />
       <Route path="/pathway/:industryId/:domainId" component={PathwayPage} />
       <Route component={NotFound} />

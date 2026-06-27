@@ -1,6 +1,8 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { db } from "./db";
 import {
+  aiCredentials,
+  type AiCredential,
   companies,
   managementTeam,
   employees,
@@ -157,6 +159,13 @@ export interface IStorage {
   getUserSubscription(userId: string): Promise<UserSubscription | undefined>;
   createUserSubscription(data: InsertUserSubscription): Promise<UserSubscription>;
   updateUserSubscription(id: string, data: Partial<InsertUserSubscription>): Promise<UserSubscription>;
+
+  // AI Credentials (BYOK)
+  getAiCredentials(userId: string): Promise<AiCredential[]>;
+  getActiveAiCredential(userId: string): Promise<AiCredential | undefined>;
+  upsertAiCredential(userId: string, provider: string, encryptedKey: string, model: string | null): Promise<AiCredential>;
+  setActiveAiCredential(userId: string, provider: string): Promise<void>;
+  deleteAiCredential(userId: string, provider: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -478,6 +487,73 @@ export class DatabaseStorage implements IStorage {
   async updateUserSubscription(id: string, data: Partial<InsertUserSubscription>): Promise<UserSubscription> {
     const [sub] = await db.update(userSubscriptions).set(data).where(eq(userSubscriptions.id, id)).returning();
     return sub;
+  }
+
+  // AI Credentials (BYOK)
+  async getAiCredentials(userId: string): Promise<AiCredential[]> {
+    return db.select().from(aiCredentials).where(eq(aiCredentials.userId, userId));
+  }
+
+  async getActiveAiCredential(userId: string): Promise<AiCredential | undefined> {
+    const [cred] = await db
+      .select()
+      .from(aiCredentials)
+      .where(and(eq(aiCredentials.userId, userId), eq(aiCredentials.isActive, true)));
+    return cred;
+  }
+
+  async upsertAiCredential(
+    userId: string,
+    provider: string,
+    encryptedKey: string,
+    model: string | null
+  ): Promise<AiCredential> {
+    const existing = await this.getAiCredentials(userId);
+    const isFirst = existing.length === 0;
+    const [cred] = await db
+      .insert(aiCredentials)
+      .values({ userId, provider, apiKey: encryptedKey, model, isActive: isFirst })
+      .onConflictDoUpdate({
+        target: [aiCredentials.userId, aiCredentials.provider],
+        set: { apiKey: encryptedKey, model },
+      })
+      .returning();
+    return cred;
+  }
+
+  async setActiveAiCredential(userId: string, provider: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx
+        .update(aiCredentials)
+        .set({ isActive: false })
+        .where(eq(aiCredentials.userId, userId));
+      await tx
+        .update(aiCredentials)
+        .set({ isActive: true })
+        .where(and(eq(aiCredentials.userId, userId), eq(aiCredentials.provider, provider)));
+    });
+  }
+
+  async deleteAiCredential(userId: string, provider: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      const [removed] = await tx
+        .delete(aiCredentials)
+        .where(and(eq(aiCredentials.userId, userId), eq(aiCredentials.provider, provider)))
+        .returning();
+      if (removed?.isActive) {
+        const [next] = await tx
+          .select()
+          .from(aiCredentials)
+          .where(eq(aiCredentials.userId, userId))
+          .limit(1);
+        if (next) {
+          await tx
+            .update(aiCredentials)
+            .set({ isActive: true })
+            .where(and(eq(aiCredentials.userId, userId), eq(aiCredentials.provider, next.provider)));
+        }
+      }
+    });
   }
 }
 

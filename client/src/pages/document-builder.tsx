@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -511,12 +512,16 @@ export default function DocumentBuilder() {
 
   const industryTemplates = getAllTemplates();
 
+  const { data: aiKeys = [] } = useQuery<
+    { provider: string; model: string | null; isActive: boolean; maskedKey: string }[]
+  >({
+    queryKey: ["/api/ai/keys"],
+  });
+  const activeKey = aiKeys.find((k) => k.isActive);
+
   const generateDocMutation = useMutation({
     mutationFn: async (prompt: string) => {
-      const res = await apiRequest("POST", "/api/ai/generate", {
-        prompt,
-        model: "gemini-2.5-flash",
-      });
+      const res = await apiRequest("POST", "/api/ai/generate", { prompt });
       return (await res.json()) as { content: string };
     },
     onSuccess: (data) => {
@@ -528,9 +533,14 @@ export default function DocumentBuilder() {
       });
     },
     onError: (error: Error) => {
+      const noKey =
+        error.message.includes("NO_AI_KEY") ||
+        error.message.toLowerCase().includes("api key");
       toast({
-        title: "Gagal membuat dokumen",
-        description: error.message || "Terjadi kesalahan saat menghubungi AI.",
+        title: noKey ? "Belum ada API key AI" : "Gagal membuat dokumen",
+        description: noKey
+          ? "Tambahkan API key Anda di menu Pengaturan AI untuk mulai membuat dokumen."
+          : error.message || "Terjadi kesalahan saat menghubungi AI.",
         variant: "destructive",
       });
     },
@@ -614,9 +624,8 @@ CATATAN PENTING:
   }, [companyName, director, ketuaFKAP, companyCode, companyAddress, currentDate, currentYear, additionalContext]);
 
   const handleSelectTemplate = useCallback((template: typeof DOCUMENT_TEMPLATES[0]) => {
-    const fullPrompt = generatePrompt(template);
-    generateDocMutation.mutate(fullPrompt);
-  }, [generatePrompt, generateDocMutation]);
+    generatePrompt(template);
+  }, [generatePrompt]);
 
   const handleCopyDocument = useCallback(async () => {
     try {
@@ -684,7 +693,7 @@ CATATAN PENTING:
                   <p className="font-medium text-blue-800 dark:text-blue-300">Cara Penggunaan:</p>
                   <ol className="mt-1 text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
                     <li>Pilih template dokumen yang ingin dibuat</li>
-                    <li>AI akan langsung membuat dokumen lengkap untuk Anda</li>
+                    <li>Klik tombol "Buat Dokumen Sekarang" untuk menjalankan AI</li>
                     <li>Salin atau unduh dokumen (.doc) yang dihasilkan</li>
                     <li>Tidak perlu pindah aplikasi — semua selesai di sini</li>
                   </ol>
@@ -692,6 +701,44 @@ CATATAN PENTING:
               </div>
             </CardContent>
           </Card>
+
+          {!activeKey && (
+            <Card className="mt-3 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="flex items-start gap-3 text-sm">
+                    <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="text-amber-800 dark:text-amber-300">
+                      <p className="font-medium">Belum ada API key AI aktif</p>
+                      <p className="text-amber-700 dark:text-amber-400 mt-0.5">
+                        Tambahkan API key akun AI Anda sendiri (Gemini, OpenAI, OpenRouter, DeepSeek, atau Qwen).
+                        Biaya token ditanggung oleh akun Anda. Anda tetap bisa menyalin Prompt secara gratis.
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild size="sm" className="gap-2" data-testid="button-go-ai-settings">
+                    <Link href="/ai-settings">
+                      <Wand2 className="w-4 h-4" />
+                      Tambah API Key
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeKey && (
+            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground" data-testid="text-active-provider">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span>
+                AI aktif: <span className="font-medium text-foreground">{activeKey.provider}</span>
+                {activeKey.model ? ` · ${activeKey.model}` : ""}
+              </span>
+              <Link href="/ai-settings" className="text-primary hover:underline ml-1" data-testid="link-change-provider">
+                Ubah
+              </Link>
+            </div>
+          )}
 
           <div className="flex items-center gap-2 mt-3 p-3 bg-muted/50 rounded-lg">
             <Building2 className="w-4 h-4 text-muted-foreground" />

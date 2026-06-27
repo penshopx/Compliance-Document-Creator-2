@@ -337,6 +337,18 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location === "/ai-settings"}
+                  className="h-10"
+                >
+                  <Link href="/ai-settings" data-testid="nav-ai-settings">
+                    <Key className="h-4 w-4" />
+                    <span>Pengaturan AI</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
