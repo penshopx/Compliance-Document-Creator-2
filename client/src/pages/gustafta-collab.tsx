@@ -11,7 +11,7 @@ import {
   BookOpen, Zap, MessageSquare, ChevronRight, ArrowLeft,
   FileCheck, Shield, UserCog, BarChart3, AlertTriangle, GraduationCap,
   Search, Presentation, ListChecks, FileX, Wrench, TrendingUp,
-  FileBarChart, ShieldAlert, RotateCw,
+  FileBarChart, ShieldAlert, RotateCw, Star, ArrowRight, Info, X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -313,6 +313,69 @@ export default function GustafdaCollab() {
   const { toast } = useToast();
   const { data: company } = useQuery<{ name?: string }>({ queryKey: ["/api/company"] });
 
+  // Load Blueprint from Dialog
+  const { data: blueprintData } = useQuery<{
+    blueprint: {
+      namaPerusahaan: string;
+      profilRisiko: { level: string; skor: number; faktorUtama: string[] };
+      rekomendasiFase: { fase: string; estimasiWaktu: string; alasan: string };
+      dokumenPrioritas: Array<{ nama: string; klausul: string; prioritas: string }>;
+      kondisiEksisting: { kekuatan: string[]; kelemahan: string[]; peluang: string[] };
+      kesimpulan: string;
+    } | null;
+    meta: { companyName: string | null; riskLevel: string | null; riskScore: number | null; recommendedPhase: string | null; priorityDocs: Array<{ nama: string; klausul: string; prioritas: string }> | null; savedAt: string | null } | null;
+  }>({ queryKey: ["/api/gustafta/blueprint/latest"], retry: false });
+  const [showBlueprintBanner, setShowBlueprintBanner] = useState(true);
+
+  const latestBlueprint = blueprintData?.blueprint;
+  const blueprintMeta = blueprintData?.meta;
+
+  // Build context string from blueprint for sub-agents
+  const blueprintContext = latestBlueprint ? `
+BLUEPRINT SMAP PERUSAHAAN (dari Gustafta Dialog):
+- Perusahaan: ${latestBlueprint.namaPerusahaan}
+- Profil Risiko: ${latestBlueprint.profilRisiko.level} (Skor ${latestBlueprint.profilRisiko.skor}/10)
+- Faktor Risiko Utama: ${latestBlueprint.profilRisiko.faktorUtama.join(", ")}
+- Rekomendasi Fase: ${latestBlueprint.rekomendasiFase.fase} (${latestBlueprint.rekomendasiFase.estimasiWaktu})
+- Dokumen Prioritas: ${latestBlueprint.dokumenPrioritas.map(d => `${d.nama} [${d.prioritas}]`).join("; ")}
+- Kekuatan Saat Ini: ${latestBlueprint.kondisiEksisting.kekuatan.join(", ")}
+- Gap Utama: ${latestBlueprint.kondisiEksisting.kelemahan.join(", ")}
+INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan yang sudah ada di blueprint. Langsung personalkan output berdasarkan data di atas.
+  `.trim() : "";
+
+  // Match blueprint priority docs to sub-agents
+  const PRIORITY_KEYWORDS: Record<string, string[]> = {
+    pedoman: ["pedoman", "manual abms", "manual smap"],
+    kebijakan: ["kebijakan", "policy anti"],
+    sk_fkap: ["fkap", "sk tim", "penetapan tim", "fungsi kepatuhan"],
+    register_risiko: ["register risiko", "risiko penyuapan"],
+    sop_whistleblowing: ["whistleblowing", "wbs", "pelaporan pelanggaran"],
+    program_pelatihan: ["pelatihan", "awareness", "training"],
+    uji_tuntas: ["uji tuntas", "due diligence", "mitra bisnis"],
+    program: ["program audit", "jadwal audit"],
+    checklist: ["checklist audit"],
+    laporan: ["laporan audit", "ncr", "temuan"],
+    capa: ["capa", "tindakan korektif"],
+    gap: ["gap analysis", "kesenjangan"],
+    mock: ["mock audit", "simulasi audit"],
+    matriks: ["matriks", "pemenuhan klausul"],
+    stage: ["stage 1", "stage 2", "persiapan sertifikasi"],
+    kpi: ["kpi", "monitoring", "indikator"],
+    surveilance_laporan: ["laporan kinerja", "kinerja smap"],
+    insiden: ["insiden", "pengelolaan insiden"],
+    resertifikasi: ["re-sertifikasi", "perpanjangan"],
+  };
+
+  function getBlueprintPriority(subKey: string): string | null {
+    if (!latestBlueprint?.dokumenPrioritas) return null;
+    const keywords = PRIORITY_KEYWORDS[subKey] || [];
+    for (const doc of latestBlueprint.dokumenPrioritas) {
+      const docLower = doc.nama.toLowerCase();
+      if (keywords.some(k => docLower.includes(k))) return doc.prioritas;
+    }
+    return null;
+  }
+
   const agent = AGENTS.find(a => a.key === activeAgent)!;
   const subAgent = agent.subAgents.find(s => s.key === activeSubKey) || null;
   const sessionKey = activeSubKey ? `${activeAgent}_${activeSubKey}` : null;
@@ -360,7 +423,8 @@ export default function GustafdaCollab() {
           messages: withUser,
           agentKey: activeAgent,
           subAgentKey: activeSubKey,
-          companyName: company?.name || "",
+          companyName: latestBlueprint?.namaPerusahaan || company?.name || "",
+          companyContext: blueprintContext,
         }),
         credentials: "include",
       });
@@ -475,6 +539,33 @@ export default function GustafdaCollab() {
         </Tabs>
       </div>
 
+      {/* Blueprint Context Banner */}
+      {latestBlueprint && showBlueprintBanner && (
+        <div className="flex-none border-b bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 px-4 py-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Sparkles className="h-3.5 w-3.5 text-blue-600 flex-none" />
+            <span className="text-xs font-semibold text-blue-700">Blueprint Aktif:</span>
+            <span className="text-xs font-medium text-slate-700">{latestBlueprint.namaPerusahaan}</span>
+            <span className="text-xs text-slate-400">·</span>
+            <span className={cn("text-xs font-medium", {
+              "text-green-600": latestBlueprint.profilRisiko.level === "Rendah",
+              "text-yellow-600": latestBlueprint.profilRisiko.level === "Sedang",
+              "text-orange-600": latestBlueprint.profilRisiko.level === "Tinggi",
+              "text-red-600": latestBlueprint.profilRisiko.level === "Sangat Tinggi",
+            })}>Risiko {latestBlueprint.profilRisiko.level}</span>
+            <span className="text-xs text-slate-400">·</span>
+            <span className="text-xs text-slate-600">{latestBlueprint.rekomendasiFase.fase}</span>
+            <span className="text-xs text-slate-400">·</span>
+            <span className="text-xs text-yellow-600 font-medium flex items-center gap-0.5">
+              <Star className="h-3 w-3" fill="currentColor" /> = Prioritas Blueprint
+            </span>
+            <button onClick={() => setShowBlueprintBanner(false)} className="ml-auto p-1 rounded hover:bg-blue-100 flex-none" title="Tutup banner">
+              <X className="h-3 w-3 text-slate-400" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Body: 3 panels */}
       <div className="flex-1 overflow-hidden flex">
         {/* LEFT: Sub-agent list */}
@@ -509,7 +600,12 @@ export default function GustafdaCollab() {
                   >
                     <Icon className={cn("h-3.5 w-3.5 mt-0.5 flex-none", isActive ? "text-white" : agent.color)} />
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium leading-tight">{sub.shortLabel}</div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium leading-tight">{sub.shortLabel}</span>
+                        {getBlueprintPriority(sub.key) && !isDone && (
+                          <Star className={cn("h-2.5 w-2.5 flex-none", isActive ? "text-yellow-200" : "text-yellow-500")} fill="currentColor" />
+                        )}
+                      </div>
                       <div className={cn("text-xs leading-tight mt-0.5 truncate", isActive ? "text-white/70" : "text-slate-400")}>
                         {sub.deliverable}
                       </div>
@@ -560,6 +656,55 @@ export default function GustafdaCollab() {
                   <p className="text-sm text-muted-foreground mt-1">{agent.fase} — {agent.subAgents.length} sub-agen spesialis</p>
                 </div>
 
+                {/* Blueprint Summary Card */}
+                {latestBlueprint && (
+                  <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center flex-none">
+                        <Sparkles className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-semibold text-blue-800">Blueprint Gustafta Dialog</span>
+                          <Badge className="text-xs bg-blue-100 text-blue-700 border-0">Terhubung</Badge>
+                        </div>
+                        <p className="text-xs text-blue-700 mt-0.5">
+                          <span className="font-medium">{latestBlueprint.namaPerusahaan}</span>
+                          {" · "}Risiko <span className={cn("font-medium", {
+                            "text-green-700": latestBlueprint.profilRisiko.level === "Rendah",
+                            "text-yellow-700": latestBlueprint.profilRisiko.level === "Sedang",
+                            "text-orange-700": latestBlueprint.profilRisiko.level === "Tinggi",
+                            "text-red-700": latestBlueprint.profilRisiko.level === "Sangat Tinggi",
+                          })}>{latestBlueprint.profilRisiko.level}</span>
+                          {" · "}{latestBlueprint.rekomendasiFase.fase}
+                        </p>
+                        {latestBlueprint.dokumenPrioritas.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {latestBlueprint.dokumenPrioritas.slice(0, 4).map((d, i) => (
+                              <span key={i} className={cn("inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded font-medium", {
+                                "bg-red-100 text-red-700": d.prioritas === "Kritis",
+                                "bg-orange-100 text-orange-700": d.prioritas === "Tinggi",
+                                "bg-yellow-100 text-yellow-700": d.prioritas === "Sedang",
+                              })}>
+                                <Star className="h-2.5 w-2.5" fill="currentColor" /> {d.nama}
+                              </span>
+                            ))}
+                            {latestBlueprint.dokumenPrioritas.length > 4 && (
+                              <span className="text-xs text-blue-600">+{latestBlueprint.dokumenPrioritas.length - 4} lainnya</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <div className="flex items-center gap-2 text-xs text-blue-600">
+                        <Info className="h-3 w-3 flex-none" />
+                        <span>Sub-agen bertanda <Star className="h-2.5 w-2.5 inline text-yellow-500" fill="currentColor" /> adalah prioritas dari Blueprint Anda — mulai dari sini untuk hasil optimal.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 gap-3">
                   {agent.subAgents.map(sub => {
                     const Icon = sub.icon;
@@ -573,17 +718,29 @@ export default function GustafdaCollab() {
                         data-testid={`card-subagent-${sub.key}`}
                         className={cn(
                           "flex items-start gap-4 p-4 bg-white border rounded-xl text-left hover:border-slate-300 hover:shadow-sm transition-all",
-                          isDone && "border-green-200 bg-green-50"
+                          isDone && "border-green-200 bg-green-50",
+                          !isDone && getBlueprintPriority(sub.key) === "Kritis" && "border-red-200",
+                          !isDone && getBlueprintPriority(sub.key) === "Tinggi" && "border-orange-200",
                         )}
                       >
                         <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center flex-none", agent.bgColor + "/10")}>
                           <Icon className={cn("h-5 w-5", agent.color)} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-semibold text-slate-800">{sub.label}</span>
                             {isDone && <Badge className="text-xs bg-green-100 text-green-700 border-0">Selesai</Badge>}
                             {!isDone && hasHistory && <Badge className="text-xs bg-blue-100 text-blue-700 border-0">Dalam proses</Badge>}
+                            {!isDone && getBlueprintPriority(sub.key) && (
+                              <Badge className={cn("text-xs border-0 flex items-center gap-0.5", {
+                                "bg-red-100 text-red-700": getBlueprintPriority(sub.key) === "Kritis",
+                                "bg-orange-100 text-orange-700": getBlueprintPriority(sub.key) === "Tinggi",
+                                "bg-yellow-100 text-yellow-700": getBlueprintPriority(sub.key) === "Sedang",
+                              })}>
+                                <Star className="h-2.5 w-2.5" fill="currentColor" />
+                                {getBlueprintPriority(sub.key)}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">{sub.description}</p>
                           <p className="text-xs font-medium mt-1.5 flex items-center gap-1">

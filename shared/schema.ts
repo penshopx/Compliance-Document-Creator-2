@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, date, jsonb, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -335,6 +335,20 @@ export const userSubscriptions = pgTable("user_subscriptions", {
 export const insertUserSubscriptionSchema = createInsertSchema(userSubscriptions).omit({ id: true, createdAt: true });
 export type InsertUserSubscription = z.infer<typeof insertUserSubscriptionSchema>;
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
+
+// Gustafta Blueprints — saved from Gustafta Dialog, consumed by Gustafta Collab
+export const gustafdaBlueprints = pgTable("gustafda_blueprints", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  companyName: text("company_name"),
+  riskLevel: text("risk_level"),
+  riskScore: integer("risk_score"),
+  recommendedPhase: text("recommended_phase"),
+  priorityDocs: jsonb("priority_docs").$type<Array<{ nama: string; klausul: string; prioritas: string }>>(),
+  blueprintJson: jsonb("blueprint_json"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export type GustafdaBlueprint = typeof gustafdaBlueprints.$inferSelect;
 
 // Export auth models
 export * from "./models/auth";

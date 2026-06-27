@@ -20,7 +20,10 @@ import {
   insertVendorSchema,
   insertDocumentSchema,
   insertGeneratedDocumentSchema,
+  gustafdaBlueprints,
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 // AI Request Validation Schemas
 const aiGenerateSchema = z.object({
@@ -1325,6 +1328,53 @@ Pastikan rekomendasi realistis sesuai informasi yang digali dari dialog. Jika in
     } catch (error) {
       console.error("Gustafta blueprint error:", error);
       res.status(500).json({ error: error instanceof Error ? error.message : "Failed to generate blueprint" });
+    }
+  });
+
+  // POST /api/gustafta/blueprint/save - persist blueprint from Dialog
+  app.post("/api/gustafta/blueprint/save", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id as string;
+      const { blueprint } = req.body;
+      if (!blueprint) return res.status(400).json({ error: "Blueprint required" });
+      await db.insert(gustafdaBlueprints).values({
+        userId,
+        companyName: blueprint.namaPerusahaan || null,
+        riskLevel: blueprint.profilRisiko?.level || null,
+        riskScore: blueprint.profilRisiko?.skor || null,
+        recommendedPhase: blueprint.rekomendasiFase?.fase || null,
+        priorityDocs: blueprint.dokumenPrioritas || null,
+        blueprintJson: blueprint,
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Save blueprint error:", error);
+      res.status(500).json({ error: "Failed to save blueprint" });
+    }
+  });
+
+  // GET /api/gustafta/blueprint/latest - load latest blueprint for user
+  app.get("/api/gustafta/blueprint/latest", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id as string;
+      const result = await db
+        .select()
+        .from(gustafdaBlueprints)
+        .where(eq(gustafdaBlueprints.userId, userId))
+        .orderBy(desc(gustafdaBlueprints.createdAt))
+        .limit(1);
+      if (result.length === 0) return res.json({ blueprint: null });
+      res.json({ blueprint: result[0].blueprintJson, meta: {
+        companyName: result[0].companyName,
+        riskLevel: result[0].riskLevel,
+        riskScore: result[0].riskScore,
+        recommendedPhase: result[0].recommendedPhase,
+        priorityDocs: result[0].priorityDocs,
+        savedAt: result[0].createdAt,
+      }});
+    } catch (error) {
+      console.error("Load blueprint error:", error);
+      res.status(500).json({ error: "Failed to load blueprint" });
     }
   });
 

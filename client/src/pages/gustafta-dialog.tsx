@@ -8,9 +8,11 @@ import {
   MessageSquare, Send, Sparkles, CheckCircle2, Circle,
   AlertCircle, Loader2, FileText, ChevronRight, RotateCcw,
   Download, Building2, Shield, Target, Clock, Users, FolderOpen,
+  ArrowRight,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -176,6 +178,13 @@ export default function GustafdaDialog() {
       const data = await response.json();
       setBlueprint(data.blueprint);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      // Auto-save blueprint to DB (silent — no user action needed)
+      fetch("/api/gustafta/blueprint/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blueprint: data.blueprint }),
+        credentials: "include",
+      }).catch(() => {});
     } catch {
       toast({ title: "Error", description: "Gagal menghasilkan blueprint. Coba lagi.", variant: "destructive" });
     } finally {
@@ -573,6 +582,39 @@ function BlueprintPanel({ blueprint }: { blueprint: Blueprint }) {
           <p className="text-sm text-slate-600 leading-relaxed">{blueprint.kesimpulan}</p>
         </CardContent>
       </Card>
+
+      {/* CTA: Go to Collab */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-5 w-5" />
+              <h3 className="text-base font-bold">Lanjutkan ke Gustafta Collab</h3>
+            </div>
+            <p className="text-sm text-blue-100 leading-relaxed mb-1">
+              Blueprint Anda telah tersimpan. Gustafta Collab akan membaca profil risiko dan dokumen prioritas dari blueprint ini — sub-agen spesialis siap membantu Anda membuat setiap dokumen SMAP tanpa perlu mengulang informasi perusahaan.
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {blueprint.dokumenPrioritas.slice(0, 3).map((d, i) => (
+                <span key={i} className="text-xs bg-white/20 rounded-full px-2.5 py-0.5">
+                  {d.nama}
+                </span>
+              ))}
+              {blueprint.dokumenPrioritas.length > 3 && (
+                <span className="text-xs bg-white/20 rounded-full px-2.5 py-0.5">
+                  +{blueprint.dokumenPrioritas.length - 3} lainnya
+                </span>
+              )}
+            </div>
+          </div>
+          <Link href="/gustafta-collab" className="flex-none">
+            <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2 font-semibold whitespace-nowrap" size="lg">
+              Buka Collab
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
