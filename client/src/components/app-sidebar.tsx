@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,6 +12,11 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,6 +92,7 @@ import {
   Wheat,
   Palmtree,
   Radio,
+  ChevronDown,
 } from "lucide-react";
 import { useIndustry } from "@/hooks/use-industry";
 
@@ -180,6 +187,7 @@ const colorMap: Record<string, { bg: string; text: string }> = {
 export function AppSidebar() {
   const [location] = useLocation();
   const { currentIndustry, industries, setIndustry, currentIndustryId } = useIndustry();
+  const [industriesOpen, setIndustriesOpen] = useState(false);
 
   const menuGroups = currentIndustry?.menuGroups || [];
 
@@ -207,20 +215,51 @@ export function AppSidebar() {
           </div>
         </div>
         
-        <div className="mt-3 flex flex-wrap gap-1">
-          {industries.map((ind) => (
+        <Collapsible
+          open={industriesOpen}
+          onOpenChange={setIndustriesOpen}
+          className="mt-3"
+        >
+          <CollapsibleTrigger asChild>
             <Button
-              key={ind.id}
-              variant={currentIndustryId === ind.id ? "default" : "ghost"}
+              variant="outline"
               size="sm"
-              className="text-xs h-7 px-2"
-              onClick={() => setIndustry(ind.id)}
-              data-testid={`sidebar-industry-${ind.id}`}
+              className="w-full justify-between text-xs h-8"
+              data-testid="button-industry-selector"
             >
-              {ind.shortName}
+              <span className="flex items-center gap-2">
+                <span className="text-sidebar-foreground/60">Industri:</span>
+                <span className="font-semibold">
+                  {currentIndustry?.shortName || "Pilih"}
+                </span>
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  industriesOpen ? "rotate-180" : ""
+                }`}
+              />
             </Button>
-          ))}
-        </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <div className="flex flex-wrap gap-1">
+              {industries.map((ind) => (
+                <Button
+                  key={ind.id}
+                  variant={currentIndustryId === ind.id ? "default" : "ghost"}
+                  size="sm"
+                  className="text-xs h-7 px-2"
+                  onClick={() => {
+                    setIndustry(ind.id);
+                    setIndustriesOpen(false);
+                  }}
+                  data-testid={`sidebar-industry-${ind.id}`}
+                >
+                  {ind.shortName}
+                </Button>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-4">
