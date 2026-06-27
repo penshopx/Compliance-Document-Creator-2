@@ -4,6 +4,9 @@
  *   SMAP01 — Pedoman SMAP (SNI ISO 37001:2016) full 49-page manual template
  *   SMAP02 — Program Audit Internal SMAP (department-level audit program)
  *   SMAP03 — SOP & Form: Tinjauan Dewan Pengarah + SOP CAPA (Klausul 10.1-10.2)
+ *   R1-07  — Tinjauan SMAP Badan Usaha (BUJK/SBU Konstruksi connection)
+ *   Modul6 — Penilaian Komitmen SMAP BUJK (Asesor BUJK, FSMAP forms, VACS)
+ *   BAB1-5 — Document Generation Matrix (comprehensive, author-synthesized)
  *
  * Used as system prompt knowledge injection for Gustafta Dialog & Collab sub-agents.
  */
@@ -317,3 +320,350 @@ export const SMAP_DOCUMENT_CATALOG = {
     { nama: "Acuan Silang Prosedur vs ISO 37001:2016", klausul: "Semua Klausul", kode: "Lampiran 3 Pedoman" },
   ],
 };
+
+// ─── SBU KONSTRUKSI — SMAP requirements for construction companies ────────────
+export const SBU_KONSTRUKSI_REQUIREMENTS = `
+KETERKAITAN SMAP DENGAN SBU JASA KONSTRUKSI (BUJK):
+Sumber: R1-07 Bimtek LPJK + Modul 6 Asesor BUJK — Kementerian PUPR Ditjen Bina Konstruksi
+
+REGULASI ACUAN:
+• UU No. 19 Tahun 2019 — Perubahan UU No. 30/2002 tentang KPK
+• Perpres No. 54 Tahun 2018 — Strategi Nasional Pencegahan Korupsi
+• Inpres No. 10 Tahun 2016 — Aksi Pencegahan dan Pemberantasan Korupsi
+• ISO 37001:2016 — Sistem Manajemen Anti Penyuapan
+• PP No. 5 Tahun 2021 — Perizinan Berusaha Berbasis Risiko (Jasa Konstruksi)
+• Permen PUPR No. 6 Tahun 2021 — Standar Kegiatan Usaha Jasa Konstruksi
+• SE LPJK No. 17/SE/LPJK/2021 — Pedoman Teknis Sertifikasi BUJK
+
+SMAP WAJIB UNTUK SBU (3 Pilihan Pemenuhan):
+1. Sertifikat ISO 37001:2016 dari Lembaga terakreditasi KAN — pemenuhan PENUH
+2. Dokumen SMAP yang dibuat sendiri oleh BUJK — pemenuhan LENGKAP
+3. Surat Pernyataan Komitmen — pemenuhan SEMENTARA (ada batas waktu)
+
+DEADLINE PEMENUHAN SMAP (dari tanggal SBU diterbitkan):
+┌─────────────────────────────┬──────────────────────┬───────────────────────────┐
+│ Kualifikasi BUJK            │ Surat Pernyataan     │ Dokumen SMAP/ISO Cert     │
+├─────────────────────────────┼──────────────────────┼───────────────────────────┤
+│ Kualifikasi Besar           │ Max 1 tahun          │ Wajib sebelum 1 tahun     │
+│ Kualifikasi Menengah        │ Max 2 tahun          │ Wajib sebelum 2 tahun     │
+│ Kualifikasi Kecil           │ Max 3 tahun          │ Wajib sebelum 3 tahun     │
+└─────────────────────────────┴──────────────────────┴───────────────────────────┘
+→ IMPLIKASI KONSULTANSI: Perusahaan konstruksi kualifikasi Besar punya urgensi TERTINGGI (1 tahun)
+
+16 KOMPONEN DOKUMEN SMAP WAJIB BUJK (sesuai persyaratan LSBU/LPJK):
+1.  Kebijakan Anti Penyuapan          → Klausul 5.2
+2.  Identifikasi (Isu & Pihak)         → Klausul 4.1; 4.2
+3.  Pemenuhan Perundang-undangan       → Klausul 4.2; 6.1
+4.  Sasaran Program                    → Klausul 6.2
+5.  Sumber Daya, Struktur & Tanggung Jawab → Klausul 5.3; 7.1
+6.  Kompetensi, Pelatihan & Kepedulian → Klausul 7.2; 7.3
+7.  Komunikasi, Partisipasi & Konsultasi → Klausul 7.4
+8.  Dokumentasi                        → Klausul 7.5
+9.  Pengendalian Dokumen               → Klausul 7.5.3
+10. Pengendalian Operasional           → Klausul 8.1–8.8
+11. Kesiagaan dan Tanggap Darurat      → Klausul 8.8; 8.10
+12. Pengukuran dan Pemantauan          → Klausul 9.1
+13. Evaluasi Kepatuhan                 → Klausul 9.1; 9.4
+14. Pengendalian Rekaman               → Klausul 7.5.3.2
+15. Audit Internal                     → Klausul 9.2
+16. Tinjauan Manajemen                 → Klausul 9.3; 9.4
+
+PROSES PENILAIAN DOKUMEN SMAP (LSBU Assessment):
+• Verifikasi = pemeriksaan KELENGKAPAN dokumen sesuai 16 komponen
+• Validasi = pemeriksaan KEABSAHAN dokumen (4 prinsip VACS):
+  - Valid/Sahih: dokumen berkaitan langsung dengan standar yang ditargetkan
+  - Authentic/Asli: dokumen merupakan karya sendiri badan usaha
+  - Current/Terbaru: dokumen masih berlaku dan mutakhir
+  - Sufficient/Cukup: dokumen memadai untuk membuktikan pemenuhan
+
+FORMULIR PENILAIAN ASESOR BUJK:
+• FSMAP-01: Penilaian Badan Usaha yang Memiliki Sertifikat ISO 37001:2016
+• FSMAP-02: Penilaian Badan Usaha yang Memiliki Dokumen SMAP (self-made)
+• FSMAP-03: Penilaian dan Rekomendasi Kesesuaian Dokumen SMAP
+• FSMAP-04: Penilaian dan Rekomendasi Kesesuaian (Surat Pernyataan)
+
+LEMBAGA SERTIFIKASI ISO 37001:2016 TERAKREDITASI KAN (per 2024):
+PT Garuda Sertifikasi Indonesia | PT Asricert Indonesia | PT TUV NORD Indonesia |
+PT Mutu Agung Lestari | PT Mutu Hijau Indonesia | PT Sucofindo Persero |
+PT Chesna | SAI Global Indonesia | PT Global Inspeksi Indonesia |
+PT BSI Group Indonesia | PT SGS Indonesia
+
+PERBEDAAN PEMENUHAN SMAP vs ISO CERT:
+• Dokumen SMAP (self-made): BUJK menyusun sendiri 16 dokumen → diverifikasi LSBU → TANPA sertifikasi eksternal
+• ISO 37001:2016 Cert: proses sertifikasi oleh CB terakreditasi KAN → sertifikat berlaku 3 tahun dengan surveilance
+• Surat Pernyataan: jalan pintas sementara → BUJK berkomitmen memenuhi dalam batas waktu atau kena sanksi
+`;
+
+// ─── DOCUMENT GENERATION MATRIX — Structured prompting matrix (BAB 1-5 synthesis) ─
+export const DOCUMENT_GENERATION_MATRIX = `
+MATRIX PROMPTING PENYUSUNAN DOKUMEN SMAP
+(Sintesis BAB 1-5 — Format: Nama Dokumen | Klausul | Input Kunci | Elemen Wajib | Kualitas VACS)
+
+════════════════════════════════════════════════════════════════
+BAB 1 — KONTEKS DAN KEPEMIMPINAN (Klausul 4 & 5)
+════════════════════════════════════════════════════════════════
+
+[DOK-01] PEDOMAN SMAP (Manual ABMS)
+• Klausul: 4.1–4.5; 5.1–5.3; 6.1–6.2; 7.1–7.5; 8.1–8.10; 9.1–9.4; 10.1–10.2
+• Input kunci: Nama perusahaan, bidang usaha, kota, jumlah karyawan, nama Direktur, nama Ketua FKAP, tanggal berlaku
+• Elemen WAJIB:
+  ✓ Halaman pengesahan + tanda tangan Direktur (atau digital)
+  ✓ Daftar isi sesuai urutan klausul ISO 37001:2016
+  ✓ Definisi FKAP, Dewan Pengarah, risiko penyuapan (Klausul 3)
+  ✓ Pernyataan ruang lingkup yang spesifik (unit bisnis, lokasi, kontrak)
+  ✓ Penilaian risiko penyuapan per proses bisnis (Klausul 4.5)
+  ✓ Pernyataan komitmen zero-tolerance (Klausul 5.1)
+  ✓ Referensi ke semua prosedur/SOP yang relevan (cross-reference)
+  ✓ 6 lampiran wajib (Business Process Map, Kebijakan, Cross-ref, Kom Internal, Kom Eksternal, Sasaran)
+• Kualitas VACS: Valid (semua klausul tercakup), Authentic (spesifik nama+kota perusahaan), Current (tanggal berlaku jelas), Sufficient (tiap klausul punya narasi ≥1 paragraf)
+• Kode dokumen: M-SMAP-[KODE PERUSAHAAN].01 | Rev.00
+
+[DOK-02] KEBIJAKAN ANTI PENYUAPAN
+• Klausul: 5.2
+• Input kunci: Nama perusahaan, nama + jabatan Direktur, tanggal berlaku, bidang usaha
+• Elemen WAJIB:
+  ✓ Pernyataan zero-tolerance (jelas, tidak ambigu)
+  ✓ Ruang lingkup: berlaku untuk semua karyawan, mitra, pihak ketiga
+  ✓ Kewajiban semua pihak untuk melaporkan dugaan penyuapan
+  ✓ Perlindungan whistleblower (anti-retaliation)
+  ✓ Mekanisme sanksi untuk pelanggaran
+  ✓ Komitmen terhadap hukum dan regulasi yang berlaku (UU KPK)
+  ✓ Referensi ke FKAP sebagai pelaksana pengawasan
+  ✓ Tanda tangan Direktur Utama + tanggal
+• Format: 1-2 halaman, bahasa Indonesia formal, nomor dokumen, header perusahaan
+• Kode dokumen: KBJ-SMAP-[KODE].01 | Rev.00
+
+[DOK-03] SK PENETAPAN TIM FKAP
+• Klausul: 5.3.2
+• Input kunci: Nama + jabatan Direktur, nomor SK, tanggal SK, nama Ketua FKAP + jabatan asli, nama Sekretaris + jabatan asli, nama Anggota (2-3 orang) + jabatan
+• Elemen WAJIB:
+  ✓ Format SK resmi: Menimbang, Mengingat, Memutuskan, Menetapkan
+  ✓ Mengingat: cantumkan SNI ISO 37001:2016 + Perpres 54/2018
+  ✓ Lampiran: Tugas Pokok dan Wewenang FKAP per jabatan:
+    - Ketua FKAP: memimpin implementasi, bertanggung jawab ke Direktur
+    - Sekretaris: administrasi, dokumentasi, distribusi dokumen
+    - Anggota: verifikasi, investigasi, sosialisasi, pelatihan
+  ✓ Keterangan masa berlaku SK
+  ✓ Tanda tangan + cap perusahaan
+• Kode dokumen: SK-FKAP-[KODE]-[NOMOR] | Tahun [TAHUN]
+
+════════════════════════════════════════════════════════════════
+BAB 2 — PERENCANAAN DAN RISIKO (Klausul 6)
+════════════════════════════════════════════════════════════════
+
+[DOK-04] REGISTER RISIKO PENYUAPAN
+• Klausul: 4.5; 6.1
+• Input kunci: Bidang usaha, proses bisnis utama, jenis mitra, interaksi pemerintah
+• Elemen WAJIB:
+  ✓ Kolom: No | Proses Bisnis | Risiko Penyuapan | Penyebab | Dampak | Likelihood (1-5) | Impact (1-5) | Level Risiko | Pengendalian Existing | Pengendalian Tambahan | PIC | Status
+  ✓ Minimal 8-12 risiko yang relevan dengan industri
+  ✓ Kalkulasi Level Risiko: Likelihood × Impact → L(1-4)/M(5-9)/H(10-16)/VH(17-25)
+  ✓ Risiko konstruksi wajib ada: pengadaan material, pengurusan izin, tender, subkontraktor
+  ✓ Rekomendasi pengendalian untuk setiap risiko H/VH
+• Format: Tabel Excel-ready, baris per risiko
+
+[DOK-05] TABEL SASARAN SMAP
+• Klausul: 6.2
+• Input kunci: Target KPI yang realistis, tahun sasaran, PIC per sasaran
+• Elemen WAJIB:
+  ✓ Kolom: No | Sasaran | Indikator Keberhasilan (KPI) | Target | Periode | PIC | Anggaran | Status
+  ✓ Minimal 5 sasaran SMART yang terukur
+  ✓ Contoh sasaran: 100% karyawan terlatih, 0 insiden penyuapan terkonfirmasi, 100% mitra ter-due diligence
+  ✓ Mekanisme pemantauan dan frekuensi review
+
+════════════════════════════════════════════════════════════════
+BAB 3 — DUKUNGAN DAN SUMBER DAYA (Klausul 7)
+════════════════════════════════════════════════════════════════
+
+[DOK-06] PROGRAM PELATIHAN SMAP TAHUNAN
+• Klausul: 7.2; 7.3
+• Input kunci: Jumlah karyawan, struktur jabatan, anggaran pelatihan, tahun program
+• Elemen WAJIB:
+  ✓ Segmentasi peserta: Direksi/Top Management | Manajer/Supervisor | Staf Operasional | Frontline
+  ✓ Kalender pelatihan per kuartal dengan jadwal bulan spesifik
+  ✓ Materi per level: awareness (1 jam), implementasi (4 jam), audit (8 jam)
+  ✓ Metode: tatap muka, e-learning, workshop, briefing rutin
+  ✓ KPI pelatihan: % karyawan terlatih, skor rata-rata pre/post test
+  ✓ Template daftar hadir dan sertifikat peserta
+  ✓ Outline materi awareness 1 jam siap pakai
+
+[DOK-07] TABEL KOMUNIKASI SMAP (Internal & Eksternal)
+• Klausul: 7.4
+• Elemen WAJIB Internal:
+  ✓ Kolom: No | Topik | Tujuan | Media | Pengirim | Penerima | Frekuensi
+  ✓ Topik minimal: kebijakan baru, laporan kinerja SMAP, sosialisasi WBS, hasil audit
+• Elemen WAJIB Eksternal:
+  ✓ Topik: komitmen anti penyuapan ke mitra, pelaporan ke regulator
+  ✓ Media: surat resmi, website, kontrak, presentasi vendor
+
+════════════════════════════════════════════════════════════════
+BAB 4 — OPERASIONAL ANTI PENYUAPAN (Klausul 8)
+════════════════════════════════════════════════════════════════
+
+[DOK-08] SOP UJI TUNTAS PERSONIL
+• Klausul: 8.2
+• Elemen WAJIB:
+  ✓ Verifikasi latar belakang (background check) calon karyawan di posisi berisiko
+  ✓ Formulir Deklarasi Konflik Kepentingan (wajib diisi saat onboarding)
+  ✓ Posisi berisiko tinggi yang wajib due diligence: Pengadaan, Marketing, Keuangan, Direksi
+  ✓ Prosedur review berkala (tahunan) untuk karyawan di posisi berisiko
+  ✓ Mekanisme jika ditemukan konflik kepentingan
+
+[DOK-09] SOP UJI TUNTAS MITRA BISNIS
+• Klausul: 8.2
+• Elemen WAJIB:
+  ✓ Klasifikasi mitra: Tier 1 (Kritis/High Risk), Tier 2 (Signifikan/Medium), Tier 3 (Rendah/Low)
+  ✓ Kriteria klasifikasi: nilai kontrak, jenis layanan, interaksi pemerintah, negara asal
+  ✓ Due Diligence Questionnaire (DDQ) 15-20 pertanyaan per Tier
+  ✓ Kriteria penerimaan (Approved) dan penolakan (Rejected) mitra
+  ✓ Monitoring berkelanjutan: review tahunan untuk Tier 1-2
+  ✓ Formulir FRM-FKAP-02: Penilaian Mitra Bisnis
+• Catatan BUJK: Subkontraktor konstruksi adalah Tier 1 jika nilai kontrak >1M atau berinteraksi dengan pejabat
+
+[DOK-10] SOP PENGENDALIAN KEUANGAN
+• Klausul: 8.3
+• Elemen WAJIB:
+  ✓ Otorisasi pembayaran: level approval per batas nilai (misal: <5jt=Manager, <50jt=Direktur)
+  ✓ 4-eyes principle: minimal 2 orang dalam setiap transaksi material
+  ✓ Larangan pembayaran tunai di atas batas (misal: >2 juta)
+  ✓ Review rekening bank mitra vs data karyawan (cegah conflict of interest)
+  ✓ Pengendalian petty cash dan representasi
+  ✓ Prosedur deteksi pembayaran tidak wajar
+
+[DOK-11] SOP HADIAH, HOSPITALITY DAN DONASI
+• Klausul: 8.7
+• Elemen WAJIB:
+  ✓ Definisi yang diperbolehkan vs dilarang (batas nilai, konteks, penerima)
+  ✓ Batas nilai hadiah yang diperbolehkan (misal: <Rp 500.000 per kejadian)
+  ✓ Larangan pemberian kepada pejabat pemerintah TANPA exception
+  ✓ Register Hadiah/Hospitality (Log setiap pemberian/penerimaan)
+  ✓ Prosedur pelaporan ke FKAP untuk pemberian di atas batas
+  ✓ Donasi: harus melalui FKAP, tidak boleh ke organisasi yang terkait pejabat pemerintah
+
+[DOK-12] SOP WHISTLEBLOWING SYSTEM (RAISING CONCERN)
+• Klausul: 8.9
+• Elemen WAJIB:
+  ✓ Mekanisme pelaporan ANONIM (wajib per ISO 37001:2016)
+  ✓ Minimal 2 channel pelaporan independen
+  ✓ SLA penerimaan dan klasifikasi: 24 jam
+  ✓ SLA investigasi: awal 5 hari kerja, mendalam 30 hari, total max 60 hari
+  ✓ Perlindungan pelapor anti-retaliation (eksplisit, tertulis)
+  ✓ Form FRM-WBS-01: Formulir Laporan Pelanggaran (mendukung anonim)
+  ✓ Register WBS: log semua laporan masuk + status
+  ✓ Pelaporan aggregate (tanpa nama pelapor) ke Tinjauan Manajemen
+
+[DOK-13] KOMITMEN ANTI PENYUAPAN (untuk Mitra)
+• Klausul: 8.6
+• Elemen WAJIB:
+  ✓ Pernyataan mitra bahwa mereka tidak akan menawarkan/menerima suap
+  ✓ Hak BUJK untuk melakukan audit kepatuhan ke mitra
+  ✓ Konsekuensi jika mitra melanggar (terminasi kontrak)
+  ✓ Ditandatangani Pimpinan Mitra + materai
+  ✓ Berlaku selama durasi kontrak + 2 tahun sesudahnya
+
+════════════════════════════════════════════════════════════════
+BAB 5 — EVALUASI DAN PENINGKATAN (Klausul 9-10)
+════════════════════════════════════════════════════════════════
+
+[DOK-14] PROGRAM AUDIT INTERNAL SMAP
+• Klausul: 9.2
+• Elemen WAJIB:
+  ✓ Format per-departemen (bukan per klausul) — Marketing/Purchasing=High 2x/tahun
+  ✓ Semua klausul 4-10 tercakup dalam satu siklus tahunan
+  ✓ Kolom: Departemen | Ruang Lingkup | Klausul ISO | Risiko | Status (Mjr/Mnr/Obs) | Frekuensi | Jadwal (bulan 1-12)
+  ✓ Tim Auditor Internal: min 2 orang, independent dari area yang diaudit
+  ✓ Jadwal Opening Meeting dan Closing Meeting
+  ✓ Teknik khusus: review payroll, personnel expense, data vendor vs data karyawan
+
+[DOK-15] CHECKLIST AUDIT INTERNAL
+• Klausul: 9.2
+• Per klausul (4 s/d 10):
+  ✓ Kolom: No | Pertanyaan Audit | Metode (W/O/D) | Bukti yang Dibutuhkan | Hasil (OK/NCR/Obs) | Catatan
+  ✓ W=Wawancara, O=Observasi, D=Review Dokumen
+  ✓ Minimal 10-15 pertanyaan per klausul
+  ✓ Pertanyaan harus menggali BUKTI (records, evidence), bukan sekadar jawaban "ya/tidak"
+
+[DOK-16] LAPORAN KINERJA SMAP + TINJAUAN MANAJEMEN
+• Klausul: 9.1; 9.3; 9.4; 9.3.2
+• Elemen WAJIB (3 dokumen tinjauan):
+  ✓ Laporan Kinerja: KPI vs target, hasil audit, statistik WBS, efektivitas pelatihan, update risiko
+  ✓ Notulen Tinjauan Manajemen Puncak (FRM-FKAP-13): input-proses-output format
+  ✓ Notulen Tinjauan Dewan Pengarah/Komisaris (FRM-FKAP-14-01): keputusan mandate
+  ✓ Semua dokumen tinjauan ditandatangani pejabat yang berwenang
+
+PRINSIP KUALITAS DOKUMEN (VACS dari Modul 6 Asesor BUJK):
+• Valid/Sahih: setiap dokumen harus merujuk klausul ISO 37001:2016 yang spesifik
+• Authentic/Asli: dokumen harus memuat nama perusahaan, bidang usaha, dan konteks operasional nyata (bukan template kosong)
+• Current/Terbaru: tanggal berlaku jelas, revisi terkini, tidak kadaluarsa
+• Sufficient/Cukup: isi memadai untuk membuktikan implementasi nyata, bukan sekadar ada dokumennya
+`;
+
+// ─── BUJK ASSESSOR KNOWLEDGE — For construction sector Gap Analysis ───────────
+export const BUJK_ASSESSOR_KNOWLEDGE = `
+PANDUAN ASESOR BUJK UNTUK GAP ANALYSIS SMAP KONSTRUKSI:
+
+TIGA LEVEL KESIAPAN BUJK:
+1. LEVEL SURAT PERNYATAAN (Minimal):
+   → Ada: Surat Pernyataan Komitmen bermaterai + KOP BUJK
+   → Belum ada: dokumen SMAP maupun sertifikat ISO
+   → Status: BUJK dapat SBU tapi ada batas waktu pemenuhan
+   → Risiko: jika tidak dipenuhi dalam batas waktu → sanksi sesuai UU
+
+2. LEVEL DOKUMEN SMAP (Menengah):
+   → Ada: 16 komponen dokumen SMAP yang dibuat sendiri (self-made)
+   → Diverifikasi + divalidasi LSBU (VACS principle)
+   → Tidak perlu sertifikat eksternal dari CB
+   → Form penilaian: FSMAP-02 + FSMAP-03
+
+3. LEVEL ISO 37001:2016 CERTIFIED (Optimal):
+   → Ada: Sertifikat dari CB terakreditasi KAN
+   → Berlaku 3 tahun + surveilance tahunan
+   → Pemenuhan otomatis untuk BUJK semua kualifikasi
+   → Form penilaian: FSMAP-01
+
+GAP ANALYSIS UNTUK KONSTRUKSI — Area Risiko Khusus:
+• Tender/Lelang: Risiko suap dalam penawaran harga, markup RAB, dokumen palsu
+• Pengadaan Material: Kickback dari supplier, phantom vendor
+• Pengurusan IMB/Izin: Interaksi dengan DINAS PUPR, BPN, Pemda — RISIKO TINGGI
+• Subkontraktor: Due diligence wajib untuk semua sub-kon besar (Tier 1)
+• Personil Lapangan (Site Manager, Surveyor, QC): akses ke area berisiko
+
+WAKTU IDEAL KONSULTANSI BERDASARKAN KUALIFIKASI:
+• BUJK Besar baru SBU: SEGERA mulai (max 1 tahun) → Fase Siap Dokumen → Target ISO cert
+• BUJK Menengah: 2 tahun → Dokumen SMAP dulu, ISO cert kemudian
+• BUJK Kecil: 3 tahun → Mulai dengan Surat Pernyataan → Dokumen SMAP → ISO (opsional)
+
+PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
+• "Apakah perusahaan sudah memiliki SBU? Kualifikasi Kecil/Menengah/Besar?"
+• "Kapan SBU terakhir diterbitkan? Berapa sisa waktu pemenuhan SMAP?"
+• "Apakah sudah ada Surat Pernyataan Komitmen SMAP yang diserahkan ke LSBU?"
+• "Seberapa sering perusahaan mengikuti tender pemerintah?"
+• "Ada berapa subkontraktor yang biasa bekerja sama?"
+`;
+
+// ─── KONSTRUKSI RISK PROFILE — Sector-specific risk factors ──────────────────
+export const KONSTRUKSI_RISK_PROFILE = `
+PROFIL RISIKO PENYUAPAN — SEKTOR KONSTRUKSI (Untuk Register Risiko & Blueprint):
+
+PROSES BISNIS BERISIKO TINGGI:
+┌────────────────────────────┬────────────┬──────────────────────────────────────┐
+│ Proses Bisnis              │ Level Risk │ Bentuk Penyuapan Tipikal             │
+├────────────────────────────┼────────────┼──────────────────────────────────────┤
+│ Tender/Lelang Pemerintah   │ SANGAT TINGGI │ Markup RAB, kebocoran HPS, dokumen palsu │
+│ Pengurusan IMB/Izin        │ TINGGI     │ Suap ke petugas Dinas                │
+│ Pengadaan Material         │ TINGGI     │ Kickback supplier, phantom vendor    │
+│ Seleksi Subkontraktor      │ TINGGI     │ Suap dalam seleksi, markup           │
+│ Pemeriksaan/Uji Mutu       │ SEDANG     │ Suap QC/inspector                    │
+│ Pembayaran Termin          │ SEDANG     │ Markup progress, dokumen fiktif      │
+│ Perizinan Operasional      │ TINGGI     │ Suap untuk percepatan izin           │
+│ Rekruitmen Personil Kunci  │ SEDANG     │ Nepotisme, jual-beli jabatan         │
+└────────────────────────────┴────────────┴──────────────────────────────────────┘
+
+PENGENDALIAN KHAS KONSTRUKSI:
+• Prosedur e-procurement (hindari tatap muka dalam proses tender)
+• Rotation kebijakan: PIC pengadaan tidak boleh jabat >3 tahun di posisi sama
+• 4-eyes principle untuk semua pembayaran >Rp 50 juta
+• Register Konflik Kepentingan wajib diisi semua PIC Pengadaan
+• Audit rutin terhadap dokumen pengadaan oleh FKAP
+• Komitmen Anti Penyuapan wajib dari semua subkontraktor dan supplier utama
+`;
