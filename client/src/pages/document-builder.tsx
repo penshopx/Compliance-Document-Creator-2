@@ -508,7 +508,8 @@ export default function DocumentBuilder() {
   const [additionalContext, setAdditionalContext] = useState("");
   const [generatedDocument, setGeneratedDocument] = useState<string>("");
   const [copiedDocument, setCopiedDocument] = useState(false);
-  const [activeView, setActiveView] = useState<"document" | "prompt">("document");
+  const [activeView, setActiveView] = useState<"document" | "prompt">("prompt");
+  const [outputMode, setOutputMode] = useState<"prompt" | "document">("prompt");
 
   const industryTemplates = getAllTemplates();
 
@@ -619,13 +620,13 @@ CATATAN PENTING:
     setGeneratedPrompt(fullPrompt);
     setSelectedTemplate(template);
     setGeneratedDocument("");
-    setActiveView("document");
     return fullPrompt;
   }, [companyName, director, ketuaFKAP, companyCode, companyAddress, currentDate, currentYear, additionalContext]);
 
   const handleSelectTemplate = useCallback((template: typeof DOCUMENT_TEMPLATES[0]) => {
     generatePrompt(template);
-  }, [generatePrompt]);
+    setActiveView(outputMode);
+  }, [generatePrompt, outputMode]);
 
   const handleCopyDocument = useCallback(async () => {
     try {
@@ -685,22 +686,49 @@ CATATAN PENTING:
             </div>
           </div>
           
-          <Card className="mt-4 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-blue-800 dark:text-blue-300">Cara Penggunaan:</p>
-                  <ol className="mt-1 text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
-                    <li>Pilih template dokumen yang ingin dibuat</li>
-                    <li>Klik tombol "Buat Dokumen Sekarang" untuk menjalankan AI</li>
-                    <li>Salin atau unduh dokumen (.doc) yang dihasilkan</li>
-                    <li>Tidak perlu pindah aplikasi — semua selesai di sini</li>
-                  </ol>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              onClick={() => { setOutputMode("prompt"); setActiveView("prompt"); }}
+              className={`p-4 rounded-xl border-2 text-left transition-all focus:outline-none ${
+                outputMode === "prompt"
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-border hover:border-primary/40 bg-card"
+              }`}
+              data-testid="button-mode-prompt"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`p-1.5 rounded-lg ${outputMode === "prompt" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                  <Copy className="w-4 h-4" />
                 </div>
+                <span className="font-semibold text-sm">Mode Prompt</span>
+                {outputMode === "prompt" && <Badge className="text-xs ml-auto">Aktif</Badge>}
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Hasilkan teks prompt — salin &amp; tempel ke ChatGPT, Gemini, Claude, atau AI eksternal lainnya. <span className="font-medium text-foreground">Gratis, tanpa API key.</span>
+              </p>
+            </button>
+
+            <button
+              onClick={() => { setOutputMode("document"); setActiveView("document"); }}
+              className={`p-4 rounded-xl border-2 text-left transition-all focus:outline-none ${
+                outputMode === "document"
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-border hover:border-primary/40 bg-card"
+              }`}
+              data-testid="button-mode-document"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`p-1.5 rounded-lg ${outputMode === "document" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                  <Wand2 className="w-4 h-4" />
+                </div>
+                <span className="font-semibold text-sm">Mode Dokumen AI</span>
+                {outputMode === "document" && <Badge className="text-xs ml-auto">Aktif</Badge>}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Generate dokumen lengkap langsung di aplikasi. <span className="font-medium text-foreground">Butuh API key AI</span> — biaya token ke akun Anda sendiri.
+              </p>
+            </button>
+          </div>
 
           {!activeKey && (
             <Card className="mt-3 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
