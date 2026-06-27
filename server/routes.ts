@@ -1494,18 +1494,37 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
   });
 
   // Public: Payment configuration (bank accounts, WhatsApp)
-  app.get("/api/payment-config", (req, res) => {
-    res.json({
-      whatsapp: process.env.PAYMENT_WHATSAPP || "",
-      accountHolder: process.env.PAYMENT_ACCOUNT_HOLDER || "",
-      banks: {
-        bca: process.env.PAYMENT_BCA_ACCOUNT || "",
-        mandiri: process.env.PAYMENT_MANDIRI_ACCOUNT || "",
-        bri: process.env.PAYMENT_BRI_ACCOUNT || "",
-        bni: process.env.PAYMENT_BNI_ACCOUNT || "",
-      },
-      qrisImageUrl: process.env.PAYMENT_QRIS_IMAGE_URL || "",
-    });
+  app.get("/api/payment-config", async (req, res) => {
+    try {
+      const company = await storage.getCompany();
+      const accountHolder =
+        process.env.PAYMENT_ACCOUNT_HOLDER ||
+        company?.name ||
+        "";
+      res.json({
+        whatsapp: process.env.PAYMENT_WHATSAPP || "",
+        accountHolder,
+        banks: {
+          bca: process.env.PAYMENT_BCA_ACCOUNT || "",
+          mandiri: process.env.PAYMENT_MANDIRI_ACCOUNT || "",
+          bri: process.env.PAYMENT_BRI_ACCOUNT || "",
+          bni: process.env.PAYMENT_BNI_ACCOUNT || "",
+        },
+        qrisImageUrl: process.env.PAYMENT_QRIS_IMAGE_URL || "",
+      });
+    } catch {
+      res.json({
+        whatsapp: process.env.PAYMENT_WHATSAPP || "",
+        accountHolder: process.env.PAYMENT_ACCOUNT_HOLDER || "",
+        banks: {
+          bca: process.env.PAYMENT_BCA_ACCOUNT || "",
+          mandiri: process.env.PAYMENT_MANDIRI_ACCOUNT || "",
+          bri: process.env.PAYMENT_BRI_ACCOUNT || "",
+          bni: process.env.PAYMENT_BNI_ACCOUNT || "",
+        },
+        qrisImageUrl: process.env.PAYMENT_QRIS_IMAGE_URL || "",
+      });
+    }
   });
 
   // Authenticated: Current user subscription status
