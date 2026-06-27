@@ -11,7 +11,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@google/genai": "^1.39.0",
+    "@google/genai": "1.35.0",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@radix-ui/react-accordion": "^1.2.4",
@@ -107,6 +107,7 @@
     "vite": "^7.3.0"
   },
   "overrides": {
+    "@google/genai": "1.35.0",
     "drizzle-kit": {
       "@esbuild-kit/esm-loader": "npm:tsx@^4.20.4"
     }
