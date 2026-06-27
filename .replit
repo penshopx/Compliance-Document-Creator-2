@@ -42,3 +42,8 @@ waitForPort = 5000
 integrations = ["javascript_gemini_ai_integrations:2.0.0", "javascript_log_in_with_replit:2.0.0", "stripe:2.0.0"]
 stack = "FULLSTACK_JS"
 expertMode = true
+
+[userenv]
+
+[userenv.shared]
+ADMIN_USER_IDS = "60563792"

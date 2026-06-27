@@ -95,6 +95,26 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useIndustry } from "@/hooks/use-industry";
+import { useQuery } from "@tanstack/react-query";
+
+function AdminNavItem({ location }: { location: string }) {
+  const { data: adminCheck } = useQuery<{ isAdmin: boolean }>({
+    queryKey: ["/api/admin/me"],
+    retry: false,
+    staleTime: 60000,
+  });
+  if (!adminCheck?.isAdmin) return null;
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={location.startsWith("/admin")} className="h-10">
+        <Link href="/admin/payments" data-testid="nav-admin-payments">
+          <Shield className="h-4 w-4" />
+          <span>Admin Pembayaran</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Home,
@@ -351,6 +371,7 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <AdminNavItem location={location} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

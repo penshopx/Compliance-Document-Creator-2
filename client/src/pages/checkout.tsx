@@ -13,19 +13,19 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { SubscriptionPlan, PaymentOrder } from "@shared/schema";
 
-const BANK_ACCOUNTS = [
-  { id: "bca", name: "BCA", account: "1234567890", holder: "PT Compliance Hub Indonesia" },
-  { id: "mandiri", name: "Mandiri", account: "0987654321", holder: "PT Compliance Hub Indonesia" },
-  { id: "bri", name: "BRI", account: "1122334455", holder: "PT Compliance Hub Indonesia" },
-  { id: "bni", name: "BNI", account: "5566778899", holder: "PT Compliance Hub Indonesia" },
-];
-
 const EWALLETS = [
   { id: "gopay", name: "GoPay" },
   { id: "ovo", name: "OVO" },
   { id: "dana", name: "Dana" },
   { id: "shopeepay", name: "ShopeePay" },
 ];
+
+interface PaymentConfig {
+  whatsapp: string;
+  accountHolder: string;
+  banks: { bca: string; mandiri: string; bri: string; bni: string };
+  qrisImageUrl: string;
+}
 
 export default function CheckoutPage() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
@@ -44,6 +44,17 @@ export default function CheckoutPage() {
   const { data: plans, isLoading: plansLoading } = useQuery<SubscriptionPlan[]>({
     queryKey: ["/api/subscription-plans"],
   });
+
+  const { data: paymentConfig } = useQuery<PaymentConfig>({
+    queryKey: ["/api/payment-config"],
+  });
+
+  const BANK_ACCOUNTS = [
+    { id: "bca", name: "BCA", account: paymentConfig?.banks.bca || "", holder: paymentConfig?.accountHolder || "" },
+    { id: "mandiri", name: "Mandiri", account: paymentConfig?.banks.mandiri || "", holder: paymentConfig?.accountHolder || "" },
+    { id: "bri", name: "BRI", account: paymentConfig?.banks.bri || "", holder: paymentConfig?.accountHolder || "" },
+    { id: "bni", name: "BNI", account: paymentConfig?.banks.bni || "", holder: paymentConfig?.accountHolder || "" },
+  ].filter(b => b.account);
 
   const selectedPlan = plans?.find(p => p.id === planId);
 
@@ -110,6 +121,7 @@ export default function CheckoutPage() {
     });
   };
 
+  const waNumber = paymentConfig?.whatsapp || "";
   const openWhatsApp = () => {
     const message = encodeURIComponent(
       `Halo, saya ingin konfirmasi pembayaran untuk:\n\n` +
@@ -118,7 +130,8 @@ export default function CheckoutPage() {
       `Jumlah: ${formatPrice(selectedPlan?.price || 0)}\n\n` +
       `Mohon verifikasi pembayaran saya.`
     );
-    window.open(`https://wa.me/6281234567890?text=${message}`, "_blank");
+    const dest = waNumber ? `https://wa.me/${waNumber}?text=${message}` : `https://wa.me/?text=${message}`;
+    window.open(dest, "_blank");
   };
 
   useEffect(() => {
@@ -350,8 +363,21 @@ export default function CheckoutPage() {
                   <p className="text-sm text-muted-foreground">
                     Gunakan aplikasi e-wallet (GoPay, OVO, Dana, ShopeePay) untuk memindai kode QRIS
                   </p>
-                  <div className="mt-4 p-8 bg-muted rounded-lg">
-                    <p className="text-xs text-muted-foreground">[QRIS Code Placeholder]</p>
+                  <div className="mt-4 rounded-lg overflow-hidden">
+                    {paymentConfig?.qrisImageUrl ? (
+                      <img
+                        src={paymentConfig.qrisImageUrl}
+                        alt="QRIS Code"
+                        className="mx-auto max-w-[240px] rounded-lg"
+                        data-testid="img-qris"
+                      />
+                    ) : (
+                      <div className="p-8 bg-muted rounded-lg">
+                        <p className="text-xs text-muted-foreground">
+                          QRIS belum dikonfigurasi. Set <code className="bg-background px-1 rounded">PAYMENT_QRIS_IMAGE_URL</code> di Secrets.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

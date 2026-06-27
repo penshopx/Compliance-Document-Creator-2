@@ -1464,6 +1464,66 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
     }
   });
 
+  // Admin: Reject / cancel a payment order
+  app.post("/api/admin/payment-orders/:id/reject", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const orderId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const order = await storage.getPaymentOrder(orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      if (order.status === "paid") return res.status(400).json({ error: "Cannot reject already paid order" });
+      const updated = await storage.updatePaymentOrder(orderId, { status: "pending" });
+      res.json({ message: "Order reset to pending", order: updated });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reject order" });
+    }
+  });
+
+  // Admin: Get subscription stats
+  app.get("/api/admin/stats", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const orders = await storage.getPaymentOrders();
+      const total = orders.length;
+      const pending = orders.filter(o => o.status === "pending").length;
+      const pendingConfirmation = orders.filter(o => o.status === "pending_confirmation").length;
+      const paid = orders.filter(o => o.status === "paid").length;
+      const revenue = orders.filter(o => o.status === "paid").reduce((sum, o) => sum + (o.amount || 0), 0);
+      res.json({ total, pending, pendingConfirmation, paid, revenue });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // Public: Payment configuration (bank accounts, WhatsApp)
+  app.get("/api/payment-config", (req, res) => {
+    res.json({
+      whatsapp: process.env.PAYMENT_WHATSAPP || "",
+      accountHolder: process.env.PAYMENT_ACCOUNT_HOLDER || "",
+      banks: {
+        bca: process.env.PAYMENT_BCA_ACCOUNT || "",
+        mandiri: process.env.PAYMENT_MANDIRI_ACCOUNT || "",
+        bri: process.env.PAYMENT_BRI_ACCOUNT || "",
+        bni: process.env.PAYMENT_BNI_ACCOUNT || "",
+      },
+      qrisImageUrl: process.env.PAYMENT_QRIS_IMAGE_URL || "",
+    });
+  });
+
+  // Authenticated: Current user subscription status
+  app.get("/api/subscription-status", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const sub = await storage.getUserSubscription(userId);
+      res.json(sub || null);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subscription status" });
+    }
+  });
+
+  // Admin: Check if current user is admin
+  app.get("/api/admin/me", isAuthenticated, isAdmin, (req, res) => {
+    res.json({ isAdmin: true });
+  });
+
   return httpServer;
 }
 
