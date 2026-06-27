@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "6xBStZRrjJ2deF-CIFoHY"
+uri = "file://attached_assets/generated_videos/compliance_hub_intro.mp4"
+type = "video"
+title = "Compliance Hub - Animated Intro Video"
