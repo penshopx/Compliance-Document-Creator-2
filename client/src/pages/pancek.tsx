@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { 
   Shield, ClipboardList, Settings, ClipboardCheck, RefreshCw, MessageSquare,
   ChevronRight, CheckCircle2, Circle, ExternalLink, FileText, Copy, Search,
-  Flag, ArrowLeft, BookOpen, Download, Award, AlertTriangle, TrendingUp
+  Flag, ArrowLeft, BookOpen, Download, Award, AlertTriangle, TrendingUp, Wand2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -241,7 +241,13 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
             <p className="text-muted-foreground">Panduan Cegah Korupsi - KPK Indonesia</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link href="/pancek-generator">
+            <Button className="gap-2 bg-orange-600 hover:bg-orange-700 text-white" data-testid="button-pancek-generator">
+              <Wand2 className="h-4 w-4" />
+              Generator Dokumen
+            </Button>
+          </Link>
           <Button variant="outline" onClick={exportChecklist} data-testid="button-export-checklist">
             <Download className="h-4 w-4 mr-2" />
             Export Checklist

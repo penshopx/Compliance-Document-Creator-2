@@ -31,6 +31,7 @@ import TemplateRepository from "@/pages/template-repository";
 import SMAPChecklist from "@/pages/smap-checklist";
 import ProdukSiap from "@/pages/produk-siap";
 import PancekPage from "@/pages/pancek";
+import PancekGenerator from "@/pages/pancek-generator";
 import IndustrySettingsPage from "@/pages/industry-settings";
 import AiSettingsPage from "@/pages/ai-settings";
 import HelpDeskChatbot from "@/components/help-desk-chatbot";
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/welcome" component={WelcomePage} />
       <Route path="/checkout" component={CheckoutPage} />
       {isIndustryEnabled("pancek") && <Route path="/pancek" component={PancekPage} />}
+      {isIndustryEnabled("pancek") && <Route path="/pancek-generator" component={PancekGenerator} />}
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/company" component={CompanyPage} />
       <Route path="/management" component={ManagementPage} />
@@ -83,7 +85,7 @@ function AppContent() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const isFullWidthPage = location === "/pdca";
-  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek" || location.startsWith("/checkout") || location.startsWith("/pathway") || location.startsWith("/admin");
+  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek" || location === "/pancek-generator" || location.startsWith("/checkout") || location.startsWith("/pathway") || location.startsWith("/admin");
 
   if (isStandalonePage) {
     return (

@@ -228,6 +228,137 @@ export async function registerRoutes(
     }
   });
 
+  // Pancek Document Generator — Buku 3 Mini Apps Pipeline (SSE streaming)
+  app.post("/api/pancek/generate", isAuthenticated, async (req, res) => {
+    try {
+      const schema = z.object({
+        docId: z.string(),
+        docName: z.string(),
+        kode: z.string(),
+        phaseId: z.string(),
+        promptTemplate: z.string(),
+        dasarHukum: z.string().optional(),
+        penanggungJawab: z.string().optional(),
+        additionalContext: z.string().optional(),
+      });
+      const validated = schema.parse(req.body);
+
+      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "AI tidak tersedia." });
+
+      // RESEARCHER: Auto-fetch all company data from DB
+      const researchParts: string[] = [];
+      try {
+        const [company, fkapTeamData, managementData, vendorData] = await Promise.all([
+          storage.getCompany(),
+          storage.getFkapTeam(),
+          storage.getManagement(),
+          storage.getVendors(),
+        ]);
+
+        if (company?.name) {
+          researchParts.push(`PROFIL PERUSAHAAN:
+- Nama: ${company.name}
+- Alamat: ${company.address || "-"}${company.city ? ", " + company.city : ""}
+- NPWP: ${company.npwp || "-"}
+- NIB: ${company.nib || "-"}
+- Direktur: ${company.directorName || "-"}`);
+        }
+
+        if (managementData.length > 0) {
+          researchParts.push(`TIM MANAJEMEN (${managementData.length} orang):
+${managementData.slice(0, 6).map((m, i) => `${i + 1}. ${m.name} — ${m.position}`).join("\n")}`);
+        }
+
+        if (fkapTeamData.length > 0) {
+          researchParts.push(`TIM FKAP / FUNGSI KEPATUHAN (${fkapTeamData.length} anggota):
+${fkapTeamData.slice(0, 8).map((f, i) => `${i + 1}. ${f.name} — ${f.position}${(f as any).role ? " (" + (f as any).role + ")" : ""}`).join("\n")}`);
+        }
+
+        if (vendorData.length > 0) {
+          researchParts.push(`MITRA / VENDOR TERDAFTAR: ${vendorData.length} entitas`);
+        }
+      } catch (dbErr) {
+        console.error("Pancek generate DB fetch error:", dbErr);
+      }
+
+      const researchContext = researchParts.length > 0
+        ? `\n\n=== DATA PERUSAHAAN (Researcher Agent — gunakan ini, jangan tanya ulang) ===\n${researchParts.join("\n\n")}\n===`
+        : "";
+
+      const additionalCtx = validated.additionalContext
+        ? `\n\nKONTEKS TAMBAHAN DARI USER:\n${validated.additionalContext}`
+        : "";
+
+      // NARRATOR: Build generation instruction
+      const systemPrompt = `Anda adalah Narrator Agent dalam pipeline Pancek Document Generator — spesialis menghasilkan dokumen kepatuhan anti-korupsi yang LENGKAP, FORMAL, dan SIAP PAKAI.
+
+TUGAS TUNGGAL: Generate dokumen "${validated.docName}" (${validated.kode}) sesuai Panduan Cegah Korupsi (Panduan CEK) KPK Indonesia.
+
+PRINSIP NARRATOR AGENT:
+1. Hasilkan dokumen LENGKAP — bukan outline, bukan daftar poin kosong, bukan template berisi placeholder [isi di sini]
+2. Gunakan data perusahaan dari Researcher Agent secara langsung (nama, jabatan, dll)
+3. Format dokumen FORMAL: nomor dokumen, tanggal, tanda tangan, pasal-pasal terstruktur
+4. Bahasa Indonesia yang baku, formal, dan profesional
+5. Konten SUBSTANTIF: setiap pasal/bagian berisi narasi nyata yang bisa langsung ditandatangani
+6. Sesuaikan dengan dasar hukum: ${validated.dasarHukum || "Panduan CEK KPK, UU 31/1999 jo UU 20/2001"}
+
+STRUKTUR OUTPUT:
+- Header dokumen (nomor, tanggal, nama perusahaan)
+- Isi dokumen lengkap sesuai jenis
+- Penutup + tanda tangan (nama jabatan dari data perusahaan)
+${researchContext}${additionalCtx}`;
+
+      const userPrompt = `Generate dokumen LENGKAP berikut:
+
+JENIS DOKUMEN: ${validated.docName}
+KODE DOKUMEN: ${validated.kode}
+PENANGGUNG JAWAB: ${validated.penanggungJawab || "Direktur Utama"}
+FASE PANCEK: ${validated.phaseId.toUpperCase()}
+DASAR HUKUM: ${validated.dasarHukum || "Panduan CEK KPK"}
+
+INSTRUKSI DETAIL:
+${validated.promptTemplate}
+
+Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data perusahaan yang tersedia dari Researcher Agent. Jika ada nama direktur/FKAP dari data, gunakan langsung dalam dokumen.`;
+
+      // Set up SSE streaming
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const genAI = new GoogleGenAI({ apiKey });
+
+      const stream = genAI.models.generateContentStream({
+        model: "gemini-2.5-flash",
+        contents: [
+          { role: "user", parts: [{ text: systemPrompt }] },
+          { role: "model", parts: [{ text: "Baik, saya akan menghasilkan dokumen yang lengkap dan siap pakai berdasarkan data perusahaan yang tersedia." }] },
+          { role: "user", parts: [{ text: userPrompt }] },
+        ],
+      });
+
+      for await (const chunk of await stream) {
+        const text = chunk.text();
+        if (text) {
+          res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
+        }
+      }
+
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    } catch (error) {
+      console.error("Pancek generate error:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Gagal generate dokumen" });
+      } else {
+        res.write(`data: ${JSON.stringify({ error: "Gagal generate" })}\n\n`);
+        res.end();
+      }
+    }
+  });
+
   // Company Routes
   app.get("/api/company", async (req, res) => {
     try {
