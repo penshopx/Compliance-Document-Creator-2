@@ -894,3 +894,428 @@ PENGENDALIAN KHAS KONSTRUKSI:
 • Audit rutin terhadap dokumen pengadaan oleh FKAP
 • Komitmen Anti Penyuapan wajib dari semua subkontraktor dan supplier utama
 `;
+
+// ─── PANCEK KPK KNOWLEDGE ─────────────────────────────────────────────────────
+// Sumber: Implementasi_Pancek_KPK_PUB2025 (KPK Direktorat Antikorupsi Badan Usaha)
+//         Panduan CEK KPK v2 (cms.kpk.go.id), Paparan PANCEK 2023
+export const PANCEK_KNOWLEDGE = `
+================================================================
+PANDUAN CEGAH KORUPSI (PANCEK) — KNOWLEDGE BASE KONSULTAN
+Sumber Otoritatif: KPK Direktorat Antikorupsi Badan Usaha
+================================================================
+
+== A. KONTEKS & DASAR HUKUM ==
+
+MENGAPA PANCEK PENTING:
+• PERMA No. 13 Tahun 2016 — Korporasi dapat dipidana jika terbukti korupsi dilakukan untuk kepentingannya
+• Bukti bahwa korporasi memiliki "Prosedur Pencegahan Korupsi yang Memadai" = faktor peringan (mitigasi pidana korporasi)
+• Panduan CEK KPK adalah panduan resmi yang diakui sebagai standar "prosedur memadai" tersebut
+• Pelaku usaha swasta = kelompok tersangka terbesar (399 kasus KPK 2004-2023), mengalahkan legislatif & eksekutif
+
+DASAR REGULASI:
+1. UU No. 31/1999 jo UU No. 20/2001 — Pemberantasan Tipikor (30 jenis, 7 kelompok)
+2. UU No. 28/1999 — Penyelenggara Negara Bersih dari KKN
+3. UU No. 8/2010 — Tindak Pidana Pencucian Uang (TPPU)
+4. PERMA No. 13/2016 — Tata Cara Penanganan Perkara Tipikor oleh Korporasi ★ KUNCI
+5. PP No. 43/2018 — Peran Serta Masyarakat & Penghargaan dalam Pencegahan Korupsi
+6. Perpres No. 54/2018 — Strategi Nasional Pencegahan Korupsi (Stranas PK)
+7. Perpres No. 13/2018 — Beneficial Ownership / Pemilik Manfaat Korporasi
+8. Kepmenaker No. 338/2017 — Sertifikasi Ahli Pembangun Integritas (API)
+
+OVERLAY SEKTORAL:
+• BUMN/BUMD: Tambah SE MenBUMN No. SE-2/MBU/07/2019 + Surat S-35/MBU/01/2020
+• BUJK Konstruksi: Tambah SE PUPR No. 21/SE/M/2021 + Permen PU No. 06/2025
+• Swasta Umum: Panduan CEK KPK generik (sudah cukup)
+
+PERBEDAAN PANCEK vs SMAP/ISO 37001:
+┌────────────────────┬─────────────────────────────┬─────────────────────────────┐
+│ Aspek              │ Panduan CEK (Pancek)         │ SNI ISO 37001:2016 (SMAP)   │
+├────────────────────┼─────────────────────────────┼─────────────────────────────┤
+│ Pengelola          │ KPK (pemerintah)             │ BSN / CB terakreditasi KAN  │
+│ Biaya              │ Gratis                       │ Berbayar (audit CB)         │
+│ Sertifikasi        │ Non-sertifikasi              │ Bersertifikasi              │
+│ Hasil              │ Status "Terverifikasi Jaga.id"│ Sertifikat ISO 37001       │
+│ Fokus              │ Hukum Indonesia (UU Tipikor) │ Standar internasional       │
+│ Metode             │ Self-assessment + verifikasi │ Audit pihak ketiga          │
+│ Fase Unik          │ RESPON (aksi kolektif)       │ Tidak ada                   │
+│ Mandatory 2027     │ BUJK via kuesioner SMAP      │ BUJK via LSBU              │
+└────────────────────┴─────────────────────────────┴─────────────────────────────┘
+Catatan: Mulai 2027, SMAP menjadi LAMPIRAN WAJIB kuesioner Pancek untuk BUJK
+
+== B. FRAMEWORK PDCAR — 5 KOMPONEN ==
+
+FONDASI: KOMITMEN PIMPINAN PUNCAK
+Tanpa komitmen Direktur/Direksi/Komisaris, sistem tidak akan berjalan efektif.
+Komitmen diwujudkan melalui: Deklarasi tertulis + Kebijakan + Kode Etik + Fungsi Pelaksana
+
+KOMPONEN 1 — KOMITMEN (K):
+  Komitmen tertulis antipenyuapan dari pimpinan tertinggi.
+  Kebijakan anti-korupsi dengan definisi, acuan UU Tipikor, peta rawan.
+  Pakta integritas untuk seluruh pegawai (termasuk di kontrak kerja).
+  Fungsi Kepatuhan (unit/individu) dengan SK resmi.
+
+KOMPONEN 2 — PERENCANAAN (P/Plan):
+  Identifikasi dan pemetaan risiko korupsi (risk register).
+  Penentuan titik rawan dan modus penyuapan per unit kerja.
+  Penilaian risiko di semua aktivitas, diperbarui berkala.
+
+KOMPONEN 3 — PELAKSANAAN (D/Do):
+  9 aktivitas wajib:
+  a) Klausul anti-korupsi dalam kontrak pihak eksternal
+  b) Uji tuntas (due diligence) mitra usaha
+  c) Pengaturan gratifikasi, hadiah, sponsor
+  d) Pengaturan kontribusi dan donasi politik
+  e) Sistem pelaporan pengaduan (WBS/Whistleblowing)
+  f) Pengaturan konflik kepentingan
+  g) Pengendalian transaksi keuangan
+  h) Komunikasi (sosialisasi berkala)
+  i) Pelatihan berkelanjutan
+
+KOMPONEN 4 — EVALUASI (C/Check):
+  Sistem pemantauan dan evaluasi peraturan antipenyuapan.
+  Hasil M&E dikomunikasikan ke seluruh pegawai dan pimpinan.
+  Audit internal dengan Piagam Audit (Audit Charter).
+
+KOMPONEN 5 — PERBAIKAN (A/Act):
+  Mekanisme sanksi bagi pelanggar.
+  Mekanisme penghargaan bagi pegawai berintegritas.
+  Perbaikan berkelanjutan dari hasil evaluasi.
+
+KOMPONEN 6 — RESPON (R):
+  Menghadapi tantangan kehilangan peluang bisnis karena anti-suap:
+  • Aksi kolektif antikorupsi (bersama asosiasi, sesama pelaku usaha)
+  • Laporan ke saluran resmi: KPK (pengaduan@kpk.go.id / 08558575575),
+    Kepolisian RI (lapor@tipidkorpolri.info), Ombudsman (137),
+    LAPOR! (lapor.go.id), WBS Internal Korporasi
+
+== C. FUNGSI PELAKSANA — AHLI PEMBANGUN INTEGRITAS (API) ==
+
+DEFINISI: Unit atau individu yang mengawal upaya pencegahan korupsi di korporasi.
+SERTIFIKASI: Keputusan Menteri Ketenagakerjaan No. 338 Tahun 2017 (Sertifikasi API)
+RASIO BEST PRACTICE: 1 API per 40 karyawan
+POSISI DALAM ORGANISASI: Bertanggung jawab langsung kepada Direktur Utama / CEO
+ALTERNATIF KOMPETENSI: Auditor, CCO (Chief Compliance Officer), SPIP, API
+
+8 FUNGSI UTAMA FUNGSI PELAKSANA:
+01. Merancang kebijakan integritas organisasi
+02. Memastikan perusahaan mematuhi peraturan dan kebijakan antikorupsi (terutama antisuap)
+03. Melaksanakan program integritas organisasi
+04. Melakukan penilaian risiko korupsi
+05. Memantau pelaksanaan rencana mitigasi risiko korupsi
+06. Melakukan pemeriksaan pelanggaran terhadap kebijakan integritas
+07. Memantau tindak lanjut rekomendasi perbaikan kebijakan integritas
+08. Menjadi narasumber (single point of contact) terkait peraturan antikorupsi & antisuap
+   + Mengevaluasi sistem integritas organisasi (fungsi ke-8)
+
+== D. KUESIONER JAGA.ID — CHECKLIST LENGKAP PER ITEM ==
+Link self-assessment: https://jaga.id/kuisprofit?vnk=aad20748
+Buku Panduan CEK: https://bit.ly/BukuKPKCEK
+
+--- I. KOMITMEN ---
+
+K.1 — Komitmen tertulis antipenyuapan dari pimpinan tertinggi (pemilik, direksi, komisaris)
+  K.1.a ✓ Komitmen tertulis antipenyuapan (dokumen Deklarasi Anti-Korupsi)
+  K.1.b ✓ Bukti deklarasi + daftar pihak yang menghadiri deklarasi
+  K.1.c ✓ Komunikasi komitmen (email internal, sesi diskusi)
+  K.1.d ✓ Bukti bahwa komitmen pimpinan menghasilkan kebijakan antipenyuapan
+
+K.2 — Pernyataan antipenyuapan ditandatangani semua pegawai (di kontrak kerja atau formulir)
+  K.2.a ✓ Pakta integritas / kontrak kerja (sampel dari level manajer)
+  K.2.b ✓ Pakta berisi larangan pemberian uang pelicin atau suap kepada pembuat kebijakan
+
+K.3 — Kebijakan/peraturan antipenyuapan memiliki definisi tentang korupsi
+  K.3.a ✓ Definisi korupsi yang dibandingkan dari berbagai sumber hukum
+
+K.4 — Kebijakan mengacu pada UU Tipikor dan wajib ditaati semua pegawai
+  K.4.a ✓ Bukti acuan ke UU Tipikor dalam kebijakan
+
+K.5 — Kebijakan memuat penjelasan area rawan penyuapan
+  K.5.a ✓ Peta rawan korupsi tertera dalam kebijakan
+
+K.6 — Ada unit/individu yang memastikan kontrol pencegahan korupsi (Fungsi Kepatuhan)
+  K.6.a ✓ Unit atau individu penyelenggara fungsi kepatuhan
+  K.6.b ✓ Surat pengangkatan (SK) dan uraian wewenang
+  K.6.c ✓ SOP unit fungsi kepatuhan
+  K.6.d ✓ Rasio pegawai kepatuhan vs total pegawai (best practice 1:40)
+  K.6.e   Bukti kompetensi (sertifikat auditor, CCO, API, SPIP, dll)
+
+K.7 — Unit/individu melaksanakan komunikasi dan pelatihan pencegahan korupsi
+  K.7.a ✓ Rencana kerja / agenda kegiatan komunikasi & pelatihan
+  K.7.b   Bukti pelaksanaan kegiatan (laporan, dokumentasi)
+  K.7.c   Bukti evaluasi pelaksanaan kegiatan
+
+--- II. PERENCANAAN ---
+
+P.1 — Identifikasi dan pemetaan risiko (titik rawan & modus penyuapan)
+  P.1.a ✓ Fungsi pelaksana yang mengidentifikasi dan memetakan risiko
+  P.1.b ✓ Kertas kerja pemetaan: risk register, perencanaan mitigasi, monev mitigasi
+  P.1.c ✓ Penentuan tingkat kerawanan risiko (Low/Medium/High/Critical)
+
+P.2 — Penilaian risiko korupsi dilakukan terhadap semua aktivitas korporasi
+  P.2.a ✓ Bukti penilaian risiko dilakukan di semua atau beberapa unit
+
+P.3 — Penilaian risiko dilakukan berkala dan diperbarui berdasarkan modus korupsi terkini
+  P.3.a ✓ Laporan pelaksanaan mitigasi + beberapa versi risk register yang diperbarui
+
+--- III. PELAKSANAAN ---
+
+D.1 — Kebijakan antipenyuapan mengikat pihak eksternal (distributor, mitra, konsultan, vendor)
+  D.1.a   Perjanjian/kontrak dengan klausul antipenyuapan untuk pihak eksternal (sampel)
+
+D.2 — Kebijakan mencakup sistem pengawasan, sanksi, evaluasi (internal + eksternal)
+  D.2.a ✓ Perjanjian kerja yang menunjukkan peraturan antipenyuapan untuk pihak internal
+
+D.3 — Kebijakan memuat pengaturan gratifikasi, hadiah/sponsor, kontribusi dana politik
+  D.3.a.1 ✓ Pengaturan gratifikasi ke pegawai negeri / penyelenggara negara (sektor publik)
+  D.3.a.2 ✓ Pengaturan praktik pemberian fasilitas, hadiah, sponsor di lingkup eksternal
+  D.3.a.3 ✓ Pengaturan kontribusi dana politik
+  D.3.b ✓ Klausul batasan nilai & bentuk gratifikasi ke PNS/Penyelenggara Negara
+  D.3.c ✓ Klausul batasan nilai & bentuk hadiah/sponsor eksternal
+  D.3.d ✓ Klausul pengaturan kontribusi dana politik yang boleh dan tidak boleh
+
+  BATAS NILAI KONTRIBUSI DANA POLITIK (khusus Badan Usaha Swasta):
+  • Pemilu Presiden/Wakil Presiden & DPR/DPRD: maks Rp 25.000.000.000
+  • Pemilu calon anggota DPD: maks Rp 1.500.000.000
+  • Pilgub/Pilbup/Pilwalkot (Gubernur, Bupati, Walikota): maks Rp 750.000.000
+  • Sumbangan untuk partai politik: maks Rp 7.500.000.000
+  (BUMN/BUMD: DILARANG memberikan kontribusi dana politik)
+
+D.5 — Menerapkan prinsip mengenali pemilik manfaat (Beneficial Owner / BO)
+  D.5.a   Penetapan BO kepada instansi berwenang (via anggaran dasar / RUPS / Kemenhukham)
+  Dasar: Perpres No. 13/2018 tentang Beneficial Ownership
+
+D.6 — Sistem pelaporan & pengaduan atas dugaan penyuapan dengan jaminan kerahasiaan pelapor
+  D.6.a ✓ Bukti sosialisasi sistem pelaporan secara periodik
+  D.6.b ✓ SOP sistem pelaporan dan pengaduan (WBS)
+  D.6.c ✓ Saluran pelaporan yang ada (aplikasi, call centre, SMS, langsung, dll)
+  D.6.d ✓ SK/job desc fungsi pelaksana pengelola WBS (internal atau eksternal)
+  D.6.e ✓ Bukti penanganan berjenjang (eskalasi laporan)
+  D.6.f ✓ Statistik laporan masuk dan diselesaikan beserta rekomendasi
+  D.6.g ✓ Bukti evaluasi sistem pelaporan secara periodik
+
+D.7 — Sosialisasi kebijakan antipenyuapan secara berkala kepada semua pegawai
+  D.7.a ✓ Kebijakan / program sosialisasi antipenyuapan
+  D.7.b ✓ Bukti kegiatan sosialisasi (laporan kegiatan, dokumentasi foto)
+  D.7.c ✓ Media sosialisasi menjangkau semua pegawai (email, poster, intranet, dll)
+  D.7.d ✓ Umpan balik dari pegawai (survei, kuesioner kepuasan pelatihan)
+
+--- IV. EVALUASI ---
+
+C.1 — Sistem pemantauan dan evaluasi (M&E) terhadap peraturan antipenyuapan
+  C.1.a ✓ Kebijakan monev antipenyuapan (peraturan monitoring dan evaluasi)
+  C.1.b ✓ Area yang perlu dievaluasi beserta cara pengukurannya
+  C.1.c ✓ Unit yang melakukan pemantauan dan evaluasi
+  C.1.d ✓ Jadwal pemantauan dan evaluasi
+  C.1.e ✓ Hasil pemantauan dievaluasi bersama + rencana tindak lanjut
+
+C.2 — Sistem M&E dikomunikasikan secara berkala kepada semua pegawai
+  C.2.a   Media komunikasi M&E (rapat, pertemuan, email, dll)
+
+C.3 — Hasil M&E terkait korupsi dikomunikasikan secara berkala kepada seluruh pimpinan
+  C.3.a ✓ Bukti penyampaian hasil pemantauan kepada pimpinan
+  C.3.b ✓ Evaluasi untuk meningkatkan efisiensi/efektivitas melalui hasil audit
+
+--- V. PERBAIKAN ---
+
+A.1 — Mekanisme sanksi bagi pelanggaran peraturan antipenyuapan
+  A.1.a ✓ Mekanisme pemberian sanksi terhadap tindakan pelanggaran
+  A.1.b ✓ Bukti pelaksanaan pemberian sanksi
+
+A.2 — Mekanisme penghargaan bagi pegawai yang berperan aktif membangun budaya integritas
+  A.2.a ✓ Kualifikasi penerima penghargaan (kriteria integritas)
+  A.2.b ✓ Mekanisme pemberian penghargaan
+  A.2.c   Bukti pelaksanaan pemberian penghargaan
+
+A.3 — Tindak lanjut hasil evaluasi pelaksanaan program pencegahan korupsi
+  A.3.a ✓ Perubahan peraturan / kebijakan / SOP berdasarkan evaluasi
+
+Catatan: Item dengan ✓ = wajib ada (mandatory), item tanpa ✓ = direkomendasikan
+
+== E. DAFTAR DOKUMEN YANG HARUS DISIAPKAN (18 DOKUMEN UTAMA) ==
+
+KOMITMEN (6 dokumen):
+1.  Deklarasi Komitmen Anti-Korupsi (K.1) — ditandatangani Direksi + Komisaris + Pemegang Saham
+2.  Email Komunikasi Deklarasi ke seluruh insan perusahaan (K.1.c)
+3.  Pakta Integritas Anti-Korupsi — Level Manajemen & level staf (K.2)
+4.  Kebijakan Anti-Korupsi Perusahaan — lengkap dengan 20+ klausul (K.3, K.4, K.5)
+    [Termasuk: Definisi, Landasan Hukum, Benturan Kepentingan, Hadiah, Kontribusi Politik, WBS]
+5.  SK Pengangkatan Fungsi Kepatuhan / Tim Pelaksana API (K.6)
+6.  SOP Fungsi Kepatuhan + Rencana Kerja Komunikasi & Pelatihan (K.6.c, K.7.a)
+
+PERENCANAAN (2 dokumen):
+7.  Risk Register / Daftar Kerawanan Risiko Korupsi per Unit Kerja (P.1)
+    [Format: No | Unit Kerja | Proses Berisiko | Modus | Dampak | Kemungkinan | Level | Mitigasi]
+8.  Jadwal Review Risk Register & Laporan Pelaksanaan Mitigasi (P.3)
+
+PELAKSANAAN (5 dokumen):
+9.  Template Kontrak/Perjanjian dengan Klausul Anti-Korupsi untuk Mitra Eksternal (D.1)
+10. Prosedur Gratifikasi, Hadiah & Sponsor (D.3) — termasuk batas nilai dan prosedur pelaporan
+11. Prosedur Kontribusi Dana Politik (D.3.d) — batas nilai sesuai UU No. 7/2017 & UU No. 2/2011
+12. Dokumen Penetapan Pemilik Manfaat / Beneficial Owner (D.5)
+13. SOP Whistleblowing System (WBS) + Format 5 Laporan (D.6)
+    [Laporan: Korupsi/Potensi Korupsi, Benturan Kepentingan, Pemberian Hadiah, Penerimaan Hadiah, Kontribusi Dana Politik]
+
+EVALUASI (3 dokumen):
+14. Piagam Audit / Audit Charter (C.1) — dasar pelaksanaan audit internal
+15. Program & Jadwal Audit Internal + Laporan Audit (C.1.c, C.1.d, C.3)
+16. Media Komunikasi Hasil M&E kepada Pegawai & Pimpinan (C.2, C.3)
+
+PERBAIKAN & RESPON (2 dokumen):
+17. Mekanisme Sanksi & Penghargaan — prosedur + kriteria + bukti pelaksanaan (A.1, A.2)
+18. Rencana Perbaikan Berkelanjutan (Corrective Action Plan) dari hasil evaluasi (A.3)
+
+== F. DRAFT DOKUMEN RESMI KPK (VERBATIM DARI PUB2025) ==
+
+--- F.1 DEKLARASI KOMITMEN ANTI-KORUPSI (K.1) ---
+Isi 9 poin komitmen:
+1. Menjalankan usaha di atas nilai integritas serta berpedoman pada Kode Etik dan Perilaku
+2. Senantiasa meningkatkan dan memperbaiki setiap proses bisnis sejalan dengan prinsip integritas
+3. Menjalankan prinsip toleransi nol (zero tolerance) terhadap penyuapan, korupsi, dan pelanggaran terkait
+4. Melarang seluruh Direksi, Komisaris, Pemegang Saham, karyawan untuk menjanjikan/memberikan sesuatu
+   kepada Penyelenggara Negara, Pegawai Negeri, atau pihak lainnya dalam lingkup pekerjaan
+5. Melarang seluruh insan perusahaan untuk meminta/menerima pemberian yang berkaitan dengan jabatan
+6. Menerapkan kebijakan anti-korupsi secara penuh, konsisten dan berkelanjutan sesuai perundangan
+7. Memberikan sosialisasi dan/atau pelatihan pencegahan korupsi secara berkala kepada semua insan
+8. Melakukan pengawasan pelaksanaan komitmen ini; setiap pelanggaran dikenai sanksi sesuai ketentuan
+9. Mendorong setiap unit organisasi untuk mencegah dan mendeteksi praktik korupsi melalui penilaian risiko
+Format tanda tangan: Direktur + Komanditer + Manajer Keuangan + Manajer Operasional (+ Cap perusahaan)
+
+--- F.2 PAKTA INTEGRITAS ANTI-KORUPSI — LEVEL MANAJEMEN (K.2) ---
+Data yang harus diisi: Nama, Unit/Divisi, Jabatan, Kontak/No. Seluler, Alamat, Perusahaan
+Isi 9 pernyataan:
+1. Senantiasa mematuhi hukum, ketentuan peraturan perundang-undangan, dan peraturan internal perusahaan
+2. Senantiasa bertindak objektif dan berpegang teguh pada nilai etika dan moral
+3. Senantiasa bertindak adil, transparan, serta menjunjung tinggi integritas dan kejujuran
+4. Tidak melakukan praktik korupsi termasuk tidak terbatas pada menjanjikan/memberikan sesuatu dalam
+   bentuk apapun kepada Penyelenggara Negara, PNS, dan/atau pihak lainnya dalam lingkup pekerjaan
+5. Berperan aktif dalam upaya pencegahan dan pemberantasan Praktik Korupsi di lingkungan Perusahaan
+6. Bersedia mengikuti sosialisasi dan/atau pelatihan atas upaya pencegahan Praktik Korupsi
+7. Bersedia melakukan pelaporan dalam hal terjadi tindakan Praktik Korupsi di lingkungan Perusahaan
+8. Senantiasa menciptakan lingkungan kerja yang bebas dari Praktik Korupsi
+9. Berkomitmen terhadap Implementasi Anti-Korupsi Perusahaan
+Format: TTD di atas meterai Rp 10.000 + Cap perusahaan
+
+--- F.3 KEBIJAKAN ANTI-KORUPSI — STRUKTUR LENGKAP (K.3-K.5) ---
+I.   DEFINISI: Insan Perusahaan, Penyelenggara Negara, Pegawai Negeri (5 kriteria),
+     Perbuatan Curang (4 kategori), Praktik Korupsi (2 kategori berdasar UU Tipikor)
+II.  LANDASAN HUKUM: UU 28/1999, UU 20/2001, PP 43/2018, PERMA 13/2016
+III. KEBIJAKAN ANTI-KORUPSI (20 klausul):
+     1. Larangan Praktik Korupsi dalam lingkup pekerjaan
+     2. Larangan menerima suap dan/atau gratifikasi (*rekomendasi swasta, wajib BUMN/BUMD)
+     3. Larangan Perbuatan Curang dalam bentuk apapun
+     4. Larangan pemerasan kepada pihak manapun
+     5. Larangan instruksi/persetujuan kepada konsultan/agen/mitra untuk praktik terlarang
+     6. Wajib melapor jika terjadi Praktik Korupsi di lingkungan Perusahaan
+     7. Wajib melapor ke pihak berwenang jika korupsi melibatkan Penyelenggara Negara/PNS
+     8. Jaminan perlindungan dan kerahasiaan identitas pelapor
+     9. Wajib berpegang teguh pada nilai etika, moral, adil, transparan, integritas, kejujuran
+     10. Tunduk pada peraturan perundang-undangan anti-korupsi yang berlaku
+     11. Pengawasan berbasis risiko terhadap unit/divisi, tinjauan berkala
+     12. Menyelenggarakan fungsi kepatuhan (pencegahan, pengawasan, penindakan berkala)
+     13. Memberikan penghargaan kepada insan yang berpartisipasi aktif dalam pencegahan korupsi
+     14. Memberikan sanksi kepada yang melakukan Praktik Korupsi sesuai bobot kesalahan
+     15. Pemetaan kerawanan risiko komprehensif dan berkala setiap [N] bulan
+     16. Pemetaan risiko melalui: identifikasi risiko, penilaian kemungkinan & dampak, mitigasi
+     17. Evaluasi berkala terhadap sistem pencegahan dan sistem pengawasan
+     18. Pemantauan dan evaluasi berkala terhadap Kebijakan Anti-Korupsi (eksistensi & implementasi)
+     19. Evaluasi berkala terhadap proses bisnis sesuai tingkat risiko
+     20. Sosialisasi dan/atau pelatihan pencegahan korupsi berkala kepada semua manajemen & karyawan
+IV.  KEBIJAKAN BENTURAN KEPENTINGAN (4 klausul):
+     - Larangan menggunakan jabatan untuk kepentingan pribadi/pihak lain
+     - Pengambilan keputusan harus objektif (tanpa preferensi agama, politik, keluarga, etnis)
+     - Wajib melapor jika ada indikasi/potensi benturan kepentingan
+     - Wajib melapor kepada atasan jika menyadari potensi benturan kepentingan dalam tugasnya
+V.   KEBIJAKAN MEMBERI HADIAH (4 klausul + catatan nilai):
+     - Larangan memberikan hadiah kepada PNS/Penyelenggara Negara (kecuali sesuai perundangan)
+     - Larangan instruksi kepada pihak ketiga untuk memberikan hadiah kepada PNS
+     - Wajib lapor + minta persetujuan jika memberi hadiah kepada non-PNS > Rp [*]
+     - Pelaporan menggunakan Mekanisme Pelaporan sesuai kebijakan
+VI.  KEBIJAKAN MENERIMA HADIAH (3 klausul + catatan BUMN):
+     - Larangan menerima hadiah yang berpotensi mempengaruhi pertimbangan bisnis objektif
+     - Hadiah terpaksa diterima = milik perusahaan, wajib dilaporkan
+     - Boleh menerima hadiah max Rp [*] jika: hanya sesekali, tidak diminta, dilakukan terbuka,
+       bukan imbalan atas jabatan, atau karena pernikahan/kelahiran/kedukaan/musibah
+     - Wajib dilaporkan paling lambat [N] hari kerja sejak menerima hadiah
+VII. KEBIJAKAN KONTRIBUSI DANA POLITIK (6 klausul + 4 batas nilai UU):
+     - Batas max Rp 25 miliar (Pilpres/DPR/DPRD), Rp 1,5 miliar (DPD),
+       Rp 750 juta (Pilgub/Pilbup/Pilwalkot), Rp 7,5 miliar (Parpol)
+     - BUMN/BUMD: DILARANG memberikan kontribusi dana politik
+     - Wajib lapor + minta persetujuan sebelum memberikan kontribusi
+VIII. MEKANISME PELAPORAN (5 format laporan resmi):
+     Format 1: Laporan Praktik Korupsi/Potensi Korupsi [Nama Pelapor, Pihak Terlapor, Kronologi, Dokumen, Catatan]
+     Format 2: Laporan Benturan Kepentingan [Nama Pelapor, Pihak Terlapor, Kronologi, Dokumen, Catatan]
+     Format 3: Laporan Pemberian Hadiah [Nama, Bentuk, Nilai, Hubungan, Kronologi, Alasan, Dokumen, Catatan]
+     Format 4: Laporan Penerimaan Hadiah [Nama, Bentuk, Nilai, Hubungan Pemberi, Kronologi, Alasan, Dokumen, Catatan]
+     Format 5: Laporan Kontribusi Dana Politik [Nama, Penerima, Nilai, Alasan, Dokumen, Catatan]
+
+== G. PANDUAN UNTUK KONSULTAN / MENTOR ==
+
+PERTANYAAN DIAGNOSTIK AWAL (tanyakan ke klien baru):
+1. "Apakah perusahaan Anda sudah pernah mengisi kuesioner Jaga.id sebelumnya?"
+2. "Apakah sudah ada kebijakan tertulis tentang anti-korupsi di perusahaan?"
+3. "Siapa yang akan menjadi Fungsi Kepatuhan / PIC Pencegahan Korupsi di perusahaan?"
+4. "Seberapa banyak karyawan Anda? (untuk menentukan kebutuhan API)"
+5. "Apakah perusahaan Anda BUMN/BUMD atau Swasta?" (menentukan aturan yang berlaku)
+
+QUICK-START SEQUENCE (urutan prioritas dokumen):
+Tahap 1 (Hari 1-3): Deklarasi + Kebijakan Anti-Korupsi + SK Fungsi Kepatuhan → K.1, K.2, K.3, K.4, K.6
+Tahap 2 (Minggu 1): Risk Register → P.1, P.2
+Tahap 3 (Minggu 2): WBS SOP + Prosedur Hadiah/Gratifikasi → D.3, D.6
+Tahap 4 (Minggu 3): Klausul Kontrak + Beneficial Owner + Sosialisasi → D.1, D.5, D.7
+Tahap 5 (Minggu 4): Piagam Audit + M&E + Sanksi/Penghargaan → C.1, A.1, A.2
+→ Total: 4 minggu untuk siap pengisian kuesioner Jaga.id
+
+KESALAHAN UMUM YANG HARUS DIHINDARI:
+• Kebijakan Anti-Korupsi tidak menyebut "UU Tipikor" secara eksplisit → gagal K.4
+• Fungsi Kepatuhan ada tapi tidak ada SK pengangkatan → gagal K.6.b
+• WBS ada tapi tidak ada SOP tertulis → gagal D.6.b
+• Risk register generik tidak spesifik per unit kerja → gagal P.1.b
+• Sosialisasi dilakukan sekali saja tanpa laporan berkala → gagal D.7.b
+• Tidak ada beneficial owner disclosure → gagal D.5
+• Pakta integritas hanya level manajemen, tidak ada untuk staf → setengah memenuhi K.2
+
+PERBEDAAN DOKUMEN BUMN vs SWASTA:
+• Gratifikasi ke PNS: BUMN wajib mengacu peraturan KPK, Swasta direkomendasikan
+• Kontribusi dana politik: BUMN/BUMD DILARANG sama sekali, Swasta ada batas nilai
+• Penerimaan hadiah: BUMN menyesuaikan peraturan KPK tentang gratifikasi
+• Tambahan regulasi BUMN: SE MenBUMN SE-2/2019 + Surat S-35/2020
+
+SALURAN PENGADUAN RESMI (untuk bagian RESPON):
+• KPK: pengaduan@kpk.go.id | SMS 08558575575 / 0811959575 | kws.kpk.go.id | Call Center 198
+• Kepolisian RI: lapor@tipidkorpolri.info | +62 21 2205 7190
+• Ombudsman: pengaduan@ombudsman.go.id | Telp 137 | ombudsman.go.id/pengaduan
+• LAPOR!: lapor.go.id
+• PTSP: bkpm.go.id/wbs
+• WBS Internal Korporasi (sistem milik perusahaan sendiri)
+• Gratifikasi KPK: pelaporan.gratifikasi@kpk.go.id
+
+== H. PANDUAN PENGGUNAAN PLATFORM JAGA.ID ==
+
+REGISTRASI (Pertama Kali):
+1. Buka www.jaga.id → klik banner "Seberapa Anti Suap Kamu?"
+2. Masuk laman edukasi → baca informasi Pancek, statistik TPK
+3. Ikuti kuis di laman edukasi (isi data diri terlebih dahulu)
+4. Setelah kuis selesai → muncul skor akhir → pilih "Registrasi Implementasi Panduan Anti Suap"
+5. Isi data perusahaan dan data admin aplikasi secara lengkap
+6. Centang persetujuan privacy pengguna → klik Register
+
+LOGIN & AKSES ADMINISTRASI:
+1. Buka www.jaga.id → klik "Masuk" di bagian kanan atas
+2. Masukkan username dan password
+3. Klik simbol di bagian kanan atas → pilih "Administrasi PanCek"
+4. Masuk Dashboard PanCek → pilih menu "Formulir PanCek"
+
+PENGISIAN FORM DAN UPLOAD DOKUMEN:
+1. Klik "Buat Form" → baca syarat dan ketentuan
+2. Download template dokumen yang tersedia
+3. Upload dokumen yang relevan (sesuai template yang tersedia)
+4. Setelah semua dokumen terupload: pilih "Simpan Perubahan" (masih bisa diedit) 
+   ATAU "Simpan" (final, tidak dapat diedit)
+5. Progress pengisian dapat dipantau di menu Dashboard
+
+LINK PENTING:
+• Self-assessment: https://jaga.id/kuisprofit?vnk=aad20748
+• Buku Panduan CEK: https://bit.ly/BukuKPKCEK
+• Panduan PDF resmi: https://cms.kpk.go.id/storage/2577/KPK_CEK_Final-062119-single-pages.pdf
+• KPK website: www.kpk.go.id
+`;
