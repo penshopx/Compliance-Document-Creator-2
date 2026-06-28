@@ -350,6 +350,16 @@ export const gustafdaBlueprints = pgTable("gustafda_blueprints", {
 });
 export type GustafdaBlueprint = typeof gustafdaBlueprints.$inferSelect;
 
+// Pancek KPK Checklist Progress — persists per-user per-item checkbox state
+export const pancekProgress = pgTable("pancek_progress", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  itemId: text("item_id").notNull(),
+  checked: boolean("checked").default(false),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export type PancekProgressItem = typeof pancekProgress.$inferSelect;
+
 // Export auth models
 export * from "./models/auth";
 export * from "./models/ai-keys";

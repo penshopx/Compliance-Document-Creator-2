@@ -1,4 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,6 +58,23 @@ export default function PancekPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
 
+  const { data: progressData, isLoading: progressLoading } = useQuery<{ progress: Record<string, boolean> }>({
+    queryKey: ["/api/pancek/progress"],
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (progressData?.progress) {
+      setCheckedItems(progressData.progress);
+    }
+  }, [progressData]);
+
+  const saveMutation = useMutation({
+    mutationFn: (items: Record<string, boolean>) =>
+      apiRequest("POST", "/api/pancek/progress", { items }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] }),
+  });
+
   const stats = getPancekStats();
   const currentPhase = PANCEK_PHASES.find(p => p.id === selectedPhase);
 
@@ -91,9 +110,11 @@ export default function PancekPage() {
     );
   }, [searchQuery]);
 
-  const handleCheckItem = (itemId: string, checked: boolean) => {
-    setCheckedItems(prev => ({ ...prev, [itemId]: checked }));
-  };
+  const handleCheckItem = useCallback((itemId: string, checked: boolean) => {
+    const updated = { ...checkedItems, [itemId]: checked };
+    setCheckedItems(updated);
+    saveMutation.mutate(updated);
+  }, [checkedItems, saveMutation]);
 
   const copyPrompt = (doc: PancekDocument) => {
     const prompt = `${doc.promptTemplate}

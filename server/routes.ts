@@ -195,10 +195,36 @@ export async function registerRoutes(
   // Dashboard Stats
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const userId = (req.user as any)?.id || (req.user as any)?.claims?.sub;
+      const stats = await storage.getDashboardStats(userId);
       res.json(stats);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // Pancek KPK Progress — persist checklist state per user
+  app.get("/api/pancek/progress", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id || (req.user as any)?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const progress = await storage.getPancekProgress(userId);
+      res.json({ progress });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch Pancek progress" });
+    }
+  });
+
+  app.post("/api/pancek/progress", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id || (req.user as any)?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { items } = req.body as { items: Record<string, boolean> };
+      if (!items || typeof items !== "object") return res.status(400).json({ error: "Invalid items" });
+      await storage.savePancekProgress(userId, items);
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save Pancek progress" });
     }
   });
 

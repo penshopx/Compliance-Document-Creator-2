@@ -25,6 +25,9 @@ import {
   Zap,
   Sparkles,
   Library,
+  Flag,
+  Brain,
+  TrendingUp,
 } from "lucide-react";
 import { useIndustry } from "@/hooks/use-industry";
 import { COMPLIANCE_DOMAINS } from "@shared/config/industry-types";
@@ -41,6 +44,8 @@ interface DashboardStats {
   generatedDocuments: number;
   management: number;
   audit: number;
+  pancekCheckedCount: number;
+  blueprintCount: number;
 }
 
 const statsCards = [
@@ -265,6 +270,80 @@ export default function Dashboard() {
             ))}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Pancek KPK + AI Blueprint Status */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Link href="/pancek">
+          <Card className="hover-elevate cursor-pointer h-full" data-testid="card-pancek-status">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Flag className="h-5 w-5 text-red-600" />
+                Kesiapan Pancek KPK
+                {(stats?.pancekCheckedCount ?? 0) >= 18 ? (
+                  <Badge className="ml-auto bg-green-100 text-green-700">Siap Verifikasi</Badge>
+                ) : (stats?.pancekCheckedCount ?? 0) > 0 ? (
+                  <Badge className="ml-auto bg-orange-100 text-orange-700">Sedang Berjalan</Badge>
+                ) : (
+                  <Badge variant="secondary" className="ml-auto">Belum Dimulai</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>Panduan Cegah Korupsi — Checklist Jaga.id</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Kuesioner selesai</span>
+                  {isLoading ? <Skeleton className="h-4 w-12" /> : (
+                    <span className="font-bold">{stats?.pancekCheckedCount ?? 0} <span className="text-muted-foreground font-normal">/ 30+ item</span></span>
+                  )}
+                </div>
+                <Progress value={Math.min(100, Math.round(((stats?.pancekCheckedCount ?? 0) / 30) * 100))} className="h-2" />
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <TrendingUp className="h-3 w-3" />
+                Progress tersimpan otomatis • Klik untuk lanjutkan
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/gustafta-dialog">
+          <Card className="hover-elevate cursor-pointer h-full" data-testid="card-blueprint-status">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Brain className="h-5 w-5 text-purple-600" />
+                Gustafta AI Blueprint
+                {(stats?.blueprintCount ?? 0) > 0 ? (
+                  <Badge className="ml-auto bg-purple-100 text-purple-700">{stats?.blueprintCount} Blueprint</Badge>
+                ) : (
+                  <Badge variant="secondary" className="ml-auto">Belum Ada</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>Analisis risiko AI + rekomendasi dokumen prioritas</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-md bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Blueprint Tersimpan</p>
+                  {isLoading ? <Skeleton className="h-6 w-8 mt-1" /> : (
+                    <p className="text-xl font-bold mt-1">{stats?.blueprintCount ?? 0}</p>
+                  )}
+                </div>
+                <div className="p-3 rounded-md bg-muted/50">
+                  <p className="text-xs text-muted-foreground">Dokumen Dibuat</p>
+                  {isLoading ? <Skeleton className="h-6 w-8 mt-1" /> : (
+                    <p className="text-xl font-bold mt-1">{stats?.generatedDocuments ?? 0}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Sparkles className="h-3 w-3" />
+                {(stats?.blueprintCount ?? 0) > 0 ? "Blueprint aktif — sub-agen siap digunakan" : "Mulai Dialog untuk buat blueprint"}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <Card>

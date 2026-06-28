@@ -32,6 +32,13 @@ Pancek (KPK) ≠ SMAP (ISO 37001). SMAP = anti-penyuapan (bribery only). Pancek 
 | A.1 | Matriks Sanksi | ⚠️ Perluas | Ada di Kebijakan SMAP, perlu dokumen tersendiri |
 | A.2 | Penghargaan Integritas | ❌ Buat Baru | SMAP tidak punya ini |
 
+## Integration Architecture (fully wired as of Jun 2026)
+- `pancek_progress` DB table stores per-user checklist state → `/api/pancek/progress` GET/POST
+- `getDashboardStats(userId)` now returns `pancekCheckedCount` + `blueprintCount`
+- Dashboard shows Pancek progress card + Gustafta Blueprint status card (linked to live DB)
+- PDCA Generator auto-fills company name, address, NPWP, director, FKAP chair from `/api/company`+`/api/fkap`+`/api/management`
+- Gustafta Collab sub-agents receive full company context: management names, FKAP members, vendor count, employee count
+
 ## Current Pancek Sub-Agent Count: 14
 
 - Komitmen (5): deklarasi, pakta, kebijakan, sk_fkp, program_pelatihan

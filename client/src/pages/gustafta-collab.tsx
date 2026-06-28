@@ -541,7 +541,11 @@ export default function GustafdaCollab() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const { data: company } = useQuery<{ name?: string }>({ queryKey: ["/api/company"] });
+  const { data: company } = useQuery<{ name?: string; address?: string; city?: string; npwp?: string; nib?: string; directorName?: string; employeeCount?: number }>({ queryKey: ["/api/company"] });
+  const { data: fkapList } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/fkap"], retry: false });
+  const { data: managementList } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/management"], retry: false });
+  const { data: vendorList } = useQuery<Array<{ name: string; category?: string }>>({ queryKey: ["/api/vendors"], retry: false });
+  const { data: employeeList } = useQuery<Array<{ name: string }>>({ queryKey: ["/api/employees"], retry: false });
 
   // Load Blueprint from Dialog
   const { data: blueprintData } = useQuery<{
@@ -560,17 +564,42 @@ export default function GustafdaCollab() {
   const latestBlueprint = blueprintData?.blueprint;
   const blueprintMeta = blueprintData?.meta;
 
-  // Build context string from blueprint for sub-agents
-  const blueprintContext = latestBlueprint ? `
-BLUEPRINT SMAP PERUSAHAAN (dari Gustafta Dialog):
-- Perusahaan: ${latestBlueprint.namaPerusahaan}
+  // Build enriched context string from blueprint + real company data for sub-agents
+  const companyDataContext = (() => {
+    const parts: string[] = [];
+    const name = latestBlueprint?.namaPerusahaan || company?.name;
+    if (name) parts.push(`- Nama Perusahaan: ${name}`);
+    if (company?.address) parts.push(`- Alamat: ${company.address}${company.city ? ", " + company.city : ""}`);
+    if (company?.npwp) parts.push(`- NPWP: ${company.npwp}`);
+    if (company?.nib) parts.push(`- NIB: ${company.nib}`);
+    if (company?.directorName) parts.push(`- Direktur: ${company.directorName}`);
+    if (managementList && managementList.length > 0) {
+      parts.push(`- Tim Manajemen: ${managementList.slice(0, 5).map(m => `${m.name} (${m.position})`).join(", ")}`);
+    }
+    if (fkapList && fkapList.length > 0) {
+      parts.push(`- Tim FKAP: ${fkapList.slice(0, 5).map(f => `${f.name} (${f.position})`).join(", ")}`);
+    }
+    if (employeeList && employeeList.length > 0) {
+      parts.push(`- Jumlah Karyawan Terdaftar: ${employeeList.length}`);
+    }
+    if (vendorList && vendorList.length > 0) {
+      parts.push(`- Vendor/Mitra Terdaftar: ${vendorList.length} mitra (${vendorList.slice(0, 3).map(v => v.name).join(", ")}${vendorList.length > 3 ? ", ..." : ""})`);
+    }
+    return parts.length > 0 ? `DATA PERUSAHAAN:\n${parts.join("\n")}` : "";
+  })();
+
+  const blueprintContext = (latestBlueprint || companyDataContext) ? `
+${companyDataContext}
+
+${latestBlueprint ? `BLUEPRINT ANALISIS RISIKO (dari Gustafta Dialog):
 - Profil Risiko: ${latestBlueprint.profilRisiko.level} (Skor ${latestBlueprint.profilRisiko.skor}/10)
 - Faktor Risiko Utama: ${latestBlueprint.profilRisiko.faktorUtama.join(", ")}
 - Rekomendasi Fase: ${latestBlueprint.rekomendasiFase.fase} (${latestBlueprint.rekomendasiFase.estimasiWaktu})
 - Dokumen Prioritas: ${latestBlueprint.dokumenPrioritas.map(d => `${d.nama} [${d.prioritas}]`).join("; ")}
 - Kekuatan Saat Ini: ${latestBlueprint.kondisiEksisting.kekuatan.join(", ")}
-- Gap Utama: ${latestBlueprint.kondisiEksisting.kelemahan.join(", ")}
-INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan yang sudah ada di blueprint. Langsung personalkan output berdasarkan data di atas.
+- Gap Utama: ${latestBlueprint.kondisiEksisting.kelemahan.join(", ")}` : ""}
+
+INSTRUKSI: Gunakan data di atas. JANGAN tanya informasi perusahaan yang sudah tersedia. Langsung personalkan output berdasarkan data nyata di atas. Gunakan nama personel yang benar dalam dokumen yang dihasilkan.
   `.trim() : "";
 
   // Match blueprint priority docs to sub-agents

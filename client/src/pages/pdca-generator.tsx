@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,9 +120,16 @@ export default function PDCAGenerator() {
   const [showRepository, setShowRepository] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Use placeholders only - no internal company data
-  const companyName = "[NAMA PERUSAHAAN]";
-  const companyAddress = "[ALAMAT PERUSAHAAN]";
+  const { data: companyData } = useQuery<{ name?: string; address?: string; city?: string; npwp?: string; directorName?: string }>({ queryKey: ["/api/company"], retry: false });
+  const { data: fkapData } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/fkap"], retry: false });
+  const { data: managementData } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/management"], retry: false });
+
+  const companyName = companyData?.name || "[NAMA PERUSAHAAN]";
+  const companyAddress = companyData?.address ? `${companyData.address}${companyData.city ? ", " + companyData.city : ""}` : "[ALAMAT PERUSAHAAN]";
+  const companyNpwp = companyData?.npwp || "[NPWP PERUSAHAAN]";
+  const directorName = companyData?.directorName || managementData?.find(m => m.position?.toLowerCase().includes("direktur"))?.name || "[NAMA DIREKTUR]";
+  const ketuaFkap = fkapData?.[0]?.name || "[KETUA FKAP]";
+  const hasRealData = !!companyData?.name;
 
   const getClauseList = useCallback(() => {
     switch (activeTab) {
@@ -244,8 +252,10 @@ Gunakan prompt ini di dokumenttender.com atau AI model lainnya
 
 KONTEKS PERUSAHAAN:
 - Nama Perusahaan: ${companyName}
-- NPWP: [NPWP PERUSAHAAN]
+- NPWP: ${companyNpwp}
 - Alamat: ${companyAddress}
+- Direktur: ${directorName}
+- Ketua FKAP: ${ketuaFkap}
 - Bidang Usaha: Jasa Konstruksi
 - Standar: SNI ISO 37001:2016
 
@@ -333,11 +343,11 @@ FORMAT OUTPUT:
             </div>
           </div>
 
-          <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-xl">
+          <div className={`p-3 rounded-xl border ${hasRealData ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800" : "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800"}`}>
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-600" />
-              <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase">
-                Template Mode (Placeholder)
+              <Shield className={`w-4 h-4 ${hasRealData ? "text-green-600" : "text-blue-600"}`} />
+              <span className={`text-[10px] font-bold uppercase ${hasRealData ? "text-green-700 dark:text-green-400" : "text-blue-700 dark:text-blue-400"}`}>
+                {hasRealData ? `Data: ${companyName}` : "Template Mode (Placeholder)"}
               </span>
             </div>
           </div>
@@ -409,7 +419,7 @@ FORMAT OUTPUT:
                     NPWP
                   </label>
                   <Input
-                    value="[NPWP PERUSAHAAN]"
+                    value={companyNpwp}
                     disabled
                     data-testid="input-npwp-display"
                   />

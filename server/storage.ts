@@ -19,6 +19,8 @@ import {
   subscriptionPlans,
   paymentOrders,
   userSubscriptions,
+  pancekProgress,
+  gustafdaBlueprints,
   type Company,
   type InsertCompany,
   type Management,
@@ -128,8 +130,12 @@ export interface IStorage {
   getClauseReferences(): Promise<ClauseReference[]>;
   getClauseReferencesByPhase(phase: string): Promise<ClauseReference[]>;
 
+  // Pancek KPK Progress
+  getPancekProgress(userId: string): Promise<Record<string, boolean>>;
+  savePancekProgress(userId: string, items: Record<string, boolean>): Promise<void>;
+
   // Dashboard
-  getDashboardStats(): Promise<{
+  getDashboardStats(userId?: string): Promise<{
     company: Company | null;
     employees: number;
     fkap: number;
@@ -140,6 +146,8 @@ export interface IStorage {
     generatedDocuments: number;
     management: number;
     audit: number;
+    pancekCheckedCount: number;
+    blueprintCount: number;
   }>;
 
   // Subscription Plans
@@ -402,8 +410,32 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(clauseReferences).where(eq(clauseReferences.pdcaPhase, phase)).orderBy(clauseReferences.sortOrder);
   }
 
+  // Pancek KPK Progress
+  async getPancekProgress(userId: string): Promise<Record<string, boolean>> {
+    const rows = await db.select().from(pancekProgress).where(eq(pancekProgress.userId, userId));
+    return rows.reduce((acc, row) => {
+      acc[row.itemId] = row.checked ?? false;
+      return acc;
+    }, {} as Record<string, boolean>);
+  }
+
+  async savePancekProgress(userId: string, items: Record<string, boolean>): Promise<void> {
+    for (const [itemId, checked] of Object.entries(items)) {
+      const existing = await db.select().from(pancekProgress)
+        .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.itemId, itemId)))
+        .limit(1);
+      if (existing.length > 0) {
+        await db.update(pancekProgress)
+          .set({ checked, updatedAt: new Date() })
+          .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.itemId, itemId)));
+      } else {
+        await db.insert(pancekProgress).values({ userId, itemId, checked });
+      }
+    }
+  }
+
   // Dashboard Stats
-  async getDashboardStats() {
+  async getDashboardStats(userId?: string) {
     const [company] = await db.select().from(companies).limit(1);
     const employeeList = await db.select().from(employees);
     const fkapList = await db.select().from(fkapTeam);
@@ -414,6 +446,16 @@ export class DatabaseStorage implements IStorage {
     const generatedDocList = await db.select().from(generatedDocuments);
     const managementList = await db.select().from(managementTeam);
     const auditList = await db.select().from(auditTeam);
+
+    let pancekCheckedCount = 0;
+    let blueprintCount = 0;
+    if (userId) {
+      const pancekRows = await db.select().from(pancekProgress)
+        .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.checked, true)));
+      pancekCheckedCount = pancekRows.length;
+      const bpRows = await db.select().from(gustafdaBlueprints).where(eq(gustafdaBlueprints.userId, userId));
+      blueprintCount = bpRows.length;
+    }
 
     return {
       company: company ?? null,
@@ -426,6 +468,8 @@ export class DatabaseStorage implements IStorage {
       generatedDocuments: generatedDocList.length,
       management: managementList.length,
       audit: auditList.length,
+      pancekCheckedCount,
+      blueprintCount,
     };
   }
 
