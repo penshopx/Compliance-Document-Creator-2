@@ -603,7 +603,7 @@ JALUR PEMENUHAN BERDASARKAN KUALIFIKASI BUJK:
   → Mulai 2027: SMAP menjadi LAMPIRAN WAJIB kuesioner Pancek KPK — investasi dokumen berlanjut
 • BUJK Menengah: ISO 37001:2016 via CB terakreditasi ATAU Dokumen SMAP + Pancek KPK
 • BUJK Besar: ISO 37001:2016 via CB (sertifikat wajib, bukan dokumen self-made)
-• ⚠️ Regulasi: Permen PU 08/2022 + SK Dirjen 144/2022 sudah diganti Permen PU 06/2025 (belum dipublikasi luas) — SNI ISO 37001:2016 tetap menjadi standar inti yang berlaku
+• ⚠️ Regulasi: Permen PU 06/2025 ✓ sudah terbit (ganti 08/2022). SK Dirjen 37/2025 ✓ sudah terbit (ganti 144/2022) tapi masih mengacu Permen 08/2022 yang dicabut. SK Dirjen pelaksana Permen 06/2025 BELUM TERBIT. SNI ISO 37001:2016 tetap standar inti yang berlaku.
 
 INTI PENGETAHUAN SMAP (referensi saat menjawab):
 • ISO 37001 punya 7 klausul inti (4-10): Konteks, Kepemimpinan (termasuk FKAP), Perencanaan (Register Risiko), Dukungan (Pelatihan, WBS), Operasional (Due Diligence Mitra, Pengendalian Keuangan), Evaluasi (Audit Internal, Tinjauan Manajemen Dewan Pengarah), Perbaikan (CAPA)
@@ -1311,7 +1311,7 @@ ATURAN JALUR COMPLIANCE BUJK (PER 2025) — jika perusahaan bergerak di jasa kon
 - BUJK Menengah: TARGET: ISO 37001:2016 atau Pancek KPK (Jaga.id) — dokumen SMAP wajib sebagai dasar
 - BUJK Kecil: SMAP masih RELEVAN DAN BERLAKU penuh saat ini → sebelum 2027 fokus pada dokumen SMAP
   (Catatan untuk Kecil: mulai 2027 Pancek KPK wajib, tapi dokumen SMAP yang dibuat sekarang akan dipakai sebagai lampiran Pancek KPK — investasi berlanjut)
-- Regulasi: Permen PU 08/2022 sudah diganti Permen PU 06/2025 (belum dipublikasi); SK Dirjen 144/2022 sudah diganti (belum dipublikasi)
+- Regulasi: Permen PU 06/2025 ✓ sudah terbit (ganti 08/2022). SK Dirjen 37/2025 ✓ sudah terbit (ganti 144/2022) tapi masih mengacu Permen 08/2022 yang dicabut. SK Dirjen pelaksana Permen 06/2025 BELUM TERBIT per Juni 2026.
 - Sebutkan jalur yang tepat berdasarkan kualifikasi, dan untuk Kecil: sampaikan roadmap 2025→2027
 
 DIALOG:
@@ -1480,7 +1480,7 @@ PENDEKATAN GENERATE:
 
 KONTEN WAJIB PER BAGIAN:
 • BAB 1 (LINGKUP): sebutkan unit kerja/departemen yang masuk ruang lingkup secara eksplisit (bukan hanya "seluruh kegiatan")
-• BAB 2 (ACUAN NORMATIF): cantumkan SEMUA 6 regulasi (UU 19/2019, Perpres 54/2018, Inpres 10/2016, SNI ISO 37001:2016, Annex A, Panduan KPK) + tambahkan Permen PU 06/2025 + SK Dirjen No. 37/2025 jika konstruksi
+• BAB 2 (ACUAN NORMATIF): cantumkan SEMUA 6 regulasi (UU 19/2019, Perpres 54/2018, Inpres 10/2016, SNI ISO 37001:2016, Annex A, Panduan KPK) + jika konstruksi tambahkan Permen PU 06/2025 dan SK Dirjen 37/2025 (dengan catatan: SK 37/2025 masih mengacu Permen 08/2022 yang dicabut; SK Dirjen pelaksana Permen 06/2025 belum terbit)
 • BAB 3 (ISTILAH): cantumkan minimal 15 definisi standar secara lengkap (bukan hanya daftar kata)
 • KLAUSUL 5.1: komitmen Direktur + Dewan Komisaris (Dewan Pengarah) secara eksplisit
 • KLAUSUL 5.3.2: cantumkan nama Ketua FKAP, Wakil, Sekretaris, Anggota + 7 tugas wewenang FKAP
@@ -1489,12 +1489,15 @@ KONTEN WAJIB PER BAGIAN:
 • LAMPIRAN: generate minimal 12 lampiran sesuai pola yang dipilih — bukan daftar kosong, tapi isi konten tiap lampiran
 
 KONSISTENSI DOKUMEN:
-• Jika konstruksi → tambahkan referensi Permen PU 06/2025 + SK Dirjen 37/2025 di Acuan Normatif
+• Jika konstruksi → tambahkan Permen PU 06/2025 di Acuan Normatif; cantumkan SK Dirjen 37/2025 dengan catatan transisi regulasi
 • SK FKAP di Lampiran harus konsisten dengan nama yang disebutkan di Klausul 5.3.2
 • Kebijakan AP di Lampiran harus konsisten dengan prinsip di Klausul 5.2 (zero-tolerance, WBS, sanksi)
 
-CATATAN REGULASI KONSTRUKSI:
-Permen PU 08/2022 sudah diganti Permen PU 06/2025. SK Dirjen 144/2022 sudah diganti SK Dirjen No. 37 Tahun 2025 (dikonfirmasi dari dokumen NIN Oktober 2024). Regulasi baru belum dipublikasi luas — gunakan nomor yang tepat.
+CATATAN REGULASI KONSTRUKSI (per Juni 2026):
+• Permen PU 08/2022 → DIGANTI Permen PU 06/2025 ✓ (sudah terbit)
+• SK Dirjen 144/2022 → DIGANTI SK Dirjen 37/2025 ✓ (sudah terbit, TAPI masih mengacu Permen 08/2022 yang telah dicabut)
+• SK Dirjen pelaksana Permen 06/2025 → BELUM TERBIT
+Saat mengisi Acuan Normatif: cantumkan Permen 06/2025 (sudah terbit) + SK Dirjen 37/2025 dengan keterangan "dalam masa transisi". Jangan cantumkan SK Dirjen baru yang belum terbit.
 
 Jika sudah punya informasi dari Blueprint, langsung mulai generate dari Halaman Judul + Bagian Muka tanpa tanya ulang.${ctx}`,
 
@@ -1944,7 +1947,7 @@ C. Surat Pernyataan Komitmen:
    → Hanya sebagai BRIDGE sementara — wajib dipenuhi sesuai deadline kualifikasi
    → Bukan solusi permanen
 
-⚠️ CATATAN REGULASI: Permen PU 08/2022 + SK Dirjen 144/2022 sudah diganti, namun regulasi penggantinya belum dipublikasi secara luas. SNI ISO 37001:2016 tetap berlaku sebagai standar inti.
+⚠️ CATATAN REGULASI (per Juni 2026): Permen PU 06/2025 ✓ sudah terbit (mengganti 08/2022). SK Dirjen 37/2025 ✓ sudah terbit (mengganti 144/2022) namun masih mengacu Permen 08/2022 yang dicabut. SK Dirjen pelaksana Permen 06/2025 BELUM TERBIT. SNI ISO 37001:2016 tetap berlaku sebagai standar inti.
 
 OUTPUT AKHIR: Beri skor kesiapan, identifikasi 3 gap kritis yang harus dipenuhi SEGERA, dan rekomendasikan jalur yang paling sesuai berdasarkan kualifikasi BUJK.${ctx}`,
 

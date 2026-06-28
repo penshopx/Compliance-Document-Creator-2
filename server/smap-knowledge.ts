@@ -48,7 +48,7 @@ ACUAN NORMATIF (cantumkan SEMUA regulasi ini):
 4. SNI ISO 37001:2016 — Sistem Manajemen Anti Penyuapan – Persyaratan (dokumen acuan utama)
 5. Annex A SNI ISO 37001:2016 — Panduan Penggunaan
 6. Panduan Cegah Korupsi KPK (Pancek)
-UNTUK BUJK KONSTRUKSI tambahkan: Peraturan Menteri PUPR No. 06 Tahun 2025 (perubahan atas Permen PU 08/2022) + Keputusan Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (perubahan atas SK Dirjen 144/2022)
+UNTUK BUJK KONSTRUKSI tambahkan: Peraturan Menteri PUPR No. 06 Tahun 2025 (menggantikan Permen PU 08/2022 — sudah terbit) + Keputusan Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (menggantikan SK Dirjen 144/2022 — sudah terbit, namun masih mengacu Permen 08/2022 yang telah dicabut; SK Dirjen pelaksana Permen 06/2025 BELUM TERBIT)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ISTILAH DAN DEFINISI (15 definisi wajib — cantumkan isi definisinya):
@@ -180,8 +180,9 @@ Jabatan dalam FKAP: 1) Ketua FKAP 2) Wakil Ketua FKAP 3) Sekretaris FKAP 4) Angg
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 REGULASI KONSTRUKSI (untuk BUJK — cantumkan jika bidang usaha konstruksi):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Peraturan Menteri PUPR No. 06 Tahun 2025 (menggantikan Permen PU 08/2022) — belum dipublikasi luas
-• Keputusan Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (menggantikan SK Dirjen 144/2022) — dikonfirmasi dari dokumen NIN Oktober 2024
+• Peraturan Menteri PUPR No. 06 Tahun 2025 — sudah terbit, menggantikan Permen PU 08/2022
+• Keputusan Dirjen Bina Konstruksi PU No. 37 Tahun 2025 — sudah terbit, menggantikan SK Dirjen 144/2022; NAMUN masih mengacu Permen 08/2022 yang telah dicabut
+• SK Dirjen pelaksana Permen PU 06/2025 — BELUM TERBIT (posisi per Juni 2026)
 • Dokumen SMAP yang dibuat sekarang tetap berlaku dan menjadi investasi berlanjut — akan dipakai sebagai lampiran kuesioner Pancek KPK
 
 FORMAT DOKUMEN: Nomor dokumen contoh: SM-P-SMAP-PK-01 (SM=perusahaan, P=Pedoman, SMAP=sistem, PK=Pekerjaan Konstruksi)
@@ -765,8 +766,9 @@ PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
 export const SMAP_DOCUMENT_FRAMEWORK = `
 FRAMEWORK KATEGORISASI DOKUMEN SMAP (dari referensi "Revolusi Penyusunan Dokumen SMAP"):
 ⚠️ CATATAN REGULASI (per 2025):
-• Permen PU No. 08 Tahun 2022 → TELAH DIGANTI oleh Permen PU No. 06 Tahun 2025 (belum dipublikasikan secara luas)
-• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → TELAH DIGANTI oleh SK Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (dikonfirmasi dari dokumen NIN Oktober 2024)
+• Permen PU No. 08 Tahun 2022 → TELAH DIGANTI oleh Permen PU No. 06 Tahun 2025 ✓ (sudah terbit)
+• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → TELAH DIGANTI oleh SK Dirjen No. 37 Tahun 2025 ✓ (sudah terbit, NAMUN masih mengacu Permen 08/2022 yang sudah dicabut)
+• SK Dirjen pelaksana Permen 06/2025 → BELUM TERBIT (per Juni 2026) — tunggu terbit sebelum dijadikan acuan baru
 • SNI ISO 37001:2016 tetap berlaku sebagai standar inti — tidak berubah
 • Dokumen SMAP yang disusun tetap relevan dan valid untuk jalur Pancek KPK maupun ISO cert
 
@@ -810,8 +812,9 @@ Dokumen yang membuktikan IMPLEMENTASI NYATA sistem. Dibuat SETELAH dokumen peren
   • Untuk SBU (BUJK): 16 komponen dokumen BUJK = subset dari 16 Perencanaan di atas
 
 REGULASI KONSTRUKSI KHUSUS:
-• Permen PU No. 08 Tahun 2022 → sudah diganti Permen PU No. 06 Tahun 2025 (belum dipublikasi luas)
-• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → sudah diganti SK Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (dikonfirmasi dari dokumen riil BUJK)
+• Permen PU No. 08 Tahun 2022 → diganti Permen PU No. 06 Tahun 2025 ✓ (sudah terbit)
+• SK Dirjen No. 144 Tahun 2022 → diganti SK Dirjen No. 37 Tahun 2025 ✓ (sudah terbit, tapi masih mengacu Permen 08/2022 yang dicabut)
+• SK Dirjen pelaksana Permen 06/2025 → BELUM TERBIT per Juni 2026
 • SNI ISO 37001:2016 tetap menjadi standar inti yang tidak berubah
 • Jalur compliance BUJK (per 2025): Kecil/Menengah → Pancek KPK (Jaga.id) + dokumen SMAP sebagai lampiran; Besar → ISO 37001 cert
 `;
