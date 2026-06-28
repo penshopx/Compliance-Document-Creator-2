@@ -12,6 +12,7 @@ import {
   FileCheck, Shield, UserCog, BarChart3, AlertTriangle, GraduationCap,
   Search, Presentation, ListChecks, FileX, Wrench, TrendingUp,
   FileBarChart, ShieldAlert, RotateCw, Star, ArrowRight, Info, X,
+  Scale, ClipboardList, Handshake, Vote, ScrollText, FileSignature,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +20,8 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 type AgentKey = "dokumen" | "internal" | "sertifikasi" | "surveilance";
+type PancekAgentKey = "komitmen" | "perencanaan" | "pelaksanaan" | "evaluasi";
+type CollabMode = "smap" | "pancek";
 interface Message { role: "user" | "assistant"; content: string; }
 
 interface SubAgent {
@@ -34,6 +37,18 @@ interface SubAgent {
 
 interface MainAgent {
   key: AgentKey;
+  label: string;
+  fase: string;
+  icon: typeof FileText;
+  color: string;
+  bgColor: string;
+  badgeColor: string;
+  subAgents: SubAgent[];
+  quickLinks: Array<{ label: string; url: string; icon: typeof FileText }>;
+}
+
+interface PancekMainAgent {
+  key: PancekAgentKey;
   label: string;
   fase: string;
   icon: typeof FileText;
@@ -311,8 +326,193 @@ const AGENTS: MainAgent[] = [
   },
 ];
 
+const PANCEK_AGENTS: PancekMainAgent[] = [
+  {
+    key: "komitmen",
+    label: "Agen Komitmen",
+    fase: "Siap Pengisian Kuesioner",
+    icon: FileSignature,
+    color: "text-emerald-700",
+    bgColor: "bg-emerald-600",
+    badgeColor: "bg-emerald-100 text-emerald-700",
+    quickLinks: [
+      { label: "Pancek Pathway", url: "/pancek", icon: ClipboardList },
+      { label: "Mentor Pancek", url: "/mentor", icon: MessageSquare },
+    ],
+    subAgents: [
+      {
+        key: "deklarasi",
+        label: "Sub-Agen Deklarasi Komitmen",
+        shortLabel: "Deklarasi (K.1)",
+        description: "Deklarasi Anti-Korupsi 9 poin + Email distribusi internal (K.1)",
+        deliverable: "Deklarasi + Email Distribusi",
+        icon: ScrollText,
+        opening: "Saya Sub-Agen Deklarasi Komitmen Anti-Korupsi. Saya akan membantu menyiapkan **Deklarasi Anti-Korupsi 9 Poin** yang ditandatangani Direktur + template Email distribusi ke seluruh karyawan — dua lampiran utama kuesioner **K.1 Jaga.id**.\n\nK.1 menanyakan: *'Apakah pimpinan tertinggi telah menyatakan komitmen anti-korupsi secara tertulis dan mengkomunikasikannya ke seluruh karyawan?'*\n\n**Saya perlu informasi:**\n1. Nama perusahaan lengkap\n2. Nama & jabatan Direktur/CEO yang akan menandatangani\n3. Tanggal deklarasi\n\nAtau ketik **\"langsung buat\"** untuk template dengan placeholder yang bisa diisi nanti.",
+        suggestions: ["Langsung buat template deklarasi 9 poin", "K.1 meminta lampiran apa saja?", "Bisa pakai tanda tangan digital?"],
+      },
+      {
+        key: "pakta",
+        label: "Sub-Agen Pakta Integritas",
+        shortLabel: "Pakta Integritas (K.2)",
+        description: "Pakta Integritas 9 poin untuk seluruh manajemen (K.2)",
+        deliverable: "Pakta Integritas + Tabel TTD Manajemen",
+        icon: Handshake,
+        opening: "Saya Sub-Agen Pakta Integritas. Saya akan membantu menyiapkan **Pakta Integritas Anti-Korupsi** lengkap dengan tabel tanda tangan seluruh manajemen — lampiran kuesioner **K.2 Jaga.id**.\n\nK.2 menanyakan: *'Apakah pimpinan tertinggi dan jajaran manajemen telah menandatangani pakta integritas?'*\n\nPakta berisi 9 poin komitmen: tidak suap, tidak gratifikasi berlebihan, tidak KKN, tidak benturan kepentingan, mendukung WBS, dll.\n\n**Info yang dibutuhkan:**\n1. Nama perusahaan & kota\n2. Daftar nama dan jabatan manajemen yang menandatangani\n3. Tanggal penandatanganan\n\nAtau ketik **\"langsung buat\"** untuk template siap isi.",
+        suggestions: ["Langsung buat Pakta Integritas", "Siapa saja yang wajib tanda tangan?", "Bedanya Pakta Integritas dan Deklarasi?"],
+      },
+      {
+        key: "kebijakan",
+        label: "Sub-Agen Kebijakan Anti-Korupsi",
+        shortLabel: "Kebijakan Anti-Korupsi (K.3-K.5)",
+        description: "Kebijakan AK komprehensif 8 bab dengan 20 klausul utama (K.3-K.5)",
+        deliverable: "Kebijakan Anti-Korupsi Lengkap (8 Bab)",
+        icon: BookOpen,
+        opening: "Saya Sub-Agen Kebijakan Anti-Korupsi — dokumen **terpenting** di Pancek karena menjawab 3 kuesioner sekaligus: **K.3, K.4, dan K.5** di Jaga.id.\n\nDokumen ini mencakup:\n- **K.3**: Larangan korupsi, suap, dan penyuapan\n- **K.4**: Pengaturan gratifikasi, benturan kepentingan, hadiah, donasi, kontribusi politik, WBS\n- **K.5**: Persetujuan Direktur dan komunikasi ke karyawan\n\n**Satu dokumen Kebijakan AK yang baik akan menjawab K.3 + K.4 + K.5 sekaligus.**\n\nStruktur: 8 Bab (Pendahuluan → Definisi → Landasan Hukum → 20 Klausul → Hadiah & Hiburan → Benturan Kepentingan → Donasi & Politik → WBS)\n\n**Info yang dibutuhkan:**\n1. Nama perusahaan, jenis badan usaha (BUMN/swasta/BUJK)\n2. Nama Direktur & Kepala Fungsi Kepatuhan\n3. Batas nilai hadiah yang diinginkan (default: Rp 500.000)\n\nAtau ketik **\"langsung buat\"** untuk versi lengkap dengan placeholder.",
+        suggestions: ["Langsung buat Kebijakan AK 8 bab lengkap", "Berapa batas wajar hadiah untuk swasta?", "Kebijakan AK berlaku untuk vendor juga?"],
+      },
+      {
+        key: "sk_fkp",
+        label: "Sub-Agen SK Fungsi Kepatuhan",
+        shortLabel: "SK & SOP Fungsi Kepatuhan (K.6)",
+        description: "SK Penetapan Fungsi Kepatuhan + uraian 8 fungsi API (K.6)",
+        deliverable: "SK Fungsi Kepatuhan + Lampiran 8 Fungsi",
+        icon: UserCog,
+        opening: "Saya Sub-Agen SK Fungsi Kepatuhan Anti-Penyuapan (API). Saya akan membantu menyiapkan **SK Penetapan Fungsi Kepatuhan** + uraian 8 fungsi resmi — lampiran kuesioner **K.6 Jaga.id**.\n\nK.6 menanyakan: *'Apakah sudah ada unit/personil yang bertanggung jawab atas program anti-korupsi dengan kewenangan memadai dan akses langsung ke pimpinan tertinggi?'*\n\n**8 Fungsi Kepatuhan yang wajib ada:**\n1. Penilaian risiko\n2. Kebijakan & prosedur\n3. Pelatihan & komunikasi\n4. Due diligence mitra\n5. Pelaporan & investigasi\n6. Pengendalian transaksi\n7. Monitoring & evaluasi\n8. Pelaporan ke manajemen\n\n**Info yang dibutuhkan:**\n1. Nama perusahaan, nama Direktur\n2. Nama & jabatan calon Kepala Fungsi Kepatuhan\n3. Apakah merangkap jabatan lain? Jabatan utamanya apa?\n\nAtau ketik **\"langsung buat\"** untuk template siap isi.",
+        suggestions: ["Langsung buat SK Fungsi Kepatuhan", "Siapa yang boleh jadi Fungsi Kepatuhan?", "Boleh merangkap jabatan lain?"],
+      },
+      {
+        key: "program_pelatihan",
+        label: "Sub-Agen Program Pelatihan Pancek",
+        shortLabel: "Program Pelatihan (K.7)",
+        description: "Program komunikasi & pelatihan anti-korupsi tahunan (K.7)",
+        deliverable: "Program Pelatihan 12 Bulan + Template Absensi",
+        icon: GraduationCap,
+        opening: "Saya Sub-Agen Program Pelatihan Pancek. Saya akan membantu menyiapkan **Program Komunikasi & Pelatihan Anti-Korupsi** tahunan yang terstruktur — lampiran kuesioner **K.7 Jaga.id**.\n\nK.7 menanyakan: *'Apakah ada program pelatihan anti-korupsi yang terstruktur dan dilaksanakan secara berkala untuk seluruh karyawan?'*\n\nProgram mencakup:\n- Pelatihan onboarding untuk karyawan baru\n- Pelatihan tahunan seluruh karyawan (target 100%)\n- Pelatihan khusus Fungsi Kepatuhan (sertifikasi API/CCO)\n- Sosialisasi bulanan via email/WAG/papan pengumuman\n\n**Info yang dibutuhkan:**\n1. Jumlah karyawan & level jabatan\n2. Anggaran pelatihan (ada/terbatas/sangat terbatas)\n3. Apakah ada pelatihan AK sebelumnya?\n\nAtau ketik **\"langsung buat\"** untuk program standar 12 bulan.",
+        suggestions: ["Langsung buat program 12 bulan", "Kami 15 karyawan, anggaran sangat terbatas", "Sertifikasi apa yang valid untuk Fungsi Kepatuhan?"],
+      },
+    ],
+  },
+  {
+    key: "perencanaan",
+    label: "Agen Perencanaan",
+    fase: "Siap Pengisian Kuesioner",
+    icon: BarChart3,
+    color: "text-blue-700",
+    bgColor: "bg-blue-600",
+    badgeColor: "bg-blue-100 text-blue-700",
+    quickLinks: [
+      { label: "Pancek Pathway", url: "/pancek", icon: ClipboardList },
+      { label: "Mentor Pancek", url: "/mentor", icon: MessageSquare },
+    ],
+    subAgents: [
+      {
+        key: "risk_register",
+        label: "Sub-Agen Risk Register Korupsi",
+        shortLabel: "Risk Register (P.1-P.3)",
+        description: "Register Risiko Korupsi per proses bisnis dengan matriks heat map (P.1-P.3)",
+        deliverable: "Register Risiko + Heat Map",
+        icon: BarChart3,
+        opening: "Saya Sub-Agen Register Risiko Korupsi. Saya akan membantu menyiapkan **Register Risiko Korupsi** per unit/proses bisnis — menjawab kuesioner **P.1, P.2, dan P.3** sekaligus di Jaga.id.\n\nP.1: *Apakah ada penilaian risiko korupsi secara berkala?*\nP.2: *Apakah mencakup seluruh proses bisnis utama?*\nP.3: *Apakah hasilnya digunakan sebagai dasar program anti-korupsi?*\n\nFormat: Tabel 8 kolom (Proses Bisnis | Risiko | Kemungkinan 1-5 | Dampak 1-5 | Skor | Level | Mitigasi | PIC)\n\nRisiko yang biasanya paling tinggi:\n- Pengadaan & tender\n- Pembayaran & keuangan\n- Perizinan & regulasi\n- Perekrutan\n\n**Info yang dibutuhkan:**\n1. Bidang usaha / sektor bisnis\n2. Proses bisnis utama\n3. Apakah ada interaksi dengan pejabat pemerintah?\n\nAtau ketik **\"langsung buat\"** untuk register standar yang bisa disesuaikan.",
+        suggestions: ["Langsung buat register risiko standar", "Kami kontraktor konstruksi pemerintah", "Kami perusahaan jasa konsultan swasta"],
+      },
+    ],
+  },
+  {
+    key: "pelaksanaan",
+    label: "Agen Pelaksanaan",
+    fase: "Siap Pengisian Kuesioner",
+    icon: ClipboardCheck,
+    color: "text-purple-700",
+    bgColor: "bg-purple-600",
+    badgeColor: "bg-purple-100 text-purple-700",
+    quickLinks: [
+      { label: "Pancek Pathway", url: "/pancek", icon: ClipboardList },
+      { label: "Mentor Pancek", url: "/mentor", icon: MessageSquare },
+    ],
+    subAgents: [
+      {
+        key: "kontrak",
+        label: "Sub-Agen Klausul Kontrak AK",
+        shortLabel: "Klausul Kontrak (D.1)",
+        description: "5 klausul anti-korupsi standar untuk semua kontrak & perjanjian (D.1)",
+        deliverable: "5 Klausul AK + Template Addendum",
+        icon: FileText,
+        opening: "Saya Sub-Agen Klausul Anti-Korupsi dalam Kontrak. Saya akan membantu menyiapkan **5 klausul anti-korupsi standar** yang dimasukkan ke semua kontrak/perjanjian perusahaan — lampiran kuesioner **D.1 Jaga.id**.\n\nD.1 menanyakan: *'Apakah perusahaan mencantumkan klausul anti-korupsi dalam kontrak dengan mitra bisnis, vendor, dan pelanggan?'*\n\n**5 klausul wajib:**\n1. Pernyataan kepatuhan anti-korupsi\n2. Larangan pemberian/penerimaan manfaat tidak wajar\n3. Kewajiban pelaporan pelanggaran\n4. Hak audit kepatuhan\n5. Sanksi pemutusan kontrak\n\n**Info yang dibutuhkan:**\n1. Jenis kontrak yang paling sering digunakan\n2. Apakah ada kontrak berjalan yang perlu addendum?\n\nAtau ketik **\"langsung buat\"** untuk 5 klausul siap pakai + template addendum.",
+        suggestions: ["Langsung buat 5 klausul + addendum", "Kontrak kami dalam Bahasa Inggris, bisa?", "Berapa panjang ideal klausul AK dalam kontrak?"],
+      },
+      {
+        key: "hadiah",
+        label: "Sub-Agen Prosedur Hadiah & Gratifikasi",
+        shortLabel: "Prosedur Hadiah (D.3)",
+        description: "Prosedur gratifikasi, hadiah, sponsorship & kontribusi politik (D.3)",
+        deliverable: "Prosedur Hadiah + Log Hadiah + Form Disclosure",
+        icon: Star,
+        opening: "Saya Sub-Agen Prosedur Hadiah, Gratifikasi & Sponsorship. Saya akan membantu menyiapkan **prosedur lengkap pengelolaan hadiah** + Log Hadiah + Formulir Disclosure — lampiran kuesioner **D.3 Jaga.id**.\n\nD.3 menanyakan: *'Apakah ada prosedur khusus terkait pemberian/penerimaan hadiah, jamuan, sponsorship, dan kontribusi politik?'*\n\n**Komponen yang akan dibuat:**\n- Prosedur hadiah & hiburan (batas wajar: ≤Rp500.000)\n- Prosedur gratifikasi kepada/dari pegawai negeri (WAJIB DIKEMBALIKAN)\n- Prosedur sponsorship & donasi (persetujuan FK untuk >Rp5jt)\n- Larangan kontribusi politik dari dana perusahaan\n- Log Hadiah (format tabel)\n- Formulir disclosure benturan kepentingan\n\n**Info yang dibutuhkan:**\n1. Jenis badan usaha (BUMN: aturan lebih ketat / swasta)\n2. Apakah sering berinteraksi dengan pejabat pemerintah?\n\nAtau ketik **\"langsung buat\"** untuk prosedur standar.",
+        suggestions: ["Langsung buat prosedur + Log Hadiah", "Kami BUMN, ada aturan tambahan apa?", "Bagaimana jika sudah menerima hadiah dari klien?"],
+      },
+      {
+        key: "wbs",
+        label: "Sub-Agen SOP Whistleblowing",
+        shortLabel: "SOP WBS Pancek (D.6)",
+        description: "SOP Whistleblowing System + 5 format laporan resmi KPK (D.6)",
+        deliverable: "SOP WBS + 5 Format Laporan",
+        icon: AlertTriangle,
+        opening: "Saya Sub-Agen SOP Whistleblowing System Pancek. Saya akan membantu menyiapkan **SOP WBS lengkap + 5 format laporan resmi** — lampiran kuesioner **D.6 Jaga.id**.\n\nD.6 menanyakan: *'Apakah ada saluran pelaporan pelanggaran yang aman, mudah diakses, dan memberikan perlindungan kepada pelapor?'*\n\n**5 format laporan wajib (Panduan CEK KPK PUB2025):**\n1. Laporan Anggota Organisasi (karyawan → FK)\n2. Laporan Pihak Ketiga (vendor/mitra eksternal → FK)\n3. Laporan Manajemen (FK → Direktur, triwulan)\n4. Laporan Penyelidikan (hasil investigasi FK)\n5. Laporan ke Pihak Berwenang (KPK/Polri jika ada indikasi pidana)\n\nSOP mencakup: alur penerimaan → investigasi → keputusan → tindak lanjut + No Retaliation Policy.\n\n**Info yang dibutuhkan:**\n1. Saluran WBS yang tersedia (email khusus? form online? kotak saran?)\n2. Nama Kepala Fungsi Kepatuhan (penerima laporan)\n\nAtau ketik **\"langsung buat\"** untuk SOP standar + 5 format laporan.",
+        suggestions: ["Langsung buat SOP WBS + 5 format laporan", "Kami hanya punya email, cukup?", "Bagaimana melindungi pelapor dari balas dendam?"],
+      },
+      {
+        key: "sosialisasi",
+        label: "Sub-Agen Program Sosialisasi",
+        shortLabel: "Program Sosialisasi (D.7)",
+        description: "Kalender sosialisasi anti-korupsi 12 bulan + template materi (D.7)",
+        deliverable: "Kalender Sosialisasi 12 Bulan + Template Materi",
+        icon: GraduationCap,
+        opening: "Saya Sub-Agen Program Sosialisasi Anti-Korupsi. Saya akan membantu menyiapkan **kalender sosialisasi 12 bulan** + template materi tiap bulan — lampiran kuesioner **D.7 Jaga.id**.\n\nD.7 menanyakan: *'Apakah program anti-korupsi telah disosialisasikan kepada seluruh karyawan dan mitra bisnis secara berkala?'*\n\n**Program mencakup:**\n- Kick-off: Deklarasi + Pakta Integritas (Bulan 1)\n- Sosialisasi WBS, gratifikasi, due diligence (Bulan 2-4)\n- Kasus nyata KPK sebagai bahan diskusi (Bulan 5)\n- Sosialisasi ke vendor/mitra utama (Bulan 10)\n- Evaluasi pemahaman karyawan (Bulan 6 & 12)\n\n**Info yang dibutuhkan:**\n1. Jumlah karyawan & lokasi (satu kantor/multi lokasi?)\n2. Channel komunikasi yang tersedia\n3. Apakah ada vendor utama yang perlu disosialisasi?\n\nAtau ketik **\"langsung buat\"** untuk program sosialisasi standar 12 bulan.",
+        suggestions: ["Langsung buat kalender sosialisasi 12 bulan", "Kami 30 karyawan, 2 lokasi berbeda", "Template materi sosialisasi gratifikasi 1 halaman"],
+      },
+    ],
+  },
+  {
+    key: "evaluasi",
+    label: "Agen Evaluasi & Perbaikan",
+    fase: "Siap Terverifikasi",
+    icon: ClipboardCheck,
+    color: "text-orange-700",
+    bgColor: "bg-orange-600",
+    badgeColor: "bg-orange-100 text-orange-700",
+    quickLinks: [
+      { label: "Pancek Pathway", url: "/pancek", icon: ClipboardList },
+      { label: "Mentor Pancek", url: "/mentor", icon: MessageSquare },
+    ],
+    subAgents: [
+      {
+        key: "audit_charter",
+        label: "Sub-Agen Piagam Audit",
+        shortLabel: "Piagam Audit (C.1)",
+        description: "Piagam Audit Anti-Korupsi + Rencana Monitoring & Evaluasi (C.1)",
+        deliverable: "Piagam Audit + Rencana M&E Tahunan",
+        icon: FileCheck,
+        opening: "Saya Sub-Agen Piagam Audit Anti-Korupsi (Audit Charter). Saya akan membantu menyiapkan **Piagam Audit** + Rencana Monitoring & Evaluasi tahunan — lampiran kuesioner **C.1 Jaga.id**.\n\nC.1 menanyakan: *'Apakah perusahaan melakukan monitoring dan evaluasi terhadap efektivitas program anti-korupsi secara berkala?'*\n\n**Piagam Audit mencakup:**\n- Mandat & tujuan audit kepatuhan\n- Ruang lingkup (semua proses berisiko)\n- Kewenangan auditor (akses penuh, independen)\n- Metodologi (review dokumen, sampling transaksi, wawancara)\n- Frekuensi: 1×/tahun rutin + audit khusus jika ada pelanggaran\n- Pelaporan: laporan ke Direktur dalam 30 hari\n\n**Info yang dibutuhkan:**\n1. Nama perusahaan, Direktur, Kepala Fungsi Kepatuhan\n2. Apakah audit dilakukan FK sendiri atau tim terpisah?\n3. Target audit pertama kapan?\n\nAtau ketik **\"langsung buat\"** untuk Piagam Audit + Rencana M&E standar.",
+        suggestions: ["Langsung buat Piagam Audit + Rencana M&E", "Fungsi Kepatuhan boleh audit sendiri?", "Temuan audit dilaporkan ke siapa?"],
+      },
+      {
+        key: "sanksi",
+        label: "Sub-Agen Sanksi & Penghargaan",
+        shortLabel: "Sanksi & Penghargaan (A.1-A.2)",
+        description: "Matriks sanksi proporsional + sistem penghargaan integritas (A.1-A.2)",
+        deliverable: "Matriks Sanksi + Skema Penghargaan Integritas",
+        icon: Scale,
+        opening: "Saya Sub-Agen Mekanisme Sanksi & Penghargaan Integritas. Saya akan membantu menyiapkan **matriks sanksi proporsional** + sistem penghargaan integritas — menjawab kuesioner **A.1 dan A.2** di Jaga.id.\n\nA.1: *'Apakah ada mekanisme sanksi yang jelas dan proporsional terhadap pelanggaran kebijakan anti-korupsi?'*\nA.2: *'Apakah ada sistem penghargaan bagi karyawan yang menunjukkan integritas tinggi atau melaporkan pelanggaran?'*\n\n**Matriks Sanksi (3 tingkatan):**\n- RINGAN (SP-1): Tidak lapor penerimaan hadiah, tidak hadir pelatihan\n- SEDANG (SP-2 + remediation): Memberikan hadiah tanpa persetujuan FK, benturan kepentingan tidak di-disclose\n- BERAT (SP-3 → PHK + proses hukum): Terbukti suap, pemalsuan dokumen, balas dendam pelapor\n\n**Skema Penghargaan:**\n- Integrity Champion Award tahunan\n- Apresiasi khusus pelapor WBS yang terbukti\n\n**Info yang dibutuhkan:**\n1. Apakah sudah ada Peraturan Perusahaan/PKB yang mengatur SP?\n2. Jumlah karyawan\n\nAtau ketik **\"langsung buat\"** untuk matriks sanksi + penghargaan standar.",
+        suggestions: ["Langsung buat matriks sanksi + penghargaan", "Kami sudah punya PKB, perlu diintegrasikan?", "Sidang etik perlu melibatkan siapa saja?"],
+      },
+    ],
+  },
+];
+
 export default function GustafdaCollab() {
+  const [mode, setMode] = useState<CollabMode>("smap");
   const [activeAgent, setActiveAgent] = useState<AgentKey>("dokumen");
+  const [pancekActiveAgent, setPancekActiveAgent] = useState<PancekAgentKey>("komitmen");
   const [activeSubKey, setActiveSubKey] = useState<string | null>(null);
   const [allMessages, setAllMessages] = useState<Record<string, Message[]>>({});
   const [completedDocs, setCompletedDocs] = useState<Set<string>>(new Set());
@@ -387,9 +587,13 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
     return null;
   }
 
-  const agent = AGENTS.find(a => a.key === activeAgent)!;
+  const smapAgent = AGENTS.find(a => a.key === activeAgent)!;
+  const pancekAgent = PANCEK_AGENTS.find(a => a.key === pancekActiveAgent)!;
+  const agent = mode === "pancek" ? pancekAgent : smapAgent;
+  const currentAgentKey = mode === "pancek" ? pancekActiveAgent : activeAgent;
+
   const subAgent = agent.subAgents.find(s => s.key === activeSubKey) || null;
-  const sessionKey = activeSubKey ? `${activeAgent}_${activeSubKey}` : null;
+  const sessionKey = activeSubKey ? `${currentAgentKey}_${activeSubKey}` : null;
   const messages = sessionKey ? (allMessages[sessionKey] || []) : [];
   const SubIcon = subAgent?.icon || FileText;
 
@@ -399,11 +603,11 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
 
   useEffect(() => {
     setInput("");
-  }, [activeSubKey, activeAgent]);
+  }, [activeSubKey, activeAgent, pancekActiveAgent, mode]);
 
   const openSubAgent = (subKey: string) => {
     setActiveSubKey(subKey);
-    const key = `${activeAgent}_${subKey}`;
+    const key = `${currentAgentKey}_${subKey}`;
     if (!allMessages[key]) {
       const sub = agent.subAgents.find(s => s.key === subKey)!;
       setAllMessages(prev => ({
@@ -432,8 +636,9 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: withUser,
-          agentKey: activeAgent,
+          agentKey: currentAgentKey,
           subAgentKey: activeSubKey,
+          mode,
           companyName: latestBlueprint?.namaPerusahaan || company?.name || "",
           companyContext: blueprintContext,
         }),
@@ -490,10 +695,11 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
     });
   };
 
-  const totalDone = AGENTS.reduce((acc, a) =>
+  const activeList = mode === "pancek" ? PANCEK_AGENTS : AGENTS;
+  const totalDone = activeList.reduce((acc, a) =>
     acc + a.subAgents.filter(s => completedDocs.has(`${a.key}_${s.key}`)).length, 0);
-  const totalAll = AGENTS.reduce((acc, a) => acc + a.subAgents.length, 0);
-  const agentDone = agent.subAgents.filter(s => completedDocs.has(`${activeAgent}_${s.key}`)).length;
+  const totalAll = activeList.reduce((acc, a) => acc + a.subAgents.length, 0);
+  const agentDone = agent.subAgents.filter(s => completedDocs.has(`${currentAgentKey}_${s.key}`)).length;
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
@@ -512,42 +718,81 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span>{totalDone}/{totalAll} deliverables selesai</span>
                 <span>·</span>
-                <span>{AGENTS.reduce((a, ag) => a + ag.subAgents.length, 0)} sub-agen spesialis</span>
+                <span>{totalAll} sub-agen spesialis</span>
               </div>
             </div>
           </div>
-          <div className="hidden sm:block">
-            <div className="h-1.5 w-32 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all"
-                style={{ width: `${(totalDone / totalAll) * 100}%` }}
-              />
+          <div className="flex items-center gap-3">
+            {/* Mode toggle */}
+            <div className="flex rounded-lg border bg-slate-50 p-0.5 gap-0.5">
+              <button
+                onClick={() => { setMode("smap"); setActiveSubKey(null); }}
+                className={cn("px-2.5 py-1 rounded-md text-xs font-semibold transition-all", mode === "smap" ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                data-testid="toggle-mode-smap"
+              >SMAP</button>
+              <button
+                onClick={() => { setMode("pancek"); setActiveSubKey(null); }}
+                className={cn("px-2.5 py-1 rounded-md text-xs font-semibold transition-all", mode === "pancek" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-700")}
+                data-testid="toggle-mode-pancek"
+              >Pancek KPK</button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1 text-right">{Math.round((totalDone / totalAll) * 100)}% selesai</p>
+            <div className="hidden sm:block">
+              <div className="h-1.5 w-28 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={cn("h-full rounded-full transition-all", mode === "pancek" ? "bg-gradient-to-r from-emerald-500 to-teal-500" : "bg-gradient-to-r from-blue-500 to-purple-500")}
+                  style={{ width: `${totalAll > 0 ? (totalDone / totalAll) * 100 : 0}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 text-right">{totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0}% selesai</p>
+            </div>
           </div>
         </div>
 
-        <Tabs value={activeAgent} onValueChange={v => { setActiveAgent(v as AgentKey); setActiveSubKey(null); }}>
-          <TabsList className="grid w-full grid-cols-4 h-auto">
-            {AGENTS.map(a => {
-              const Icon = a.icon;
-              const done = a.subAgents.filter(s => completedDocs.has(`${a.key}_${s.key}`)).length;
-              return (
-                <TabsTrigger
-                  key={a.key} value={a.key}
-                  className="flex-col py-1.5 gap-0 h-auto"
-                  data-testid={`tab-agent-${a.key}`}
-                >
-                  <div className="flex items-center gap-1">
-                    <Icon className="h-3 w-3" />
-                    <span className="text-xs font-medium hidden md:block">{a.label.replace("Agen ", "")}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{done}/{a.subAgents.length}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-        </Tabs>
+        {mode === "smap" ? (
+          <Tabs value={activeAgent} onValueChange={v => { setActiveAgent(v as AgentKey); setActiveSubKey(null); }}>
+            <TabsList className="grid w-full grid-cols-4 h-auto">
+              {AGENTS.map(a => {
+                const Icon = a.icon;
+                const done = a.subAgents.filter(s => completedDocs.has(`${a.key}_${s.key}`)).length;
+                return (
+                  <TabsTrigger
+                    key={a.key} value={a.key}
+                    className="flex-col py-1.5 gap-0 h-auto"
+                    data-testid={`tab-agent-${a.key}`}
+                  >
+                    <div className="flex items-center gap-1">
+                      <Icon className="h-3 w-3" />
+                      <span className="text-xs font-medium hidden md:block">{a.label.replace("Agen ", "")}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{done}/{a.subAgents.length}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+        ) : (
+          <Tabs value={pancekActiveAgent} onValueChange={v => { setPancekActiveAgent(v as PancekAgentKey); setActiveSubKey(null); }}>
+            <TabsList className="grid w-full grid-cols-4 h-auto">
+              {PANCEK_AGENTS.map(a => {
+                const Icon = a.icon;
+                const done = a.subAgents.filter(s => completedDocs.has(`${a.key}_${s.key}`)).length;
+                return (
+                  <TabsTrigger
+                    key={a.key} value={a.key}
+                    className="flex-col py-1.5 gap-0 h-auto"
+                    data-testid={`tab-pancek-agent-${a.key}`}
+                  >
+                    <div className="flex items-center gap-1">
+                      <Icon className="h-3 w-3" />
+                      <span className="text-xs font-medium hidden md:block">{a.label.replace("Agen ", "")}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{done}/{a.subAgents.length}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+        )}
       </div>
 
       {/* Blueprint Context Banner */}
@@ -594,7 +839,7 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
               {agent.subAgents.map(sub => {
                 const Icon = sub.icon;
                 const isActive = activeSubKey === sub.key;
-                const docKey = `${activeAgent}_${sub.key}`;
+                const docKey = `${currentAgentKey}_${sub.key}`;
                 const isDone = completedDocs.has(docKey);
                 const hasHistory = !!allMessages[docKey]?.length;
                 return (
@@ -719,7 +964,7 @@ INSTRUKSI: Gunakan konteks blueprint di atas. JANGAN tanya informasi perusahaan 
                 <div className="grid grid-cols-1 gap-3">
                   {agent.subAgents.map(sub => {
                     const Icon = sub.icon;
-                    const docKey = `${activeAgent}_${sub.key}`;
+                    const docKey = `${currentAgentKey}_${sub.key}`;
                     const isDone = completedDocs.has(docKey);
                     const hasHistory = !!(allMessages[docKey]?.length);
                     return (
