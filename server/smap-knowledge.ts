@@ -11,79 +11,182 @@
  * Used as system prompt knowledge injection for Gustafta Dialog & Collab sub-agents.
  */
 
-// ─── PEDOMAN SMAP — Exact structure from SMAP01 ──────────────────────────────
+// ─── PEDOMAN SMAP — Enriched from 4 real company documents ──────────────────
 export const PEDOMAN_SMAP_STRUCTURE = `
-STRUKTUR RESMI PEDOMAN SMAP (berdasarkan template konsultan SNI ISO 37001:2016):
+STRUKTUR RESMI PEDOMAN SMAP (diverifikasi dari 4 dokumen perusahaan riil: CV Sitiotio Mandiri, PT Kharisma Bina Konstruksi, PT Najah Tejo Abadi, CV Nabeel Isoresh Nusantara)
 
-BAGIAN AWAL (Halaman 1-6):
-• 0.1 Pendahuluan — Latar belakang komitmen anti penyuapan perusahaan
-• 0.2 Pengendalian Dokumen — FKAP bertanggung jawab atas: master copy, penerbitan, distribusi, perubahan. Setiap salinan hardcopy diberi cap status pengendalian. Distribusi dicatatkan dalam Daftar Dokumen Internal.
-• 0.3 Pengesahan — Ditandatangani Top Manajemen (Direktur Utama/Dewan Direksi)
-• 0.4 Informasi Revisi — Daftar perubahan antar versi (Rev.00, Rev.01, dst.)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAGIAN MUKA (sebelum Klausul 4):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• HALAMAN JUDUL: nama perusahaan, judul "PEDOMAN SISTEM MANAJEMEN ANTI PENYUAPAN (SMAP) SNI ISO/IEC 37001:2016", nomor dokumen, edisi/revisi, tanggal berlaku, status distribusi (Terkendali/Tak Terkendali), kolom tanda tangan Ketua FKAP & Direktur
+• DAFTAR DISTRIBUSI: tabel checklist pemegang dokumen (copy 01=Master FKAP, copy 02+=Salinan ke Direktur, Komisaris, Kepala Bagian, dll.)
+• LEMBAR CATATAN REVISI: tabel No/No.Revisi/Tanggal Revisi/Bagian/Catatan/Disetujui
+• DAFTAR ISI: lengkap dengan nomor halaman
 
-DAFTAR ISI UTAMA (Klausul sesuai urutan SNI ISO 37001:2016):
-1. Ruang Lingkup — Penetapan batas dan aplikabilitas SMAP dalam organisasi
-2. Referensi Normatif — SNI ISO 37001:2016 sebagai dokumen acuan utama
-3. Istilah dan Definisi — Terminologi kunci SMAP (penyuapan, FKAP, Dewan Pengarah, dll.)
-4. Konteks Organisasi
+ADA DUA POLA PEMBUKAAN (pilih sesuai preferensi klien):
+POLA A (SM/NIN style — langsung Klausul 1): Daftar Isi → 1. Lingkup → 2. Acuan Normatif → 3. Istilah → 4-10 → Lampiran
+POLA B (KBK style — ada Bab 1 Pendahuluan): PMAP-01 Pendahuluan & Tujuan → PMAP-02 Ruang Lingkup → PMAP-03 Istilah & Referensi → PMAP-04 s/d PMAP-10 (Klausul 4-10) → Lampiran
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KONTEN BAB PENDAHULUAN / TUJUAN (jika Pola B):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1.1 PENDAHULUAN:
+Perusahaan menyadari urgensi tata kelola yang bersih dan berintegritas untuk mendukung proses bisnis bebas KKN (Korupsi, Kolusi, Nepotisme). Penyuapan menimbulkan masalah sosial, moral, ekonomi, dan politik yang serius — mengacaukan tata kelola pemerintah dan bisnis. Perusahaan berkomitmen penuh menerapkan kebijakan kepatuhan dan beroperasi secara etis dan bertanggung jawab dengan dukungan SMAP sesuai SNI ISO 37001:2016.
+
+1.2 TUJUAN PENERAPAN SMAP:
+Manfaat penerapan SNI ISO/IEC 37001:
+a) Membantu perusahaan menerapkan sistem anti penyuapan dan meningkatkan pengendalian yang sudah ada
+b) Memberikan jaminan kepada regulator, manajemen, pelanggan, dan pihak berkepentingan bahwa perusahaan menerapkan praktik pengendalian anti penyuapan yang diakui internasional
+c) Memberikan bukti kepada pihak berwenang dalam hal penyelidikan bahwa perusahaan telah mengambil langkah-langkah mencegah penyuapan
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACUAN NORMATIF (cantumkan SEMUA regulasi ini):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Undang-Undang Nomor 19 Tahun 2019 tentang Perubahan Kedua atas UU Nomor 30 Tahun 2002 tentang Komisi Pemberantasan Tindak Pidana Korupsi
+2. Peraturan Presiden Nomor 54 Tahun 2018 tentang Strategi Nasional Pencegahan Korupsi
+3. Instruksi Presiden Nomor 10 Tahun 2016 tentang Aksi Pencegahan dan Pemberantasan Korupsi
+4. SNI ISO 37001:2016 — Sistem Manajemen Anti Penyuapan – Persyaratan (dokumen acuan utama)
+5. Annex A SNI ISO 37001:2016 — Panduan Penggunaan
+6. Panduan Cegah Korupsi KPK (Pancek)
+UNTUK BUJK KONSTRUKSI tambahkan: Peraturan Menteri PUPR No. 06 Tahun 2025 (perubahan atas Permen PU 08/2022) + Keputusan Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (perubahan atas SK Dirjen 144/2022)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISTILAH DAN DEFINISI (15 definisi wajib — cantumkan isi definisinya):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.1 Penyuapan — Menawarkan, menjanjikan, memberikan, menerima atau meminta keuntungan yang tidak semestinya dari nilai apapun (keuangan atau non-keuangan), langsung atau tidak langsung, terlepas dari lokasi, merupakan pelanggaran peraturan perundang-undangan, sebagai bujukan atau hadiah untuk orang yang bertindak atau menahan diri dari bertindak terkait kinerja tugasnya.
+3.2 Organisasi — Orang atau kelompok orang yang memiliki fungsi masing-masing dengan tanggung jawab, wewenang dan hubungan untuk mencapai suatu sasaran.
+3.3 Pihak Berkepentingan (Pemangku Kepentingan) — Orang atau organisasi yang dapat mempengaruhi, dipengaruhi, atau menganggap dirinya terpengaruh oleh suatu keputusan atau aktivitas.
+3.4 Persyaratan — Kebutuhan yang dinyatakan dan wajib.
+3.5 Sistem Manajemen — Sekumpulan unsur organisasi yang saling terkait atau berinteraksi untuk menetapkan kebijakan dan sasaran serta proses untuk mencapai sasaran tersebut.
+3.6 Manajemen Puncak — Orang atau kelompok orang yang mengarahkan dan mengendalikan organisasi pada tingkat tertinggi.
+3.7 Dewan Pengarah — Kelompok atau badan yang memiliki tanggung jawab utama dan kewenangan untuk aktivitas organisasi, pengelolaan dan kebijakan yang menerima laporan dan pertanggungjawaban dari manajemen puncak. (Pada perusahaan Indonesia: Dewan Komisaris atau Komisaris)
+3.8 Fungsi Kepatuhan Anti Penyuapan (FKAP) — Orang (atau kelompok) dengan tanggung jawab dan wewenang untuk melaksanakan operasi sistem manajemen anti penyuapan.
+3.9 Keefektifan — Tingkatan dimana rencana aktivitas terealisasi dan hasil direncanakan tercapai.
+3.10 Kebijakan — Maksud dan tujuan dari organisasi, yang dinyatakan secara formal oleh manajemen puncak atau dewan pengarah.
+3.11 Sasaran — Hasil yang ingin dicapai.
+3.12 Risiko — Dampak dari ketidakpastian pada sasaran.
+3.13 Kompetensi — Kemampuan menerapkan pengetahuan dan keterampilan untuk mencapai hasil yang diinginkan.
+3.14 Informasi Terdokumentasi — Informasi dalam bentuk media penyimpanan yang dipersyaratkan untuk dikendalikan dan dipelihara oleh organisasi dimana informasi tersebut berada.
+3.15 Proses — Serangkaian kegiatan yang saling terkait atau berinteraksi yang mengubah masukan menjadi keluaran.
+3.16 Kinerja — Hasil terukur.
+3.17 Uji Kelayakan (Due Diligence) — Proses untuk menilai sifat dan tingkat risiko penyuapan yang berkaitan dengan organisasi, personil, atau rekan bisnis.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DAFTAR ISI KLAUSUL 4-10 (sama untuk kedua pola):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. KONTEKS ORGANISASI
    4.1 Memahami Organisasi dan Konteksnya (isu internal & eksternal)
-   4.2 Memahami Kebutuhan dan Harapan Pihak Berkepentingan
-   4.3 Menentukan Ruang Lingkup SMAP
-   4.4 Sistem Manajemen Anti Penyuapan
+   4.2 Memahami Kebutuhan dan Harapan Pihak yang Berkepentingan
+   4.3 Menetapkan Lingkup Manajemen Anti Penyuapan
+   4.4 Sistem Manajemen Anti Penyuapan dan Proses-prosesnya
    4.5 Penilaian Risiko Penyuapan
-5. Kepemimpinan
-   5.1 Kepemimpinan dan Komitmen (Top Management + Dewan Pengarah)
+5. KEPEMIMPINAN
+   5.1 Kepemimpinan dan Komitmen (Top Management + Dewan Pengarah/Komisaris)
    5.2 Kebijakan Anti Penyuapan
-   5.3 Peran, Tanggung Jawab dan Wewenang Organisasi
-       5.3.1 Tanggung jawab umum
-       5.3.2 Fungsi Kepatuhan Anti Penyuapan (FKAP)
-       5.3.3 Pendelegasian wewenang saat personil utama tidak bertugas
-6. Perencanaan
+   5.3 Peran, Tanggung Jawab, dan Wewenang Organisasi
+       5.3.1 Tanggung jawab umum seluruh personil
+       5.3.2 Fungsi Kepatuhan Anti Penyuapan (FKAP) — Ketua, Wakil Ketua, Sekretaris, Anggota
+       5.3.3 Pendelegasian wewenang
+6. PERENCANAAN
    6.1 Tindakan untuk Mengatasi Risiko dan Peluang
-   6.2 Sasaran Anti Penyuapan dan Perencanaan untuk mencapainya
-7. Pendukung
+   6.2 Sasaran Anti Penyuapan serta Perencanaan untuk Mencapainya
+7. PENDUKUNG
    7.1 Sumber Daya
-   7.2 Kompetensi (7.2.1 Umum, 7.2.2 Personil dengan risiko penyuapan spesifik)
-   7.3 Kesadaran (Awareness) / Kepedulian dan Pelatihan
+   7.2 Kompetensi (7.2.1 Umum; 7.2.2 Personil dengan risiko penyuapan spesifik)
+   7.3 Kepedulian dan Pelatihan
    7.4 Komunikasi (internal & eksternal)
-   7.5 Informasi Terdokumentasi (7.5.1 Umum, 7.5.2 Membuat & Memperbarui, 7.5.3.1 & 7.5.3.2 Pengendalian)
-8. Pengoperasian (Operasional)
-   8.1 Perencanaan dan Pengendalian Pengoperasian
-   8.2 Uji Kelayakan / Uji Tuntas (Due Diligence) — personil & mitra bisnis
+   7.5 Informasi Terdokumentasi
+8. OPERASI
+   8.1 Perencanaan dan Pengendalian Operasional
+   8.2 Uji Kelayakan (Due Diligence) — personil & mitra bisnis
    8.3 Pengendalian Keuangan
-   8.4 Pengendalian Non-Finansial
-   8.5 Penerapan Pengendalian Anti Penyuapan oleh Organisasi Lain dan Rekan Bisnis
+   8.4 Pengendalian Non-Keuangan
+   8.5 Penerapan Pengendalian Anti Penyuapan yang Dikendalikan Organisasi dan Rekan Bisnisnya
    8.6 Komitmen Anti Penyuapan (pernyataan tertulis dari mitra)
-   8.7 Hadiah, Keramah-tamahan (Hospitality), Donasi dan Keuntungan Serupa
+   8.7 Hadiah, Kemurahan Hati, Sumbangan, dan Keuntungan Serupa
    8.8 Mengelola Ketidakcukupan Pengendalian Anti Penyuapan
-   8.9 Menyampaikan Kekhawatiran / Perhatian (Raising Concern) — Whistleblowing System (WBS)
+   8.9 Meningkatkan Kepedulian (WBS / Whistleblowing System — wajib mekanisme anonim)
    8.10 Investigasi dan Penanganan Penyuapan
-9. Evaluasi Kinerja
-   9.1 Pemantauan, Pengukuran, Analisis dan Evaluasi
+9. EVALUASI KINERJA
+   9.1 Pemantauan, Pengukuran, Analisis, dan Evaluasi
    9.2 Audit Internal
-   9.3 Tinjauan Manajemen (Management Review)
-   9.4 Tinjauan oleh FKAP
-10. Peningkatan
+   9.3 Tinjauan Manajemen
+   9.4 Tinjauan Fungsi Kepatuhan Anti Penyuapan (FKAP)
+10. PERBAIKAN
     10.1 Ketidaksesuaian dan Tindakan Korektif
-    10.2 Perbaikan Berkelanjutan
+    10.2 Peningkatan Berkelanjutan
 
-LAMPIRAN RESMI (6 lampiran):
-• Lampiran 1: Peta Proses Kerja (Business Process Mapping) SMAP
-• Lampiran 2: Kebijakan Anti Penyuapan (full text)
-• Lampiran 3: Acuan Silang Prosedur vs. ISO 37001:2016 (cross-reference matrix)
-• Lampiran 4A: Tabel Komunikasi Internal
-• Lampiran 4B: Tabel Komunikasi Eksternal
-• Lampiran 5: Tabel Sasaran SMAP dan Pemantauannya
-• Lampiran 6: Struktur Organisasi
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAMPIRAN PEDOMAN SMAP (dua pola dari dokumen riil):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-PRINSIP UTAMA SMAP (dari pendahuluan):
-SMAP membantu organisasi mengendalikan praktek penyuapan dengan cara:
-• Mencegah (prevention)
-• Mendeteksi (detection)
-• Melaporkan (reporting)
-• Menangani (handling) — bila penyuapan terjadi
+POLA A — 12 Lampiran (SM/NIN style — lebih detail per elemen):
+Lampiran 1: Identifikasi Isu Internal dan Eksternal
+Lampiran 2: Identifikasi Kebutuhan dan Harapan Pihak yang Berkepentingan
+Lampiran 3: Bisnis Proses Organisasi (flowchart proses utama)
+Lampiran 4: Visi dan Misi Perusahaan
+Lampiran 5: Kebijakan Anti Penyuapan (full text + tanda tangan Direktur)
+Lampiran 6: Struktur Organisasi
+Lampiran 7: Uraian Tugas, Jabatan, dan Wewenang Organisasi (job desc + wewenang per jabatan)
+Lampiran 8: Sasaran Anti Penyuapan (tabel sasaran per departemen + target + pemantauan)
+Lampiran 9: Tabel Komunikasi (internal & eksternal dalam satu tabel)
+Lampiran 10: Analisa Risiko (Register Risiko Penyuapan)
+Lampiran 11: Kode Etik Anti Penyuapan
+Lampiran 12: Program Kerja (Program Pelatihan + Program Audit SMAP)
++ Lampiran Daftar Dokumen, Prosedur dan Formulir SMAP
 
-FORMAT DOKUMEN: Gunakan kode dokumen M-SMAP.[KODE_PERUSAHAAN].01 | Rev.00
+POLA B — 12 Lampiran (KBK style — lebih menekankan komitmen & korelasi):
+Lampiran 1: Konteks Organisasi (isu internal/eksternal + pihak berkepentingan gabungan)
+Lampiran 2: Komitmen Anti Penyuapan (pernyataan komitmen pimpinan)
+Lampiran 3: Kebijakan Anti Penyuapan (full text)
+Lampiran 4: Pakta Integritas (pernyataan seluruh karyawan)
+Lampiran 5: Komitmen Anti Penyuapan Rekan Bisnis (untuk ditandatangani vendor/mitra)
+Lampiran 6: Deklarasi Kepatuhan Anti Penyuapan
+Lampiran 7: Sasaran dan Program Anti Penyuapan
+Lampiran 8: Kebijakan Penerimaan Hadiah & Hiburan
+Lampiran 9: Matriks Komunikasi (internal & eksternal)
+Lampiran 10: Matriks Korelasi Standar SNI ISO/IEC 37001 (cross-reference klausul vs dokumen)
+Lampiran 11: SK Kewenangan / Pendelegasian
+Lampiran 12: SK Struktur & FKAP SNI ISO/IEC 37001:2016
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TABEL SASARAN SMAP (isi konten yang realistis, per departemen):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Format: No | Bagian/Fungsi | Sasaran SMAP | Target | Pemantauan
+
+Sasaran standar yang wajib ada (sesuaikan dengan nama divisi perusahaan):
+1. FKAP — Mendapatkan/mempertahankan sertifikat SNI ISO 37001:2016 | Akhir [tahun] | 1x/tahun audit sertifikasi/surveillance
+2. Risk Management / FKAP — Meningkatkan efektivitas mitigasi risiko penyuapan | Penurunan nilai risiko pada 70%+ risiko teridentifikasi | 2x/tahun monitoring residual risk
+3. Purchasing/Pengadaan — Menghilangkan penyuapan/gratifikasi dari penyedia barang/jasa | Nol kasus penyuapan oleh rekan bisnis | Per 3 bulan, evaluasi kinerja vendor
+4. Audit Internal — Meningkatkan keefektifan sistem WBS | 90% laporan WBS dapat ter-follow-up | Per 3 bulan
+5. HRD — Mengurangi/menghilangkan konflik kepentingan dalam rekrutmen | Nol kasus konflik kepentingan dalam rekrutmen | 1x/tahun
+6. HRD & FKAP — Meningkatkan kepedulian/kesadaran karyawan SMAP | 100% karyawan ikut sosialisasi | 1x/tahun
+7. Marketing/Sales — Menghilangkan penyuapan/gratifikasi kepada pelanggan | Nol kasus penyuapan oleh personil marketing/sales | 1x/tahun
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SK FKAP (struktur dari dokumen riil PT NTA):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Jabatan dalam FKAP: 1) Ketua FKAP 2) Wakil Ketua FKAP 3) Sekretaris FKAP 4) Anggota Tim FKAP
+
+7 Tanggung jawab dan wewenang FKAP yang wajib dicantumkan dalam SK:
+1. Mengawasi pengembangan dan penerapan SMAP perusahaan
+2. Memberikan saran dan bimbingan kepada seluruh personil terkait penerapan SMAP dan isu penyuapan
+3. Memastikan SMAP sesuai dengan persyaratan SNI ISO 37001:2016 dan peraturan perundang-undangan
+4. Membantu Direksi mengkomunikasikan Kebijakan Anti Penyuapan kepada seluruh personil dan pemangku kepentingan
+5. Melakukan tinjauan berkelanjutan untuk memastikan SMAP berjalan efektif mengelola risiko penyuapan
+6. Mengawasi dan memantau status investigasi atas laporan insiden penyuapan atau pelanggaran Kebijakan AP
+7. Melaporkan kinerja SMAP secara berkala setiap 6 bulan kepada Direksi sebagai Manajemen Puncak dan/atau Dewan Komisaris sebagai Dewan Pengarah SMAP
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGULASI KONSTRUKSI (untuk BUJK — cantumkan jika bidang usaha konstruksi):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Peraturan Menteri PUPR No. 06 Tahun 2025 (menggantikan Permen PU 08/2022) — belum dipublikasi luas
+• Keputusan Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (menggantikan SK Dirjen 144/2022) — dikonfirmasi dari dokumen NIN Oktober 2024
+• Dokumen SMAP yang dibuat sekarang tetap berlaku dan menjadi investasi berlanjut — akan dipakai sebagai lampiran kuesioner Pancek KPK
+
+FORMAT DOKUMEN: Nomor dokumen contoh: SM-P-SMAP-PK-01 (SM=perusahaan, P=Pedoman, SMAP=sistem, PK=Pekerjaan Konstruksi)
+Alternatif: M-SMAP.[KODE_PERUSAHAAN].01 | Rev.00
+Target tebal: 35-67 halaman (sesuai kompleksitas perusahaan)
 `;
 
 // ─── PROGRAM AUDIT INTERNAL — Department structure from SMAP02 ───────────────
@@ -662,8 +765,8 @@ PERTANYAAN KUNCI UNTUK BUJK DALAM DIALOG GUSTAFTA:
 export const SMAP_DOCUMENT_FRAMEWORK = `
 FRAMEWORK KATEGORISASI DOKUMEN SMAP (dari referensi "Revolusi Penyusunan Dokumen SMAP"):
 ⚠️ CATATAN REGULASI (per 2025):
-• Permen PU No. 08 Tahun 2022 → TELAH DIGANTI oleh Permen PU No. 06 Tahun 2025 (detail implementasi baru belum dipublikasikan secara luas)
-• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → TELAH DIGANTI (regulasi pengganti belum dipublikasikan)
+• Permen PU No. 08 Tahun 2022 → TELAH DIGANTI oleh Permen PU No. 06 Tahun 2025 (belum dipublikasikan secara luas)
+• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → TELAH DIGANTI oleh SK Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (dikonfirmasi dari dokumen NIN Oktober 2024)
 • SNI ISO 37001:2016 tetap berlaku sebagai standar inti — tidak berubah
 • Dokumen SMAP yang disusun tetap relevan dan valid untuk jalur Pancek KPK maupun ISO cert
 
@@ -707,8 +810,8 @@ Dokumen yang membuktikan IMPLEMENTASI NYATA sistem. Dibuat SETELAH dokumen peren
   • Untuk SBU (BUJK): 16 komponen dokumen BUJK = subset dari 16 Perencanaan di atas
 
 REGULASI KONSTRUKSI KHUSUS:
-• Permen PU No. 08 Tahun 2022 → sudah diganti Permen PU No. 06 Tahun 2025 (implementasi baru belum dipublikasi)
-• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → sudah diganti (regulasi baru belum dipublikasi)
+• Permen PU No. 08 Tahun 2022 → sudah diganti Permen PU No. 06 Tahun 2025 (belum dipublikasi luas)
+• SK Dirjen Bina Konstruksi No. 144 Tahun 2022 → sudah diganti SK Dirjen Bina Konstruksi PU No. 37 Tahun 2025 (dikonfirmasi dari dokumen riil BUJK)
 • SNI ISO 37001:2016 tetap menjadi standar inti yang tidak berubah
 • Jalur compliance BUJK (per 2025): Kecil/Menengah → Pancek KPK (Jaga.id) + dokumen SMAP sebagai lampiran; Besar → ISO 37001 cert
 `;
