@@ -635,7 +635,54 @@ INTI PENGETAHUAN SMAP (referensi saat menjawab):
 Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan senior, bukan hanya definisi. Gunakan contoh kasus nyata perusahaan Indonesia. Jika pengguna tanya soal jalur BUJK, langsung arahkan ke paket yang paling relevan.`;
       };
 
-      const SYSTEM_PROMPT = getSystemPrompt(industryId);
+      // Auto-inject live company + FKAP + progress context into system prompt
+      let dynamicContext = "";
+      try {
+        const [company, fkapTeamData, managementData] = await Promise.all([
+          storage.getCompany(),
+          storage.getFkapTeam(),
+          storage.getManagement(),
+        ]);
+
+        const contextParts: string[] = [];
+
+        if (company?.name) {
+          contextParts.push(`PROFIL KLIEN AKTIF (dari sistem — gunakan ini dalam percakapan):
+- Perusahaan: ${company.name}
+- Kota: ${company.city || "-"}
+- NPWP: ${company.npwp || "-"}
+- NIB: ${company.nib || "-"}
+- Direktur: ${company.directorName || "-"}`);
+        }
+
+        if (managementData.length > 0) {
+          contextParts.push(`Tim Manajemen: ${managementData.slice(0, 4).map(m => `${m.name} (${m.position})`).join(", ")}`);
+        }
+
+        if (fkapTeamData.length > 0) {
+          contextParts.push(`Tim FKAP: ${fkapTeamData.slice(0, 5).map(f => `${f.name} — ${f.position}`).join(", ")}`);
+        }
+
+        // Pancek progress for pancek mentor
+        if (industryId === "pancek") {
+          try {
+            const pancekProgress = await storage.getPancekProgress("system");
+            const checkedCount = pancekProgress ? Object.values(pancekProgress).filter(Boolean).length : 0;
+            if (checkedCount > 0) {
+              contextParts.push(`Progress Pancek Klien: ${checkedCount} item checklist sudah dicentang`);
+            }
+          } catch { /* ignore */ }
+        }
+
+        if (contextParts.length > 0) {
+          dynamicContext = `\n\n=== DATA KLIEN AKTIF (gunakan secara natural dalam percakapan, jangan perlu tanya ulang) ===\n${contextParts.join("\n")}\n===`;
+        }
+      } catch (dbErr) {
+        console.error("Mentor context fetch error:", dbErr);
+      }
+
+      const BASE_SYSTEM_PROMPT = getSystemPrompt(industryId);
+      const SYSTEM_PROMPT = BASE_SYSTEM_PROMPT + dynamicContext;
 
       // Use Replit AI Integration (Gemini via Google GenAI SDK)
       const { GoogleGenAI } = await import("@google/genai");

@@ -133,33 +133,91 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
   };
 
   const exportChecklist = () => {
-    const lines = ["CHECKLIST PANCEK - PANDUAN CEGAH KORUPSI KPK", ""];
-    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+    const totalRequired = PANCEK_PHASES.flatMap(p => p.checklistItems).filter(i => i.required).length;
+    const totalOptional = PANCEK_PHASES.flatMap(p => p.checklistItems).filter(i => !i.required).length;
+    const completedRequired = PANCEK_PHASES.flatMap(p => p.checklistItems).filter(i => i.required && checkedItems[i.id]).length;
+    const completedOptional = PANCEK_PHASES.flatMap(p => p.checklistItems).filter(i => !i.required && checkedItems[i.id]).length;
+
+    const separator = "═".repeat(60);
+    const thin = "─".repeat(60);
+
+    const lines = [
+      separator,
+      "  LAPORAN PROGRESS CHECKLIST PANCEK",
+      "  Panduan Cegah Korupsi — KPK Indonesia / Platform Jaga.id",
+      separator,
+      "",
+      `  Tanggal Export : ${dateStr}, ${timeStr}`,
+      `  Standar        : Panduan Cegah Korupsi (Panduan CEK) KPK`,
+      "",
+      thin,
+      "  RINGKASAN PROGRESS",
+      thin,
+      `  Progress Keseluruhan : ${overallProgress}%  ${overallProgress >= 70 ? "✓ SIAP VERIFIKASI" : `(butuh ${70 - overallProgress}% lagi untuk verifikasi)` }`,
+      `  Item Wajib           : ${completedRequired} / ${totalRequired} selesai`,
+      `  Item Opsional        : ${completedOptional} / ${totalOptional} selesai`,
+      "",
+      "  Progress Per Fase:",
+    ];
+
     PANCEK_PHASES.forEach(phase => {
-      lines.push(`\n## ${phase.order}. ${phase.name.toUpperCase()}`);
-      lines.push(`Progress: ${phaseProgress[phase.id]}%\n`);
-      
+      const pct = phaseProgress[phase.id];
+      const bar = "█".repeat(Math.round(pct / 10)) + "░".repeat(10 - Math.round(pct / 10));
+      lines.push(`  ${phase.order}. ${phase.name.padEnd(20)} [${bar}] ${pct}%`);
+    });
+
+    lines.push("");
+    lines.push(separator);
+    lines.push("  DETAIL CHECKLIST PER FASE");
+    lines.push(separator);
+
+    PANCEK_PHASES.forEach(phase => {
+      const phaseTotal = phase.checklistItems.filter(i => i.required).length;
+      const phaseDone = phase.checklistItems.filter(i => i.required && checkedItems[i.id]).length;
+      lines.push("");
+      lines.push(`${thin}`);
+      lines.push(`  ${phase.order}. ${phase.name.toUpperCase()} — ${phaseDone}/${phaseTotal} wajib selesai`);
+      lines.push(`${thin}`);
+
       phase.checklistItems.forEach(item => {
-        const status = checkedItems[item.id] ? "[x]" : "[ ]";
-        const required = item.required ? "(Wajib)" : "(Opsional)";
-        lines.push(`${status} ${item.id}. ${item.question} ${required}`);
+        const done = checkedItems[item.id];
+        const status = done ? "✓" : "○";
+        const tag = item.required ? "[WAJIB]" : "[OPS]  ";
+        lines.push(`  ${status} ${tag} ${item.id}. ${item.question}`);
+        if (item.description) {
+          lines.push(`          → ${item.description}`);
+        }
       });
     });
 
-    lines.push(`\n\n---\nTotal Progress: ${overallProgress}%`);
-    lines.push(`Tanggal Export: ${new Date().toLocaleDateString('id-ID')}`);
+    lines.push("");
+    lines.push(separator);
+    lines.push("  Item yang sudah selesai:");
+    const doneIds = Object.entries(checkedItems).filter(([, v]) => v).map(([k]) => k);
+    if (doneIds.length > 0) {
+      doneIds.forEach(id => lines.push(`  ✓ ${id}`));
+    } else {
+      lines.push("  (belum ada item yang dicentang)");
+    }
+    lines.push("");
+    lines.push("  Dibuat oleh Compliance Hub — compliance.dokumentender.com");
+    lines.push(separator);
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `checklist-pancek-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `laporan-pancek-${now.toISOString().split("T")[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
 
     toast({
-      title: "Checklist diekspor",
-      description: "File checklist telah diunduh"
+      title: "Laporan diekspor",
+      description: `Progress ${overallProgress}% — ${completedRequired}/${totalRequired} item wajib selesai`
     });
   };
 
