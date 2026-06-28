@@ -1652,7 +1652,65 @@ Sesuaikan dokumenPrioritas berdasarkan kondisi perusahaan dari dialog (dokumen y
       const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
       if (!apiKey) return res.status(500).json({ error: "AI tidak tersedia." });
 
-      const ctx = `${validated.companyName ? `\nPERUSAHAAN: ${validated.companyName}` : ""}${validated.companyContext ? `\nKONTEKS: ${validated.companyContext}` : ""}`;
+      // Auto-inject relevant DB data based on which sub-agent is called
+      const subKey = validated.subAgentKey;
+      const autoDataParts: string[] = [];
+
+      // Always inject company + management + FKAP for all sub-agents
+      try {
+        const [company, fkapTeamData, managementData] = await Promise.all([
+          storage.getCompany(),
+          storage.getFkapTeam(),
+          storage.getManagement(),
+        ]);
+
+        if (company?.name) {
+          autoDataParts.push(`PROFIL PERUSAHAAN (dari database):
+- Nama: ${company.name}
+- Alamat: ${company.address || "-"}${company.city ? ", " + company.city : ""}
+- NPWP: ${company.npwp || "-"}
+- NIB: ${company.nib || "-"}
+- Direktur: ${company.directorName || "-"}`);
+        }
+
+        if (managementData.length > 0) {
+          autoDataParts.push(`TIM MANAJEMEN (dari database):
+${managementData.slice(0, 6).map((m, i) => `${i + 1}. ${m.name} — ${m.position}`).join("\n")}`);
+        }
+
+        if (fkapTeamData.length > 0) {
+          autoDataParts.push(`TIM FKAP (dari database):
+${fkapTeamData.slice(0, 8).map((f, i) => `${i + 1}. ${f.name} — ${f.position}${(f as any).role ? " (" + (f as any).role + ")" : ""}`).join("\n")}`);
+        }
+
+        // Vendor list for due diligence and contract sub-agents
+        const vendorSubKeys = ["due_diligence", "uji_tuntas", "kontrak", "benturan_kepentingan"];
+        if (vendorSubKeys.includes(subKey)) {
+          const vendorData = await storage.getVendors();
+          if (vendorData.length > 0) {
+            autoDataParts.push(`DAFTAR VENDOR/MITRA TERDAFTAR (dari database, ${vendorData.length} total):
+${vendorData.slice(0, 10).map((v, i) => `${i + 1}. ${(v as any).name || (v as any).companyName} — ${(v as any).category || (v as any).serviceType || "Mitra Bisnis"}`).join("\n")}${vendorData.length > 10 ? `\n... dan ${vendorData.length - 10} vendor lainnya` : ""}`);
+          }
+        }
+
+        // Employee data for training and HR sub-agents
+        const hrSubKeys = ["program_pelatihan", "sosialisasi", "wbs", "audit_charter"];
+        if (hrSubKeys.includes(subKey)) {
+          const empData = await storage.getEmployees();
+          if (empData.length > 0) {
+            autoDataParts.push(`DATA KARYAWAN: ${empData.length} karyawan terdaftar dalam sistem`);
+          }
+        }
+      } catch (dbErr) {
+        // Non-fatal — continue without DB data
+        console.error("Auto-inject DB data error:", dbErr);
+      }
+
+      const autoDataContext = autoDataParts.length > 0
+        ? `\n\n=== DATA PERUSAHAAN DARI SISTEM (GUNAKAN DATA INI, JANGAN TANYA ULANG) ===\n${autoDataParts.join("\n\n")}\n=== END DATA PERUSAHAAN ===`
+        : "";
+
+      const ctx = `${validated.companyName ? `\nPERUSAHAAN: ${validated.companyName}` : ""}${validated.companyContext ? `\nKONTEKS: ${validated.companyContext}` : ""}${autoDataContext}`;
 
       const SUB_AGENT_PROMPTS: Record<string, string> = {
         // ─── AGEN DOKUMEN ────────────────────────────────────────────

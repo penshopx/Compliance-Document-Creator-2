@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -502,12 +503,16 @@ export default function DocumentBuilder() {
 
   const industryTemplates = getAllTemplates();
 
-  // Use placeholders only - no internal company data
-  const companyName = "[NAMA PERUSAHAAN]";
-  const companyCode = "[KODE]";
-  const companyAddress = "[ALAMAT PERUSAHAAN]";
-  const director = "[NAMA DIREKTUR]";
-  const ketuaFKAP = "[KETUA FKAP]";
+  const { data: companyData } = useQuery<{ name?: string; address?: string; city?: string; npwp?: string; directorName?: string }>({ queryKey: ["/api/company"], retry: false });
+  const { data: fkapData } = useQuery<Array<{ name: string; position: string; role?: string }>>({ queryKey: ["/api/fkap"], retry: false });
+  const { data: managementData } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/management"], retry: false });
+
+  const hasRealData = !!companyData?.name;
+  const companyName = companyData?.name || "[NAMA PERUSAHAAN]";
+  const companyCode = companyData?.name ? companyData.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 4) : "[KODE]";
+  const companyAddress = companyData?.address ? `${companyData.address}${companyData.city ? ", " + companyData.city : ""}` : "[ALAMAT PERUSAHAAN]";
+  const director = companyData?.directorName || managementData?.find(m => m.position?.toLowerCase().includes("direktur"))?.name || "[NAMA DIREKTUR]";
+  const ketuaFKAP = fkapData?.find(f => f.role?.toLowerCase().includes("ketua") || f.position?.toLowerCase().includes("ketua"))?.name || fkapData?.[0]?.name || "[KETUA FKAP]";
 
   const filteredTemplates = activeCategory === "all"
     ? DOCUMENT_TEMPLATES
@@ -527,7 +532,16 @@ export default function DocumentBuilder() {
     prompt = prompt.replace(/\{\{year\}\}/g, currentYear);
     prompt = prompt.replace(/\{\{address\}\}/g, companyAddress);
 
-    // Build complete prompt with placeholder company context
+    // Build TIM FKAP section from real data or placeholder
+    const fkapSection = fkapData && fkapData.length > 0
+      ? fkapData.slice(0, 8).map((f, i) => `${i + 1}. ${f.name} — ${f.position}`).join("\n")
+      : "1. [KETUA FKAP] — Ketua\n2. [ANGGOTA FKAP 1] — Anggota\n3. [ANGGOTA FKAP 2] — Anggota";
+
+    const managementSection = managementData && managementData.length > 0
+      ? managementData.slice(0, 6).map((m, i) => `${i + 1}. ${m.name} — ${m.position}`).join("\n")
+      : "1. [DIREKTUR UTAMA] — Direktur Utama\n2. [DIREKTUR OPERASIONAL] — Direktur Operasional\n3. [DIREKTUR KEUANGAN] — Direktur Keuangan";
+
+    // Build complete prompt with real or placeholder company context
     const fullPrompt = `=== PROMPT GENERATOR DOKUMEN SMAP ===
 Gunakan prompt ini di AI model (ChatGPT, Gemini, Claude) atau dokumenttender.com
 
@@ -542,14 +556,10 @@ KONTEKS PERUSAHAAN:
 - Standar: SNI ISO 37001:2016 (Sistem Manajemen Anti Penyuapan)
 
 TIM FKAP:
-1. [KETUA FKAP] - Ketua
-2. [ANGGOTA FKAP 1] - Anggota
-3. [ANGGOTA FKAP 2] - Anggota
+${fkapSection}
 
 MANAJEMEN:
-1. [DIREKTUR UTAMA] - Direktur Utama
-2. [DIREKTUR OPERASIONAL] - Direktur Operasional
-3. [DIREKTUR KEUANGAN] - Direktur Keuangan
+${managementSection}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -575,7 +585,7 @@ CATATAN PENTING:
     setGeneratedPrompt(fullPrompt);
     setSelectedTemplate(template);
     return fullPrompt;
-  }, [companyName, director, ketuaFKAP, companyCode, companyAddress, currentDate, currentYear, additionalContext]);
+  }, [companyName, director, ketuaFKAP, companyCode, companyAddress, currentDate, currentYear, additionalContext, fkapData, managementData]);
 
   const handleSelectTemplate = useCallback((template: typeof DOCUMENT_TEMPLATES[0]) => {
     generatePrompt(template);
@@ -612,10 +622,21 @@ CATATAN PENTING:
             <div className="p-2 rounded-lg bg-primary/10">
               <Copy className="w-6 h-6 text-primary" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold" data-testid="text-page-title">
-                Prompt Generator Dokumen {currentIndustry?.shortName || ""}
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-bold" data-testid="text-page-title">
+                  Prompt Generator Dokumen {currentIndustry?.shortName || ""}
+                </h1>
+                {hasRealData ? (
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-green-300 dark:border-green-700" data-testid="badge-data-status">
+                    ✓ Data Perusahaan Terisi
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-yellow-400 text-yellow-700 dark:text-yellow-400" data-testid="badge-data-status">
+                    ⚠ Menggunakan Placeholder
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground text-sm">
                 Generate prompt siap pakai — {industryTemplates.length} template tersedia. Tempel di Gemini atau Qwen untuk mendapatkan dokumen lengkap.
               </p>
@@ -639,10 +660,12 @@ CATATAN PENTING:
             </CardContent>
           </Card>
 
-          <div className="flex items-center gap-2 mt-3 p-3 bg-muted/50 rounded-lg">
-            <Building2 className="w-4 h-4 text-muted-foreground" />
+          <div className={`flex items-center gap-2 mt-3 p-3 rounded-lg ${hasRealData ? "bg-green-50 dark:bg-green-950/20" : "bg-muted/50"}`}>
+            <Building2 className={`w-4 h-4 shrink-0 ${hasRealData ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`} />
             <span className="text-sm">
-              Template menggunakan placeholder — ganti sesuai data perusahaan Anda di dalam chat AI
+              {hasRealData
+                ? `Prompt otomatis terisi dengan data perusahaan: ${companyName} · Direktur: ${director} · Ketua FKAP: ${ketuaFKAP}`
+                : "Belum ada data perusahaan — isi dulu di Profil Perusahaan & Tim FKAP agar prompt terisi otomatis"}
             </span>
           </div>
         </div>
