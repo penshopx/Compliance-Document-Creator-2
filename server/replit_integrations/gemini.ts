@@ -11,13 +11,9 @@ import type { GoogleGenAI } from "@google/genai";
  * - gemini-2.5-pro: Advanced reasoning for complex tasks
  */
 
-let _ai: GoogleGenAI | null = null;
-
+// Do NOT cache the client — Replit integration tokens can be rotated at any time.
 function getAI(): GoogleGenAI {
-  if (!_ai) {
-    _ai = getGeminiClient();
-  }
-  return _ai;
+  return getGeminiClient();
 }
 
 export const ai = { get instance() { return getAI(); } };
