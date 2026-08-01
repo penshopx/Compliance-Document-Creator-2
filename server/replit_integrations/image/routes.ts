@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { Modality } from "@google/genai";
-import { ai } from "./client";
+import { getGeminiClient, isGeminiAvailable } from "../../lib/gemini-ai";
 
 export function registerImageRoutes(app: Express): void {
   app.post("/api/generate-image", async (req: Request, res: Response) => {
@@ -11,7 +11,10 @@ export function registerImageRoutes(app: Express): void {
         return res.status(400).json({ error: "Prompt is required" });
       }
 
-      const response = await ai.models.generateContent({
+      if (!isGeminiAvailable()) {
+        return res.status(500).json({ error: "AI tidak tersedia. Silakan konfigurasi API key Gemini." });
+      }
+      const response = await getGeminiClient().models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {

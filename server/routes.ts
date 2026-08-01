@@ -6,6 +6,7 @@ import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
 import { generateDocumentWithProvider, chatWithProvider } from "./lib/ai-providers";
 import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
+import { getGeminiClient, isGeminiAvailable } from "./lib/gemini-ai";
 import { industryConfigs } from "@shared/data/industry-configs";
 import {
   PEDOMAN_SMAP_STRUCTURE,
@@ -243,8 +244,7 @@ export async function registerRoutes(
       });
       const validated = schema.parse(req.body);
 
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "AI tidak tersedia." });
+      if (!isGeminiAvailable()) return res.status(500).json({ error: "AI tidak tersedia." });
 
       // RESEARCHER: Auto-fetch all company data from DB
       const researchParts: string[] = [];
@@ -327,8 +327,7 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({ apiKey });
+      const genAI = getGeminiClient();
 
       const stream = genAI.models.generateContentStream({
         model: "gemini-2.5-flash",
@@ -340,7 +339,7 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
       });
 
       for await (const chunk of await stream) {
-        const text = chunk.text();
+        const text = chunk.text;
         if (text) {
           res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
         }
@@ -816,22 +815,11 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       const SYSTEM_PROMPT = BASE_SYSTEM_PROMPT + dynamicContext;
 
       // Use Replit AI Integration (Gemini via Google GenAI SDK)
-      const { GoogleGenAI } = await import("@google/genai");
-      
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      const baseUrl = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
-      
-      if (!apiKey || !baseUrl) {
+      if (!isGeminiAvailable()) {
         return res.status(500).json({ error: "AI Integration tidak dikonfigurasi" });
       }
 
-      const ai = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: "",
-          baseUrl,
-        },
-      });
+      const ai = getGeminiClient();
 
       const contents = [
         { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
@@ -1303,9 +1291,8 @@ PANDUAN MENJAWAB:
 
 ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`;
 
-      // Check API key before starting SSE
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) {
+      // Check AI availability before starting SSE
+      if (!isGeminiAvailable()) {
         return res.status(500).json({ 
           error: "AI tidak tersedia. Hubungi administrator." 
         });
@@ -1316,14 +1303,7 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: "",
-          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-        },
-      });
+      const genAI = getGeminiClient();
 
       const stream = await genAI.models.generateContentStream({
         model: "gemini-2.5-flash",
@@ -1374,8 +1354,7 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
       });
       const validated = schema.parse(req.body);
 
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) {
+      if (!isGeminiAvailable()) {
         return res.status(500).json({ error: "AI tidak tersedia. Hubungi administrator." });
       }
 
@@ -1415,11 +1394,7 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
         res.setHeader("Cache-Control", "no-cache");
         res.setHeader("Connection", "keep-alive");
 
-        const { GoogleGenAI } = await import("@google/genai");
-        const genAI = new GoogleGenAI({
-          apiKey,
-          httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "" },
-        });
+        const genAI = getGeminiClient();
 
         const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
           { role: "user", parts: [{ text: PANCEK_DIALOG_PROMPT }] },
@@ -1481,14 +1456,7 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: "",
-          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-        },
-      });
+      const genAI = getGeminiClient();
 
       // Build conversation history for Gemini (must alternate user/model)
       const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
@@ -1540,8 +1508,7 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
       });
       const validated = schema.parse(req.body);
 
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) {
+      if (!isGeminiAvailable()) {
         return res.status(500).json({ error: "AI tidak tersedia." });
       }
 
@@ -1621,14 +1588,7 @@ Hasilkan HANYA JSON murni (tanpa markdown, tanpa teks tambahan):
 
 Pastikan rekomendasi realistis sesuai informasi yang digali dari dialog. Jika informasi kurang, buat asumsi yang reasonable dan sebutkan dalam kesimpulan.`;
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: "",
-          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-        },
-      });
+      const genAI = getGeminiClient();
 
       const response = await genAI.models.generateContent({
         model: "gemini-2.5-pro",
@@ -1708,8 +1668,7 @@ Pastikan rekomendasi realistis sesuai informasi yang digali dari dialog. Jika in
       });
       const validated = schema.parse(req.body);
 
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "AI tidak tersedia." });
+      if (!isGeminiAvailable()) return res.status(500).json({ error: "AI tidak tersedia." });
 
       const conversationText = validated.messages
         .map(m => `${m.role === "user" ? "Perusahaan" : "Gustafta"}: ${m.content}`)
@@ -1773,11 +1732,7 @@ Hasilkan HANYA JSON murni (tanpa markdown, tanpa teks tambahan):
 
 Sesuaikan dokumenPrioritas berdasarkan kondisi perusahaan dari dialog (dokumen yang sudah ada tidak perlu jadi prioritas Kritis). Jika info kurang, buat asumsi reasonable dan sebutkan di kesimpulan.`;
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({
-        apiKey,
-        httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "" },
-      });
+      const genAI = getGeminiClient();
 
       const response = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
@@ -1827,8 +1782,7 @@ Sesuaikan dokumenPrioritas berdasarkan kondisi perusahaan dari dialog (dokumen y
       });
       const validated = schema.parse(req.body);
 
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "AI tidak tersedia." });
+      if (!isGeminiAvailable()) return res.status(500).json({ error: "AI tidak tersedia." });
 
       // Auto-inject relevant DB data based on which sub-agent is called
       const subKey = validated.subAgentKey;
@@ -3520,14 +3474,7 @@ OUTPUT: SOP Benturan Kepentingan + Formulir Disclosure + Log BK + panduan D.5 + 
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: "",
-          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-        },
-      });
+      const genAI = getGeminiClient();
 
       const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
         { role: "user", parts: [{ text: systemPrompt }] },
@@ -3576,8 +3523,7 @@ OUTPUT: SOP Benturan Kepentingan + Formulir Disclosure + Log BK + panduan D.5 + 
       });
       const validated = schema.parse(req.body);
 
-      const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-      if (!apiKey) {
+      if (!isGeminiAvailable()) {
         return res.status(500).json({ error: "AI tidak tersedia." });
       }
 
@@ -3713,14 +3659,7 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({
-        apiKey,
-        httpOptions: {
-          apiVersion: "",
-          baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-        },
-      });
+      const genAI = getGeminiClient();
 
       const systemPrompt = AGENT_PROMPTS[validated.agent];
       const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [

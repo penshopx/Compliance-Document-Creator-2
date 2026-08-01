@@ -1,9 +1,11 @@
-import { GoogleGenAI } from "@google/genai";
+import { getGeminiClient } from "../lib/gemini-ai";
+import type { GoogleGenAI } from "@google/genai";
 
 /**
  * Gemini AI Client for SMAP Document Generation
- * Uses Replit AI Integrations - no API key required (uses Replit credits)
- * 
+ * Uses Replit AI Integrations (Replit credits) when available,
+ * falls back to user-provided GEMINI_API_KEY.
+ *
  * Supported models:
  * - gemini-2.5-flash: Fast, efficient for daily use
  * - gemini-2.5-pro: Advanced reasoning for complex tasks
@@ -13,17 +15,7 @@ let _ai: GoogleGenAI | null = null;
 
 function getAI(): GoogleGenAI {
   if (!_ai) {
-    const apiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("Gemini API key not configured. Please set up the AI integration.");
-    }
-    _ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        apiVersion: "",
-        baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
-      },
-    });
+    _ai = getGeminiClient();
   }
   return _ai;
 }

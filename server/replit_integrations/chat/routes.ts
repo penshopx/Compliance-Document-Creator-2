@@ -1,20 +1,12 @@
 import type { Express, Request, Response } from "express";
-import { GoogleGenAI } from "@google/genai";
+import { getGeminiClient, isGeminiAvailable } from "../../lib/gemini-ai";
 import { chatStorage } from "./storage";
 
 /*
 Supported models: gemini-2.5-flash (fast), gemini-2.5-pro (advanced reasoning)
-Usage: Include httpOptions with baseUrl and empty apiVersion when using AI Integrations (required)
+Uses Replit AI credits (AI_INTEGRATIONS_GEMINI_API_KEY) when available,
+falls back to user-provided GEMINI_API_KEY.
 */
-
-// This is using Replit's AI Integrations service, which provides Gemini-compatible API access without requiring your own Gemini API key.
-const ai = new GoogleGenAI({
-  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
-  httpOptions: {
-    apiVersion: "",
-    baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
-  },
-});
 
 export function registerChatRoutes(app: Express): void {
   // Get all conversations
@@ -89,8 +81,15 @@ export function registerChatRoutes(app: Express): void {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
+      // Check AI availability
+      if (!isGeminiAvailable()) {
+        res.write(`data: ${JSON.stringify({ error: "AI tidak tersedia. Silakan konfigurasi API key." })}\n\n`);
+        res.end();
+        return;
+      }
+
       // Stream response from Gemini
-      const stream = await ai.models.generateContentStream({
+      const stream = await getGeminiClient().models.generateContentStream({
         model: "gemini-2.5-flash",
         contents: chatMessages,
       });
