@@ -363,3 +363,4 @@ export type PancekProgressItem = typeof pancekProgress.$inferSelect;
 // Export auth models
 export * from "./models/auth";
 export * from "./models/ai-keys";
+export * from "./models/chat";

@@ -6,6 +6,7 @@ import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
 import { generateDocumentWithProvider, chatWithProvider } from "./lib/ai-providers";
 import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
+import { registerChatRoutes } from "./replit_integrations/chat";
 import { getGeminiClient, isGeminiAvailable } from "./lib/gemini-ai";
 import { industryConfigs } from "@shared/data/industry-configs";
 import {
@@ -81,6 +82,7 @@ export async function registerRoutes(
   // Setup authentication BEFORE other routes
   await setupAuth(app);
   registerAuthRoutes(app);
+  registerChatRoutes(app);
 
   // Industry Configuration Routes
   app.get("/api/industries", async (req, res) => {
