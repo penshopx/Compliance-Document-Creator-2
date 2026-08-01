@@ -1,5 +1,4 @@
 import { getGeminiClient } from "../lib/gemini-ai";
-import type { GoogleGenAI } from "@google/genai";
 
 /**
  * Gemini AI Client for SMAP Document Generation
@@ -11,12 +10,10 @@ import type { GoogleGenAI } from "@google/genai";
  * - gemini-2.5-pro: Advanced reasoning for complex tasks
  */
 
-// Do NOT cache the client — Replit integration tokens can be rotated at any time.
-function getAI(): GoogleGenAI {
-  return getGeminiClient();
-}
-
-export const ai = { get instance() { return getAI(); } };
+// Always call getGeminiClient() fresh — never cache it.
+// Replit integration tokens can be rotated at any time, and caching would
+// serve stale credentials. GEMINI_API_KEY fallback is also re-read each call.
+export const ai = { get instance() { return getGeminiClient(); } };
 
 /**
  * Generate document content using Gemini AI
@@ -29,7 +26,7 @@ export async function generateDocumentContent(
   model: "gemini-2.5-flash" | "gemini-2.5-pro" = "gemini-2.5-flash"
 ): Promise<string> {
   try {
-    const response = await getAI().models.generateContent({
+    const response = await getGeminiClient().models.generateContent({
       model,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });

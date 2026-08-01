@@ -154,7 +154,7 @@ export default function AdminPaymentsPage() {
     const matchSearch =
       !search ||
       o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-      o.planName.toLowerCase().includes(search.toLowerCase()) ||
+      (o.planName ?? "").toLowerCase().includes(search.toLowerCase()) ||
       o.userId.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
@@ -308,7 +308,7 @@ export default function AdminPaymentsPage() {
                   </TableHeader>
                   <TableBody>
                     {filtered.map((order) => {
-                      const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+                      const statusCfg = STATUS_CONFIG[order.status ?? "pending"] || STATUS_CONFIG.pending;
                       const isPendingVerif = order.status === "pending_confirmation";
                       const isPaid = order.status === "paid";
                       return (

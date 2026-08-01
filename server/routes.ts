@@ -1050,7 +1050,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       if (!creds.some((c) => c.provider === provider)) {
         return res.status(404).json({ error: "Provider belum memiliki API key" });
       }
-      await storage.setActiveAiCredential(userId, provider);
+      await storage.setActiveAiCredential(userId, String(provider));
       res.json({ success: true });
     } catch (error) {
       console.error("Activate AI key error:", error);
@@ -1062,7 +1062,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   app.delete("/api/ai/keys/:provider", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as { id: string }).id;
-      await storage.deleteAiCredential(userId, req.params.provider);
+      await storage.deleteAiCredential(userId, String(req.params.provider));
       res.json({ success: true });
     } catch (error) {
       console.error("Delete AI key error:", error);
