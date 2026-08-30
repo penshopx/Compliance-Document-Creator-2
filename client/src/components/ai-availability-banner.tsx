@@ -1,28 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ExternalLink, RefreshCw, Settings2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-
-interface AiStatus {
-  configured: boolean;
-  model?: string;
-  reason?: string;
-}
+import { useAiStatus } from "@/hooks/use-ai-status";
 
 export default function AiAvailabilityBanner() {
-  const { data, isError, refetch, isFetching } = useQuery<AiStatus>({
-    queryKey: ["/api/ai/status"],
-    staleTime: 30_000,
-    refetchOnWindowFocus: true,
-  });
+  const {
+    isChecking,
+    isUnavailable,
+    isError,
+    reason,
+    refetch,
+    isFetching,
+  } = useAiStatus();
 
-  if (!isError && (!data || data.configured)) {
+  if (isChecking || !isUnavailable) {
     return null;
   }
-
-  const statusUnavailable = isError
-    ? "Status layanan AI tidak dapat diperiksa. Coba muat ulang atau hubungi administrator."
-    : data?.reason || "GEMINI_API_KEY belum dikonfigurasi.";
 
   return (
     <Alert
@@ -34,8 +27,9 @@ export default function AiAvailabilityBanner() {
       <div className="min-w-0 flex-1">
         <AlertTitle>Fitur AI sedang tidak tersedia</AlertTitle>
         <AlertDescription className="text-amber-900/80 dark:text-amber-100/80">
-          {statusUnavailable} Generator dokumen dan AI Mentor tidak dapat digunakan
-          sampai konfigurasi AI diperbaiki.
+          {reason} Generator dokumen dan AI Mentor tidak dapat digunakan sampai
+          konfigurasi AI diperbaiki. Hubungi administrator untuk mengkonfigurasi
+          GEMINI_API_KEY.
         </AlertDescription>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button

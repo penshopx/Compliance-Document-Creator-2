@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useAiStatus } from "@/hooks/use-ai-status";
 import {
   ArrowLeft, Wand2, Copy, Download, CheckCircle2, Loader2,
   Search, Database, FileText, Zap, Building2, Users, Shield,
@@ -25,6 +26,7 @@ const PHASE_COLORS: Record<string, { bg: string; text: string; border: string }>
 
 export default function PancekGenerator() {
   const { toast } = useToast();
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
   const [selectedPhase, setSelectedPhase] = useState<string>("komitmen");
   const [selectedDoc, setSelectedDoc] = useState<PancekDocument | null>(null);
   const [additionalContext, setAdditionalContext] = useState("");
@@ -56,6 +58,10 @@ export default function PancekGenerator() {
 
   const handleGenerate = useCallback(async () => {
     if (!selectedDoc) return;
+    if (isAiChecking || !aiAvailable) {
+      toast({ title: "AI tidak tersedia", description: aiReason, variant: "destructive" });
+      return;
+    }
     if (isGenerating) {
       abortRef.current?.abort();
       return;
@@ -124,7 +130,7 @@ export default function PancekGenerator() {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedDoc, additionalContext, isGenerating, toast]);
+  }, [selectedDoc, additionalContext, isGenerating, isAiChecking, aiAvailable, aiReason, toast]);
 
   const handleCopy = useCallback(async () => {
     if (!output) return;
@@ -388,7 +394,8 @@ export default function PancekGenerator() {
                 <div className="flex gap-2">
                   <Button
                     onClick={handleGenerate}
-                    disabled={false}
+                    disabled={isAiChecking || !aiAvailable}
+                    title={!aiAvailable ? aiReason : undefined}
                     className="flex-1 gap-2"
                     variant={isGenerating ? "outline" : "default"}
                     data-testid="button-generate"

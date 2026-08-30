@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/hooks/use-industry";
+import { useAiStatus } from "@/hooks/use-ai-status";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { FileText, Plus, Eye, Download, Trash2, FileCheck, Scale, BookOpen, ClipboardList, AlertTriangle, Sparkles } from "lucide-react";
 import type { Document } from "@shared/schema";
@@ -80,6 +81,7 @@ const documentTemplates = [
 export default function DocumentsPage() {
   const { toast } = useToast();
   const { currentIndustry, getAllTemplates } = useIndustry();
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [generatingType, setGeneratingType] = useState<string | null>(null);
@@ -122,6 +124,10 @@ export default function DocumentsPage() {
   });
 
   const handleGenerate = (type: string) => {
+    if (isAiChecking || !aiAvailable) {
+      toast({ title: "AI tidak tersedia", description: aiReason, variant: "destructive" });
+      return;
+    }
     setGeneratingType(type);
     generateMutation.mutate(type);
   };
@@ -204,7 +210,8 @@ export default function DocumentsPage() {
                     <Button
                       size="sm"
                       onClick={() => handleGenerate(template.type)}
-                      disabled={isGenerating}
+                      disabled={isGenerating || isAiChecking || !aiAvailable}
+                      title={!aiAvailable ? aiReason : undefined}
                       data-testid={`button-generate-${template.type}`}
                     >
                       <Plus className="mr-1 h-3 w-3" />

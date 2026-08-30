@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useIndustry } from "@/hooks/use-industry";
+import { useAiStatus } from "@/hooks/use-ai-status";
 import {
   MessageCircle,
   X,
@@ -37,6 +38,7 @@ const QUICK_QUESTIONS = [
 
 export default function HelpDeskChatbot() {
   const { currentIndustry } = useIndustry();
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -73,7 +75,7 @@ export default function HelpDeskChatbot() {
   }, [isOpen]);
 
   const sendMessage = useCallback(async (messageText: string) => {
-    if (!messageText.trim() || isLoading) return;
+    if (!messageText.trim() || isLoading || isAiChecking || !aiAvailable) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -127,7 +129,7 @@ export default function HelpDeskChatbot() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentIndustry?.id, isLoading]);
+  }, [currentIndustry?.id, isLoading, isAiChecking, aiAvailable]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,6 +219,8 @@ export default function HelpDeskChatbot() {
                       variant="outline"
                       className="w-full justify-start text-left h-auto py-2 px-3"
                       onClick={() => handleQuickQuestion(q.query)}
+                      disabled={isAiChecking || !aiAvailable}
+                      title={!aiAvailable ? aiReason : undefined}
                       data-testid={`button-quick-question-${i}`}
                     >
                       <q.icon className="h-4 w-4 mr-2 shrink-0" />
@@ -280,14 +284,15 @@ export default function HelpDeskChatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ketik pertanyaan Anda..."
-                disabled={isLoading}
+                disabled={isLoading || isAiChecking || !aiAvailable}
                 className="flex-1"
                 data-testid="input-chat-message"
               />
               <Button
                 type="submit"
                 size="icon"
-                disabled={isLoading || !input.trim()}
+                disabled={isLoading || !input.trim() || isAiChecking || !aiAvailable}
+                title={!aiAvailable ? aiReason : undefined}
                 className={bgColor}
                 data-testid="button-send-message"
               >

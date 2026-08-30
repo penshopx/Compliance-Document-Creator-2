@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { useAiStatus } from "@/hooks/use-ai-status";
 
 type DialogMode = "smap" | "pancek";
 
@@ -93,6 +94,7 @@ export default function GustafdaDialog() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
 
   const activeTopics = mode === "pancek" ? PANCEK_TOPICS : SMAP_TOPICS;
 
@@ -167,6 +169,10 @@ export default function GustafdaDialog() {
   };
 
   const startDialog = async () => {
+    if (isAiChecking || !aiAvailable) {
+      toast({ title: "AI tidak tersedia", description: aiReason, variant: "destructive" });
+      return;
+    }
     setIsStarted(true);
     setIsLoading(true);
     setMessages([{ role: "assistant", content: "" }]);
@@ -182,7 +188,7 @@ export default function GustafdaDialog() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isAiChecking || !aiAvailable) return;
     const userMsg = input.trim();
     setInput("");
     const withUser: Message[] = [...messages, { role: "user", content: userMsg }];
@@ -198,6 +204,10 @@ export default function GustafdaDialog() {
   };
 
   const generateBlueprint = async () => {
+    if (isAiChecking || !aiAvailable) {
+      toast({ title: "AI tidak tersedia", description: aiReason, variant: "destructive" });
+      return;
+    }
     setIsGeneratingBlueprint(true);
     try {
       const endpoint = mode === "pancek" ? "/api/gustafta/pancek-blueprint" : "/api/gustafta/blueprint";
@@ -355,6 +365,8 @@ export default function GustafdaDialog() {
                 <Button
                   size="lg"
                   onClick={startDialog}
+                  disabled={isAiChecking || !aiAvailable}
+                  title={!aiAvailable ? aiReason : undefined}
                   className={cn("gap-2 w-full", mode === "pancek" ? "bg-emerald-600 hover:bg-emerald-700" : "")}
                   data-testid="button-start-dialog"
                 >
@@ -409,13 +421,14 @@ export default function GustafdaDialog() {
                     onKeyDown={handleKeyDown}
                     placeholder="Ketik jawaban Anda... (Enter untuk kirim, Shift+Enter untuk baris baru)"
                     className="resize-none min-h-[52px] max-h-[120px]"
-                    disabled={isLoading}
+                    disabled={isLoading || isAiChecking || !aiAvailable}
                     data-testid="input-gustafta-message"
                     rows={2}
                   />
                   <Button
                     onClick={sendMessage}
-                    disabled={isLoading || !input.trim()}
+                    disabled={isLoading || !input.trim() || isAiChecking || !aiAvailable}
+                    title={!aiAvailable ? aiReason : undefined}
                     className="h-[52px] px-4 flex-none"
                     data-testid="button-gustafta-send"
                   >
@@ -471,7 +484,8 @@ export default function GustafdaDialog() {
               {isReadyForBlueprint || completedTopics.size >= 4 ? (
                 <Button
                   onClick={generateBlueprint}
-                  disabled={isGeneratingBlueprint}
+                  disabled={isGeneratingBlueprint || isAiChecking || !aiAvailable}
+                  title={!aiAvailable ? aiReason : undefined}
                   className={cn("w-full gap-2", mode === "pancek" ? "bg-emerald-600 hover:bg-emerald-700" : "")}
                   data-testid="button-generate-blueprint"
                 >

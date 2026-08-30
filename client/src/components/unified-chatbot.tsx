@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Send, Bot, User, Loader2, Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIndustry } from "@/hooks/use-industry";
+import { useAiStatus } from "@/hooks/use-ai-status";
 
 interface Message {
   id: string;
@@ -36,6 +37,7 @@ function stripMarkdown(text: string): string {
 export default function UnifiedChatbot() {
   const { toast } = useToast();
   const { currentIndustry, industries, setIndustry, currentIndustryId } = useIndustry();
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
   const [isOpen, setIsOpen] = useState(false);
   const [showIndustrySelector, setShowIndustrySelector] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -96,7 +98,7 @@ export default function UnifiedChatbot() {
   }, [isOpen]);
 
   const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || isAiChecking || !aiAvailable) return;
     
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -162,6 +164,8 @@ export default function UnifiedChatbot() {
       <div className="fixed bottom-4 right-6 z-40">
         <Button
           onClick={() => setIsOpen(true)}
+          disabled={isAiChecking || !aiAvailable}
+          title={!aiAvailable ? aiReason : undefined}
           className={`rounded-full shadow-lg ${colorClass}`}
           size="icon"
           data-testid="button-open-chatbot"
@@ -281,6 +285,8 @@ export default function UnifiedChatbot() {
                   size="sm"
                   className="text-xs h-auto py-1"
                   onClick={() => sendMessage(topic)}
+                  disabled={isAiChecking || !aiAvailable}
+                  title={!aiAvailable ? aiReason : undefined}
                   data-testid={`button-topic-${idx}`}
                 >
                   {topic}
@@ -298,13 +304,14 @@ export default function UnifiedChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              disabled={isLoading}
+              disabled={isLoading || isAiChecking || !aiAvailable}
               className="flex-1"
               data-testid="input-chat-message"
             />
             <Button
               onClick={() => sendMessage(input)}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || isAiChecking || !aiAvailable}
+              title={!aiAvailable ? aiReason : undefined}
               size="icon"
               className={colorClass}
               data-testid="button-send-message"

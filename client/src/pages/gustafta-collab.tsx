@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { useAiStatus } from "@/hooks/use-ai-status";
 
 type AgentKey = "dokumen" | "internal" | "sertifikasi" | "surveilance";
 type PancekAgentKey = "komitmen" | "perencanaan" | "pelaksanaan" | "evaluasi";
@@ -541,6 +542,7 @@ export default function GustafdaCollab() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
   const { data: company } = useQuery<{ name?: string; address?: string; city?: string; npwp?: string; nib?: string; directorName?: string; employeeCount?: number }>({ queryKey: ["/api/company"] });
   const { data: fkapList } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/fkap"], retry: false });
   const { data: managementList } = useQuery<Array<{ name: string; position: string }>>({ queryKey: ["/api/management"], retry: false });
@@ -669,7 +671,7 @@ INSTRUKSI: Gunakan data di atas. JANGAN tanya informasi perusahaan yang sudah te
   const sendMessage = async (messageText?: string) => {
     if (!sessionKey || !subAgent) return;
     const userText = (messageText || input).trim();
-    if (!userText || isLoading) return;
+    if (!userText || isLoading || isAiChecking || !aiAvailable) return;
     setInput("");
 
     const withUser: Message[] = [...messages, { role: "user", content: userText }];
@@ -1127,8 +1129,9 @@ INSTRUKSI: Gunakan data di atas. JANGAN tanya informasi perusahaan yang sudah te
                       <button
                         key={i}
                         onClick={() => sendMessage(s)}
-                        disabled={isLoading}
-                        className="text-xs px-3 py-1.5 bg-white border rounded-full hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                        disabled={isLoading || isAiChecking || !aiAvailable}
+                        title={!aiAvailable ? aiReason : undefined}
+                        className="text-xs px-3 py-1.5 bg-white border rounded-full hover:bg-slate-50 hover:border-slate-300 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {s}
                       </button>
@@ -1146,13 +1149,14 @@ INSTRUKSI: Gunakan data di atas. JANGAN tanya informasi perusahaan yang sudah te
                     onKeyDown={handleKeyDown}
                     placeholder={`Tanya ${subAgent.shortLabel}... (Enter kirim)`}
                     className="resize-none min-h-[44px] max-h-[100px] text-sm"
-                    disabled={isLoading}
+                    disabled={isLoading || isAiChecking || !aiAvailable}
                     data-testid="input-subagent-message"
                     rows={2}
                   />
                   <Button
                     onClick={() => sendMessage()}
-                    disabled={isLoading || !input.trim()}
+                    disabled={isLoading || !input.trim() || isAiChecking || !aiAvailable}
+                    title={!aiAvailable ? aiReason : undefined}
                     className={cn("h-[44px] px-3 flex-none", agent.bgColor)}
                     data-testid="button-subagent-send"
                   >

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { X, Send, HelpCircle, User, Loader2, BookOpen, ChevronRight } from "lucide-react";
+import { useAiStatus } from "@/hooks/use-ai-status";
 
 interface Message {
   id: string;
@@ -125,6 +126,7 @@ Mentor dapat membantu:
 ];
 
 export default function HelpChatbot() {
+  const { available: aiAvailable, isChecking: isAiChecking, reason: aiReason } = useAiStatus();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -176,7 +178,7 @@ export default function HelpChatbot() {
   };
 
   const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || isAiChecking || !aiAvailable) return;
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -354,14 +356,15 @@ export default function HelpChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Tanya tentang cara pakai..."
-              disabled={isLoading}
+              disabled={isLoading || isAiChecking || !aiAvailable}
               className="flex-1"
               data-testid="input-help-message"
             />
             <Button 
               type="submit" 
               size="icon" 
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || isAiChecking || !aiAvailable}
+              title={!aiAvailable ? aiReason : undefined}
               className="bg-slate-600"
               data-testid="button-send-help"
             >

@@ -91,6 +91,7 @@ function AppContent() {
   if (isStandalonePage) {
     return (
       <div className="min-h-screen w-full">
+        <AiAvailabilityBanner />
         <Router />
       </div>
     );
