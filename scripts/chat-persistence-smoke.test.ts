@@ -13,6 +13,12 @@ function getTestPort(): number {
 }
 
 async function startFakeGeminiProvider(): Promise<HttpServer> {
+  const responseChunksByRequest = [
+    ["Balasan AI pertama ", "tetap tersimpan."],
+    ["Balasan AI kedua ", "juga tetap tersimpan."],
+  ];
+  let requestCount = 0;
+
   const provider = createServer(async (request, response) => {
     if (request.method !== "POST" || !request.url?.includes("streamGenerateContent")) {
       response.writeHead(404).end();
@@ -25,7 +31,8 @@ async function startFakeGeminiProvider(): Promise<HttpServer> {
       "Content-Type": "text/event-stream",
     });
 
-    const chunks = ["Balasan AI ", "tetap tersimpan setelah restart."];
+    const chunks = responseChunksByRequest[requestCount] ?? ["Balasan AI tak terduga."];
+    requestCount += 1;
     for (const content of chunks) {
       response.write(
         `data: ${JSON.stringify({
@@ -194,22 +201,41 @@ test("chat conversations and streamed messages survive a server restart", async 
       "created conversation should be returned by the list endpoint",
     );
 
-    const messageResponse = await fetch(
-      `${baseUrl}/api/conversations/${conversationId}/messages`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: "Message written before restart" }),
-        signal: AbortSignal.timeout(requestTimeoutMs),
-      },
-    );
-    assert.equal(messageResponse.status, 200);
-    const sseEvents = parseSseEvents(await messageResponse.text());
-    assert.deepEqual(
-      sseEvents.filter((event) => typeof event.content === "string").map((event) => event.content),
-      ["Balasan AI ", "tetap tersimpan setelah restart."],
-    );
-    assert.deepEqual(sseEvents.at(-1), { done: true });
+    const expectedMessages = [
+      { role: "user", content: "Message written before restart" },
+      { role: "assistant", content: "Balasan AI pertama tetap tersimpan." },
+      { role: "user", content: "Message written immediately after first" },
+      { role: "assistant", content: "Balasan AI kedua juga tetap tersimpan." },
+    ];
+    const messageContents = [
+      "Message written before restart",
+      "Message written immediately after first",
+    ];
+    const expectedResponseChunks = [
+      ["Balasan AI pertama ", "tetap tersimpan."],
+      ["Balasan AI kedua ", "juga tetap tersimpan."],
+    ];
+
+    for (let index = 0; index < messageContents.length; index += 1) {
+      const messageResponse = await fetch(
+        `${baseUrl}/api/conversations/${conversationId}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: messageContents[index] }),
+          signal: AbortSignal.timeout(requestTimeoutMs),
+        },
+      );
+      assert.equal(messageResponse.status, 200);
+      const sseEvents = parseSseEvents(await messageResponse.text());
+      assert.deepEqual(
+        sseEvents
+          .filter((event) => typeof event.content === "string")
+          .map((event) => event.content),
+        expectedResponseChunks[index],
+      );
+      assert.deepEqual(sseEvents.at(-1), { done: true });
+    }
 
     const fetchedBeforeRestart = await requestJson<{
       id: number;
@@ -220,10 +246,7 @@ test("chat conversations and streamed messages survive a server restart", async 
     assert.equal(fetchedBeforeRestart.body.id, conversationId);
     assert.deepEqual(
       fetchedBeforeRestart.body.messages.map(({ role, content }) => ({ role, content })),
-      [
-        { role: "user", content: "Message written before restart" },
-        { role: "assistant", content: "Balasan AI tetap tersimpan setelah restart." },
-      ],
+      expectedMessages,
     );
 
     await stopServer(server);
@@ -253,10 +276,7 @@ test("chat conversations and streamed messages survive a server restart", async 
     assert.equal(fetchedAfterRestart.body.title, "Persistence smoke test");
     assert.deepEqual(
       fetchedAfterRestart.body.messages.map(({ role, content }) => ({ role, content })),
-      [
-        { role: "user", content: "Message written before restart" },
-        { role: "assistant", content: "Balasan AI tetap tersimpan setelah restart." },
-      ],
+      expectedMessages,
     );
   } finally {
     if (server) {
