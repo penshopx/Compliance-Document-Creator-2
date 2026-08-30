@@ -7,7 +7,12 @@ import { generateDocumentWithProvider, chatWithProvider } from "./lib/ai-provide
 import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
 import { registerChatRoutes } from "./replit_integrations/chat";
-import { getGeminiClient, isGeminiAvailable, parseGeminiError } from "./lib/gemini-ai";
+import {
+  checkGeminiStatus,
+  getGeminiClient,
+  isGeminiAvailable,
+  parseGeminiError,
+} from "./lib/gemini-ai";
 import { industryConfigs } from "@shared/data/industry-configs";
 import {
   PEDOMAN_SMAP_STRUCTURE,
@@ -1006,16 +1011,11 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
     }
   });
 
-  // AI configuration status — reports whether a Gemini credential is configured.
-  // This does NOT verify that the key is valid or that the provider is reachable;
-  // it only checks env-var presence so it never consumes quota.
-  // Response: { configured: boolean, reason?: string }
+  // AI configuration status — verifies credential access without generating content.
+  // Response: { available, configured, status, reason?, model? }
   app.get("/api/ai/status", async (req, res) => {
-    const configured = isGeminiAvailable();
-    if (!configured) {
-      return res.json({ configured: false, reason: "GEMINI_API_KEY tidak dikonfigurasi." });
-    }
-    return res.json({ configured: true, model: "gemini-2.5-flash" });
+    const status = await checkGeminiStatus();
+    return res.json(status);
   });
 
   // Gemini AI Document Generation

@@ -50,6 +50,90 @@ export function isGeminiAvailable(): boolean {
   );
 }
 
+export type GeminiStatus =
+  | "missing"
+  | "valid"
+  | "invalid"
+  | "quota_exceeded"
+  | "unreachable";
+
+export interface GeminiStatusResult {
+  available: boolean;
+  configured: boolean;
+  status: GeminiStatus;
+  reason?: string;
+  model?: string;
+}
+
+/**
+ * Checks that the configured credential can access the model without
+ * generating content or consuming model tokens.
+ *
+ * This is intentionally separate from isGeminiAvailable(), which remains a
+ * synchronous presence check for request guards. A key can be present but
+ * invalid, revoked, or unable to access the configured model.
+ */
+export async function checkGeminiStatus(): Promise<GeminiStatusResult> {
+  if (!isGeminiAvailable()) {
+    return {
+      available: false,
+      configured: false,
+      status: "missing",
+      reason: "GEMINI_API_KEY tidak dikonfigurasi.",
+    };
+  }
+
+  try {
+    await getGeminiClient().models.get({ model: "gemini-2.5-flash" });
+    return {
+      available: true,
+      configured: true,
+      status: "valid",
+      model: "gemini-2.5-flash",
+    };
+  } catch (error) {
+    const status = classifyGeminiStatus(error);
+    return {
+      available: false,
+      configured: true,
+      status,
+      reason: parseGeminiError(error),
+    };
+  }
+}
+
+function classifyGeminiStatus(error: unknown): Exclude<GeminiStatus, "missing" | "valid"> {
+  const message = error instanceof Error ? error.message : String(error);
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("resource_exhausted") ||
+    normalized.includes("resource exhausted") ||
+    normalized.includes("quota") ||
+    normalized.includes("rate limit") ||
+    normalized.includes("too many requests") ||
+    normalized.includes("429")
+  ) {
+    return "quota_exceeded";
+  }
+
+  if (
+    normalized.includes("unauthenticated") ||
+    normalized.includes("invalid api key") ||
+    normalized.includes("api key not valid") ||
+    normalized.includes("api_key_invalid") ||
+    normalized.includes("permission_denied") ||
+    normalized.includes("permission denied") ||
+    normalized.includes("unauthorized") ||
+    normalized.includes("401") ||
+    normalized.includes("403")
+  ) {
+    return "invalid";
+  }
+
+  return "unreachable";
+}
+
 /**
  * Parses a Gemini SDK error and returns a clean, human-readable message.
  *

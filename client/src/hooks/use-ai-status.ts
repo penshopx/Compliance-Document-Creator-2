@@ -3,12 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 interface AiStatusApiResponse {
   available?: boolean;
   configured?: boolean;
+  status?: "missing" | "valid" | "invalid" | "quota_exceeded" | "unreachable";
   reason?: string;
   model?: string;
 }
 
 export interface AiStatus {
   available: boolean;
+  configured: boolean;
+  status?: AiStatusApiResponse["status"];
   reason?: string;
   model?: string;
 }
@@ -28,6 +31,8 @@ export function useAiStatus() {
   return {
     ...query,
     available,
+    configured: query.data?.configured ?? false,
+    status: query.data?.status,
     isChecking: query.isPending,
     isUnavailable,
     reason,

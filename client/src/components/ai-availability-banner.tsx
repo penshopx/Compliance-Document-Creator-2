@@ -9,6 +9,7 @@ export default function AiAvailabilityBanner() {
     isUnavailable,
     isError,
     reason,
+    status,
     refetch,
     isFetching,
   } = useAiStatus();
@@ -25,11 +26,17 @@ export default function AiAvailabilityBanner() {
     >
       <AlertTriangle className="h-5 w-5 shrink-0" />
       <div className="min-w-0 flex-1">
-        <AlertTitle>Fitur AI sedang tidak tersedia</AlertTitle>
+        <AlertTitle>
+          {status === "invalid"
+            ? "Konfigurasi Gemini perlu diperbaiki"
+            : "Fitur AI sedang tidak tersedia"}
+        </AlertTitle>
         <AlertDescription className="text-amber-900/80 dark:text-amber-100/80">
           {reason} Generator dokumen dan AI Mentor tidak dapat digunakan sampai
-          konfigurasi AI diperbaiki. Hubungi administrator untuk mengkonfigurasi
-          GEMINI_API_KEY.
+          konfigurasi AI diperbaiki.
+          {status === "invalid"
+            ? " Periksa kembali API key Gemini dan akses proyek Google AI Studio Anda."
+            : " Hubungi administrator untuk mengkonfigurasi GEMINI_API_KEY."}
         </AlertDescription>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
