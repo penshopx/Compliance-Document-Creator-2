@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { consumeJsonSse } from "@/lib/sse";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { useAiStatus } from "@/hooks/use-ai-status";
@@ -699,32 +700,23 @@ INSTRUKSI: Gunakan data di atas. JANGAN tanya informasi perusahaan yang sudah te
       if (!response.ok) throw new Error("Gagal terhubung");
 
       let text = "";
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          for (const line of chunk.split("\n")) {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.content) {
-                  text += data.content;
-                  setAllMessages(prev => {
-                    const updated = [...(prev[sessionKey] || [])];
-                    updated[updated.length - 1] = { role: "assistant", content: text };
-                    return { ...prev, [sessionKey]: updated };
-                  });
-                }
-              } catch {}
-            }
-          }
+      await consumeJsonSse(response, (data) => {
+        if (data.content) {
+          text += data.content;
+          setAllMessages(prev => {
+            const updated = [...(prev[sessionKey] || [])];
+            updated[updated.length - 1] = { role: "assistant", content: text };
+            return { ...prev, [sessionKey]: updated };
+          });
         }
-      }
-    } catch {
-      toast({ title: "Error", description: "Gagal mengirim pesan.", variant: "destructive" });
+      });
+    } catch (error) {
+      setAllMessages(prev => ({ ...prev, [sessionKey]: withUser }));
+      toast({
+        title: "Balasan AI tidak selesai",
+        description: error instanceof Error ? error.message : "Gagal mengirim pesan.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

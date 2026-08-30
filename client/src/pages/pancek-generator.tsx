@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useAiStatus } from "@/hooks/use-ai-status";
+import { consumeJsonSse } from "@/lib/sse";
 import {
   ArrowLeft, Wand2, Copy, Download, CheckCircle2, Loader2,
   Search, Database, FileText, Zap, Building2, Users, Shield,
@@ -97,33 +98,18 @@ export default function PancekGenerator() {
       }
 
       let text = "";
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          for (const line of chunk.split("\n")) {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.content) {
-                  text += data.content;
-                  setOutput(text);
-                  if (outputRef.current) {
-                    outputRef.current.scrollTop = outputRef.current.scrollHeight;
-                  }
-                }
-                if (data.done) setIsDone(true);
-              } catch {}
-            }
+      await consumeJsonSse(response, (data) => {
+        if (data.content) {
+          text += data.content;
+          setOutput(text);
+          if (outputRef.current) {
+            outputRef.current.scrollTop = outputRef.current.scrollHeight;
           }
         }
-      }
+      });
       setIsDone(true);
     } catch (err: any) {
+      setIsDone(false);
       if (err.name !== "AbortError") {
         toast({ title: "Gagal generate", description: err.message, variant: "destructive" });
       }

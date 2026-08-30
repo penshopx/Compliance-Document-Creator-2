@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
@@ -48,6 +48,19 @@ const aiGenerateSchema = z.object({
   prompt: z.string().min(1).max(20000),
   model: z.string().max(100).optional(),
 });
+
+function sendSseFailure(res: Response, error: unknown): void {
+  if (res.writableEnded || res.destroyed) return;
+
+  const message = parseGeminiError(error);
+  if (!res.headersSent) {
+    res.status(500).json({ error: message });
+    return;
+  }
+
+  res.write(`data: ${JSON.stringify({ error: message, done: false })}\n\n`);
+  res.end();
+}
 
 const saveAiKeySchema = z.object({
   provider: z.enum(AI_PROVIDER_IDS as [string, ...string[]]),
@@ -351,12 +364,7 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
       res.end();
     } catch (error) {
       console.error("Pancek generate error:", error);
-      if (!res.headersSent) {
-        res.status(500).json({ error: parseGeminiError(error) });
-      } else {
-        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
-        res.end();
-      }
+      sendSseFailure(res, error);
     }
   });
 
@@ -1493,12 +1501,7 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
       res.end();
     } catch (error) {
       console.error("Gustafta chat error:", error);
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
-        res.end();
-      } else {
-        res.status(500).json({ error: parseGeminiError(error) });
-      }
+      sendSseFailure(res, error);
     }
   });
 
@@ -3506,12 +3509,7 @@ OUTPUT: SOP Benturan Kepentingan + Formulir Disclosure + Log BK + panduan D.5 + 
       res.end();
     } catch (error) {
       console.error("Gustafta subagent error:", error);
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
-        res.end();
-      } else {
-        res.status(500).json({ error: parseGeminiError(error) });
-      }
+      sendSseFailure(res, error);
     }
   });
 
@@ -3696,12 +3694,7 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
       res.end();
     } catch (error) {
       console.error("Gustafta collab error:", error);
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
-        res.end();
-      } else {
-        res.status(500).json({ error: parseGeminiError(error) });
-      }
+      sendSseFailure(res, error);
     }
   });
 

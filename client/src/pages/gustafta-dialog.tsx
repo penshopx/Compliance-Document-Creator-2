@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { useAiStatus } from "@/hooks/use-ai-status";
+import { consumeJsonSse } from "@/lib/sse";
 
 type DialogMode = "smap" | "pancek";
 
@@ -138,33 +139,18 @@ export default function GustafdaDialog() {
     if (!response.ok) throw new Error("Gagal terhubung ke Gustafta");
 
     let text = "";
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
-          if (line.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.content) {
-                text += data.content;
-                setMessages(prev => {
-                  const updated = [...prev];
-                  if (updated[updated.length - 1]?.role === "assistant") {
-                    updated[updated.length - 1] = { role: "assistant", content: text };
-                  }
-                  return updated;
-                });
-              }
-            } catch {}
+    await consumeJsonSse(response, (data) => {
+      if (data.content) {
+        text += data.content;
+        setMessages(prev => {
+          const updated = [...prev];
+          if (updated[updated.length - 1]?.role === "assistant") {
+            updated[updated.length - 1] = { role: "assistant", content: text };
           }
-        }
+          return updated;
+        });
       }
-    }
+    });
     return text;
   };
 
@@ -196,8 +182,13 @@ export default function GustafdaDialog() {
     setIsLoading(true);
     try {
       await callChat(withUser);
-    } catch {
-      toast({ title: "Error", description: "Gagal mengirim pesan.", variant: "destructive" });
+    } catch (error) {
+      setMessages(withUser);
+      toast({
+        title: "Balasan AI tidak selesai",
+        description: error instanceof Error ? error.message : "Gagal mengirim pesan.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
