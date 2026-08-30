@@ -9,6 +9,7 @@
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "test:gemini-status": "tsx --test server/lib/gemini-ai.test.ts",
+    "test:server-sse": "tsx --test server/routes.sse.test.ts",
     "test:sse": "tsx --test client/src/lib/sse.test.ts",
     "db:push": "drizzle-kit push",
     "test:chat-persistence": "tsx --test scripts/chat-persistence-smoke.test.ts"

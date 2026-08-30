@@ -54,7 +54,7 @@ const aiGenerateSchema = z.object({
   model: z.string().max(100).optional(),
 });
 
-function sendSseFailure(res: Response, error: unknown): void {
+export function sendSseFailure(res: Response, error: unknown): void {
   if (res.writableEnded || res.destroyed) return;
 
   const message = parseGeminiError(error);
