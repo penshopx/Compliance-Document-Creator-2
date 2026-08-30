@@ -42,6 +42,7 @@ import PathwayPage from "@/pages/pathway";
 import AdminPaymentsPage from "@/pages/admin-payments";
 import GustafdaDialog from "@/pages/gustafta-dialog";
 import GustafdaCollab from "@/pages/gustafta-collab";
+import AiAvailabilityBanner from "@/components/ai-availability-banner";
 import { isIndustryEnabled } from "@/data/industry-configs";
 
 function Router() {
@@ -120,6 +121,7 @@ function AppContent() {
           )}
         </header>
         <main className={`flex-1 overflow-auto ${isFullWidthPage ? "" : "p-6"}`}>
+          <AiAvailabilityBanner />
           <Router />
         </main>
       </div>
