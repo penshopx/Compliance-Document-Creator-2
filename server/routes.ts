@@ -58,12 +58,17 @@ function sendSseFailure(res: Response, error: unknown): void {
   if (res.writableEnded || res.destroyed) return;
 
   const message = parseGeminiError(error);
-  if (!res.headersSent) {
+  const contentType = res.getHeader("Content-Type");
+  const sseStarted =
+    typeof contentType === "string" &&
+    contentType.toLowerCase().startsWith("text/event-stream");
+
+  if (!res.headersSent && !sseStarted) {
     res.status(500).json({ error: message });
     return;
   }
 
-  res.write(`data: ${JSON.stringify({ error: message, done: false })}\n\n`);
+  res.write(`data: ${JSON.stringify({ error: message, done: true })}\n\n`);
   res.end();
 }
 
@@ -1341,19 +1346,14 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
       res.end();
     } catch (error) {
       console.error("Helpdesk chat error:", error);
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
-        res.end();
-      } else {
-        if (error instanceof z.ZodError) {
-          return res.status(400).json({ error: "Invalid request", details: error.errors });
-        }
-        res.status(500).json({ error: parseGeminiError(error) });
+      if (error instanceof z.ZodError && !res.headersSent) {
+        return res.status(400).json({ error: "Invalid request", details: error.errors });
       }
+      sendSseFailure(res, error);
     }
   });
 
-  // ============ GUSTAFTA DIALOG ROUTES ============
+  // GUSTAFTA DIALOG ROUTES
 
   // POST /api/gustafta/chat - SSE streaming Socratic dialogue
   app.post("/api/gustafta/chat", isAuthenticated, async (req, res) => {
@@ -3698,7 +3698,7 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
     }
   });
 
-  // ============ PAYMENT ROUTES ============
+  // PAYMENT ROUTES
 
   // Get all subscription plans
   app.get("/api/subscription-plans", async (req, res) => {

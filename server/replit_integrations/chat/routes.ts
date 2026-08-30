@@ -62,6 +62,7 @@ export function registerChatRoutes(app: Express): void {
 
   // Send message and get AI response (streaming)
   app.post("/api/conversations/:id/messages", async (req: Request, res: Response) => {
+    let sseStarted = false;
     try {
       const conversationId = parseInt(req.params.id as string);
       const { content } = req.body;
@@ -80,10 +81,11 @@ export function registerChatRoutes(app: Express): void {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
+      sseStarted = true;
 
       // Check AI availability
       if (!isGeminiAvailable()) {
-        res.write(`data: ${JSON.stringify({ error: "AI tidak tersedia. Silakan konfigurasi API key." })}\n\n`);
+        res.write(`data: ${JSON.stringify({ error: "AI tidak tersedia. Silakan konfigurasi API key.", done: true })}\n\n`);
         res.end();
         return;
       }
@@ -112,8 +114,8 @@ export function registerChatRoutes(app: Express): void {
     } catch (error) {
       console.error("Error sending message:", error);
       // Check if headers already sent (SSE streaming started)
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Failed to send message" })}\n\n`);
+      if (sseStarted || res.headersSent) {
+        res.write(`data: ${JSON.stringify({ error: "Failed to send message", done: true })}\n\n`);
         res.end();
       } else {
         res.status(500).json({ error: "Failed to send message" });

@@ -37,16 +37,16 @@ export async function consumeJsonSse(
       const event = parseEventBlock(block);
       if (!event) continue;
       onEvent(event);
+      if (event.done === true) completed = true;
       if (event.error) throw new Error(event.error);
-      if (event.done) completed = true;
     }
 
     if (flush && remainder.trim()) {
       const event = parseEventBlock(remainder);
       if (event) {
         onEvent(event);
+        if (event.done === true) completed = true;
         if (event.error) throw new Error(event.error);
-        if (event.done) completed = true;
       }
     }
   };
