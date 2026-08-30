@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { createHash } from "node:crypto";
 
 /**
  * Creates a GoogleGenAI client using the best available credentials.
@@ -65,6 +66,36 @@ export interface GeminiStatusResult {
   model?: string;
 }
 
+const GEMINI_STATUS_CACHE_TTL_MS = 60_000;
+const GEMINI_STATUS_MODEL = "gemini-2.5-flash";
+
+interface GeminiStatusCacheEntry {
+  credentialFingerprint: string;
+  expiresAt: number;
+  result: GeminiStatusResult;
+}
+
+let geminiStatusCache: GeminiStatusCacheEntry | undefined;
+let geminiStatusCheckInFlight:
+  | {
+      credentialFingerprint: string;
+      promise: Promise<GeminiStatusResult>;
+    }
+  | undefined;
+
+function getCredentialFingerprint(): string {
+  // Store only a one-way fingerprint so cache metadata can never expose a credential.
+  return createHash("sha256")
+    .update(
+      [
+        process.env.GEMINI_API_KEY ?? "",
+        process.env.AI_INTEGRATIONS_GEMINI_API_KEY ?? "",
+        process.env.AI_INTEGRATIONS_GEMINI_BASE_URL ?? "",
+      ].join("\u0000"),
+    )
+    .digest("hex");
+}
+
 /**
  * Checks that the configured credential can access the model without
  * generating content or consuming model tokens.
@@ -74,22 +105,60 @@ export interface GeminiStatusResult {
  * invalid, revoked, or unable to access the configured model.
  */
 export async function checkGeminiStatus(): Promise<GeminiStatusResult> {
+  const credentialFingerprint = getCredentialFingerprint();
+  const now = Date.now();
+
+  if (
+    geminiStatusCache &&
+    geminiStatusCache.credentialFingerprint === credentialFingerprint &&
+    geminiStatusCache.expiresAt > now
+  ) {
+    return geminiStatusCache.result;
+  }
+
+  if (geminiStatusCheckInFlight?.credentialFingerprint === credentialFingerprint) {
+    return geminiStatusCheckInFlight.promise;
+  }
+
+  const promise = performGeminiStatusCheck();
+  geminiStatusCheckInFlight = { credentialFingerprint, promise };
+
+  try {
+    const result = await promise;
+    // Do not cache a result under a credential configuration that changed mid-request.
+    if (getCredentialFingerprint() === credentialFingerprint) {
+      geminiStatusCache = {
+        credentialFingerprint,
+        expiresAt: Date.now() + GEMINI_STATUS_CACHE_TTL_MS,
+        result,
+      };
+    }
+    return result;
+  } finally {
+    if (geminiStatusCheckInFlight?.promise === promise) {
+      geminiStatusCheckInFlight = undefined;
+    }
+  }
+}
+
+async function performGeminiStatusCheck(): Promise<GeminiStatusResult> {
   if (!isGeminiAvailable()) {
     return {
       available: false,
       configured: false,
       status: "missing",
-      reason: "GEMINI_API_KEY tidak dikonfigurasi.",
+      reason:
+        "Gemini belum dikonfigurasi. Tambahkan GEMINI_API_KEY atau aktifkan integrasi Gemini.",
     };
   }
 
   try {
-    await getGeminiClient().models.get({ model: "gemini-2.5-flash" });
+    await getGeminiClient().models.get({ model: GEMINI_STATUS_MODEL });
     return {
       available: true,
       configured: true,
       status: "valid",
-      model: "gemini-2.5-flash",
+      model: GEMINI_STATUS_MODEL,
     };
   } catch (error) {
     const status = classifyGeminiStatus(error);
@@ -97,14 +166,44 @@ export async function checkGeminiStatus(): Promise<GeminiStatusResult> {
       available: false,
       configured: true,
       status,
-      reason: parseGeminiError(error),
+      reason: getGeminiStatusReason(status),
     };
   }
 }
 
+function getGeminiStatusReason(
+  status: Exclude<GeminiStatus, "missing" | "valid">,
+): string {
+  switch (status) {
+    case "invalid":
+      return "Kredensial Gemini tidak valid atau aksesnya ditolak. Perbarui API key Gemini atau periksa konfigurasi integrasinya.";
+    case "quota_exceeded":
+      return "Kuota Gemini API habis atau batas laju tercapai. Coba lagi nanti atau periksa batas penggunaan.";
+    case "unreachable":
+      return "Layanan Gemini tidak dapat dijangkau saat ini. Periksa koneksi atau konfigurasi endpoint, lalu coba lagi.";
+  }
+}
+
 function classifyGeminiStatus(error: unknown): Exclude<GeminiStatus, "missing" | "valid"> {
+  const errorRecord =
+    error && typeof error === "object"
+      ? (error as {
+          status?: unknown;
+          code?: unknown;
+          response?: { status?: unknown; statusCode?: unknown };
+        })
+      : undefined;
   const message = error instanceof Error ? error.message : String(error);
-  const normalized = message.toLowerCase();
+  const normalized = [
+    message,
+    errorRecord?.status,
+    errorRecord?.code,
+    errorRecord?.response?.status,
+    errorRecord?.response?.statusCode,
+  ]
+    .filter((value) => value !== undefined && value !== null)
+    .join(" ")
+    .toLowerCase();
 
   if (
     normalized.includes("resource_exhausted") ||
