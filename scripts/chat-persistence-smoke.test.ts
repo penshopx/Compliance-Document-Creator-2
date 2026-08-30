@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn, type ChildProcess } from "node:child_process";
 import { once } from "node:events";
+import { createServer, type Server as HttpServer } from "node:http";
 import { test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 
@@ -11,7 +12,58 @@ function getTestPort(): number {
   return 5100 + Math.floor(Math.random() * 100);
 }
 
-function startServer(port: number): ChildProcess {
+async function startFakeGeminiProvider(): Promise<HttpServer> {
+  const provider = createServer(async (request, response) => {
+    if (request.method !== "POST" || !request.url?.includes("streamGenerateContent")) {
+      response.writeHead(404).end();
+      return;
+    }
+
+    response.writeHead(200, {
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "Content-Type": "text/event-stream",
+    });
+
+    const chunks = ["Balasan AI ", "tetap tersimpan setelah restart."];
+    for (const content of chunks) {
+      response.write(
+        `data: ${JSON.stringify({
+          candidates: [{ content: { parts: [{ text: content }] } }],
+        })}\n\n`,
+      );
+      await delay(10);
+    }
+    response.end();
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    provider.once("error", reject);
+    provider.listen(0, "127.0.0.1", () => resolve());
+  });
+
+  return provider;
+}
+
+function getProviderUrl(provider: HttpServer): string {
+  const address = provider.address();
+  if (!address || typeof address === "string") {
+    throw new Error("Fake Gemini provider did not open a TCP port");
+  }
+  return `http://127.0.0.1:${address.port}`;
+}
+
+async function stopFakeGeminiProvider(provider: HttpServer): Promise<void> {
+  if (!provider.listening) {
+    return;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    provider.close((error) => (error ? reject(error) : resolve()));
+  });
+}
+
+function startServer(port: number, geminiBaseUrl: string): ChildProcess {
   const server = spawn(
     process.execPath,
     ["node_modules/tsx/dist/cli.mjs", "server/index.ts"],
@@ -20,11 +72,9 @@ function startServer(port: number): ChildProcess {
         ...process.env,
         NODE_ENV: "development",
         PORT: String(port),
-        // The persistence check should not call an external AI service. The
-        // message endpoint stores the user message before checking availability.
         GEMINI_API_KEY: "",
-        AI_INTEGRATIONS_GEMINI_API_KEY: "",
-        AI_INTEGRATIONS_GEMINI_BASE_URL: "",
+        AI_INTEGRATIONS_GEMINI_API_KEY: "smoke-test-key",
+        AI_INTEGRATIONS_GEMINI_BASE_URL: geminiBaseUrl,
       },
       stdio: ["ignore", "pipe", "pipe"],
     },
@@ -98,14 +148,26 @@ async function requestJson<T>(
   return { response, body };
 }
 
-test("chat conversations and messages survive a server restart", async () => {
+function parseSseEvents(raw: string): Array<Record<string, unknown>> {
+  return raw
+    .split("\n\n")
+    .filter(Boolean)
+    .map((event) => {
+      assert.match(event, /^data: /);
+      return JSON.parse(event.slice("data: ".length)) as Record<string, unknown>;
+    });
+}
+
+test("chat conversations and streamed messages survive a server restart", async () => {
   const port = getTestPort();
   const baseUrl = `http://127.0.0.1:${port}`;
+  const fakeGeminiProvider = await startFakeGeminiProvider();
+  const geminiBaseUrl = getProviderUrl(fakeGeminiProvider);
   let server: ChildProcess | undefined;
   let conversationId: number | undefined;
 
   try {
-    server = startServer(port);
+    server = startServer(port, geminiBaseUrl);
     await waitForServer(server, port);
 
     const created = await requestJson<{
@@ -142,7 +204,12 @@ test("chat conversations and messages survive a server restart", async () => {
       },
     );
     assert.equal(messageResponse.status, 200);
-    assert.match(await messageResponse.text(), /AI tidak tersedia/);
+    const sseEvents = parseSseEvents(await messageResponse.text());
+    assert.deepEqual(
+      sseEvents.filter((event) => typeof event.content === "string").map((event) => event.content),
+      ["Balasan AI ", "tetap tersimpan setelah restart."],
+    );
+    assert.deepEqual(sseEvents.at(-1), { done: true });
 
     const fetchedBeforeRestart = await requestJson<{
       id: number;
@@ -153,11 +220,14 @@ test("chat conversations and messages survive a server restart", async () => {
     assert.equal(fetchedBeforeRestart.body.id, conversationId);
     assert.deepEqual(
       fetchedBeforeRestart.body.messages.map(({ role, content }) => ({ role, content })),
-      [{ role: "user", content: "Message written before restart" }],
+      [
+        { role: "user", content: "Message written before restart" },
+        { role: "assistant", content: "Balasan AI tetap tersimpan setelah restart." },
+      ],
     );
 
     await stopServer(server);
-    server = startServer(port);
+    server = startServer(port, geminiBaseUrl);
     await waitForServer(server, port);
 
     const listedAfterRestart = await requestJson<Array<{ id: number; title: string }>>(
@@ -183,7 +253,10 @@ test("chat conversations and messages survive a server restart", async () => {
     assert.equal(fetchedAfterRestart.body.title, "Persistence smoke test");
     assert.deepEqual(
       fetchedAfterRestart.body.messages.map(({ role, content }) => ({ role, content })),
-      [{ role: "user", content: "Message written before restart" }],
+      [
+        { role: "user", content: "Message written before restart" },
+        { role: "assistant", content: "Balasan AI tetap tersimpan setelah restart." },
+      ],
     );
   } finally {
     if (server) {
@@ -199,5 +272,6 @@ test("chat conversations and messages survive a server restart", async () => {
       }
       await stopServer(server);
     }
+    await stopFakeGeminiProvider(fakeGeminiProvider);
   }
 });
