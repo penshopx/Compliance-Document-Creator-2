@@ -51,6 +51,125 @@ export function isGeminiAvailable(): boolean {
   );
 }
 
+/**
+ * Gemini periodically retires preview model names. Keep the preferred model
+ * first, but let streaming chat recover when the configured credential can
+ * only access an older still-supported model.
+ */
+export const GEMINI_CHAT_MODELS = [
+  "gemini-3.5-flash",
+  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+] as const;
+
+type GeminiStreamParameters = Parameters<
+  GoogleGenAI["models"]["generateContentStream"]
+>[0];
+type GeminiGenerateParameters = Parameters<
+  GoogleGenAI["models"]["generateContent"]
+>[0];
+
+function isModelUnavailableError(error: unknown): boolean {
+  const value = error as {
+    message?: unknown;
+    status?: unknown;
+    code?: unknown;
+    response?: { status?: unknown; statusCode?: unknown };
+  };
+  const normalized = [
+    value?.message,
+    value?.status,
+    value?.code,
+    value?.response?.status,
+    value?.response?.statusCode,
+  ]
+    .filter((item) => item !== undefined && item !== null)
+    .join(" ")
+    .toLowerCase();
+  const mentionsModel =
+    normalized.includes("model") || normalized.includes("models/");
+  const hasModelUnavailableSignal =
+    normalized.includes("not_found") ||
+    normalized.includes("model not found") ||
+    normalized.includes("unknown model") ||
+    normalized.includes("unsupported model") ||
+    normalized.includes("no longer available") ||
+    normalized.includes("does not exist");
+
+  return mentionsModel && hasModelUnavailableSignal;
+}
+
+function getGeminiModelCandidates(requestedModel?: string | null): string[] {
+  const configuredModel = process.env.GEMINI_MODEL?.trim();
+  return Array.from(
+    new Set([
+      ...(requestedModel?.trim() ? [requestedModel.trim()] : []),
+      ...(configuredModel ? [configuredModel] : []),
+      ...GEMINI_CHAT_MODELS,
+    ]),
+  );
+}
+
+/**
+ * Opens a Gemini stream using the first model accepted by the configured
+ * endpoint. Retries only model-availability errors; quota and credential
+ * failures are surfaced immediately instead of hiding the real problem.
+ */
+export async function generateGeminiContentStream(
+  params: Omit<GeminiStreamParameters, "model">,
+  clientFactory: () => GoogleGenAI = getGeminiClient,
+  requestedModel?: string | null,
+): Promise<{
+  stream: Awaited<
+    ReturnType<GoogleGenAI["models"]["generateContentStream"]>
+  >;
+  model: string;
+}> {
+  let lastError: unknown;
+
+  for (const model of getGeminiModelCandidates(requestedModel)) {
+    try {
+      const stream = await clientFactory().models.generateContentStream({
+        ...params,
+        model,
+      });
+      return { stream, model };
+    } catch (error) {
+      lastError = error;
+      if (!isModelUnavailableError(error)) throw error;
+    }
+  }
+
+  throw lastError ?? new Error("Tidak ada model Gemini yang tersedia.");
+}
+
+export async function generateGeminiContent(
+  params: Omit<GeminiGenerateParameters, "model">,
+  clientFactory: () => GoogleGenAI = getGeminiClient,
+  requestedModel?: string | null,
+): Promise<{
+  response: Awaited<ReturnType<GoogleGenAI["models"]["generateContent"]>>;
+  model: string;
+}> {
+  let lastError: unknown;
+
+  for (const model of getGeminiModelCandidates(requestedModel)) {
+    try {
+      const response = await clientFactory().models.generateContent({
+        ...params,
+        model,
+      });
+      return { response, model };
+    } catch (error) {
+      lastError = error;
+      if (!isModelUnavailableError(error)) throw error;
+    }
+  }
+
+  throw lastError ?? new Error("Tidak ada model Gemini yang tersedia.");
+}
+
 export type GeminiStatus =
   | "missing"
   | "valid"
@@ -67,8 +186,6 @@ export interface GeminiStatusResult {
 }
 
 const GEMINI_STATUS_CACHE_TTL_MS = 60_000;
-const GEMINI_STATUS_MODEL = "gemini-2.5-flash";
-
 interface GeminiStatusCacheEntry {
   credentialFingerprint: string;
   expiresAt: number;
@@ -141,6 +258,53 @@ export async function checkGeminiStatus(): Promise<GeminiStatusResult> {
   }
 }
 
+async function checkConfiguredGeminiStatus(
+  clientFactory: () => GoogleGenAI,
+  requestedModel?: string | null,
+): Promise<GeminiStatusResult> {
+  let lastError: unknown;
+
+  for (const model of getGeminiModelCandidates(requestedModel)) {
+    try {
+      await clientFactory().models.get({ model });
+      return {
+        available: true,
+        configured: true,
+        status: "valid",
+        model,
+      };
+    } catch (error) {
+      lastError = error;
+      if (isModelUnavailableError(error)) continue;
+      const status = classifyGeminiStatus(error);
+      return {
+        available: false,
+        configured: true,
+        status,
+        reason: getGeminiStatusReason(status),
+      };
+    }
+  }
+
+  const status = classifyGeminiStatus(lastError);
+  return {
+    available: false,
+    configured: true,
+    status,
+    reason: getGeminiStatusReason(status),
+  };
+}
+
+export async function checkGeminiCredentialStatus(
+  apiKey: string,
+  requestedModel?: string | null,
+): Promise<GeminiStatusResult> {
+  return checkConfiguredGeminiStatus(
+    () => new GoogleGenAI({ apiKey }),
+    requestedModel,
+  );
+}
+
 async function performGeminiStatusCheck(): Promise<GeminiStatusResult> {
   if (!isGeminiAvailable()) {
     return {
@@ -152,23 +316,7 @@ async function performGeminiStatusCheck(): Promise<GeminiStatusResult> {
     };
   }
 
-  try {
-    await getGeminiClient().models.get({ model: GEMINI_STATUS_MODEL });
-    return {
-      available: true,
-      configured: true,
-      status: "valid",
-      model: GEMINI_STATUS_MODEL,
-    };
-  } catch (error) {
-    const status = classifyGeminiStatus(error);
-    return {
-      available: false,
-      configured: true,
-      status,
-      reason: getGeminiStatusReason(status),
-    };
-  }
+  return checkConfiguredGeminiStatus(getGeminiClient);
 }
 
 function getGeminiStatusReason(

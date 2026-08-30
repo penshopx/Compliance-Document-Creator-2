@@ -12,8 +12,13 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
   {
     id: "gemini",
     label: "Google Gemini",
-    defaultModel: "gemini-2.5-flash",
-    models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"],
+    defaultModel: "gemini-3.5-flash",
+    models: [
+      "gemini-3.5-flash",
+      "gemini-3.1-flash-lite",
+      "gemini-2.5-flash",
+      "gemini-2.5-pro",
+    ],
     keyUrl: "https://aistudio.google.com/apikey",
     keyHint: "AIza...",
     note: "API key gratis tersedia di Google AI Studio.",

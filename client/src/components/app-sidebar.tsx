@@ -92,6 +92,7 @@ import {
   Wheat,
   Palmtree,
   Radio,
+  ShieldCheck,
   ChevronDown,
 } from "lucide-react";
 import { useIndustry } from "@/hooks/use-industry";
@@ -189,6 +190,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wheat,
   Palmtree,
   Radio,
+  ShieldCheck,
 };
 
 const colorMap: Record<string, { bg: string; text: string }> = {

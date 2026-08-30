@@ -1,4 +1,5 @@
 import { getProviderMeta } from "@shared/ai-providers";
+import { generateGeminiContent } from "./gemini-ai";
 
 const MAX_OUTPUT_TOKENS = 8192;
 
@@ -26,11 +27,10 @@ async function generateWithGemini(params: GenerateParams): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: params.apiKey });
   const model = resolveModel("gemini", params.model);
 
-  const response = await ai.models.generateContent({
-    model,
+  const { response } = await generateGeminiContent({
     contents: [{ role: "user", parts: [{ text: params.prompt }] }],
     config: { maxOutputTokens: MAX_OUTPUT_TOKENS },
-  });
+  }, () => ai, model);
 
   const text = response.text;
   if (!text) {
@@ -124,11 +124,10 @@ async function chatWithGemini(params: ChatParams): Promise<string> {
     { role: "user", parts: [{ text: params.message }] },
   ];
 
-  const response = await ai.models.generateContent({
-    model,
+  const { response } = await generateGeminiContent({
     contents,
     config: { maxOutputTokens: MAX_OUTPUT_TOKENS },
-  });
+  }, () => ai, model);
 
   const text = response.text;
   if (!text) {

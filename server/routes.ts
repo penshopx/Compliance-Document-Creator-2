@@ -8,7 +8,10 @@ import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
 import { registerChatRoutes } from "./replit_integrations/chat";
 import {
+  checkGeminiCredentialStatus,
   checkGeminiStatus,
+  generateGeminiContent,
+  generateGeminiContentStream,
   getGeminiClient,
   isGeminiAvailable,
   parseGeminiError,
@@ -44,9 +47,18 @@ import {
   insertDocumentSchema,
   insertGeneratedDocumentSchema,
   gustafdaBlueprints,
+  projectIntegrityAssessments,
+  projectIntegrityVendors,
+  companies,
+  fkapTeam,
+  projects,
+  vendors,
+  documents,
+  generatedDocuments,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
+import { getPancekStats } from "@shared/data/pancek-data";
 
 // AI Request Validation Schemas
 const aiGenerateSchema = z.object({
@@ -352,10 +364,7 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const genAI = getGeminiClient();
-
-      const stream = genAI.models.generateContentStream({
-        model: "gemini-2.5-flash",
+      const { stream } = await generateGeminiContentStream({
         contents: [
           { role: "user", parts: [{ text: systemPrompt }] },
           { role: "model", parts: [{ text: "Baik, saya akan menghasilkan dokumen yang lengkap dan siap pakai berdasarkan data perusahaan yang tersedia." }] },
@@ -363,7 +372,7 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
         ],
       });
 
-      for await (const chunk of await stream) {
+      for await (const chunk of stream) {
         const text = chunk.text;
         if (text) {
           res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
@@ -379,9 +388,10 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
   });
 
   // Company Routes
-  app.get("/api/company", async (req, res) => {
+  app.get("/api/company", isAuthenticated, async (req, res) => {
     try {
-      const company = await storage.getCompany();
+      const userId = (req.user as { id: string }).id;
+      const [company] = await db.select().from(companies).where(eq(companies.ownerId, userId)).limit(1);
       if (!company) {
         return res.status(404).json({ error: "Company not found" });
       }
@@ -391,20 +401,26 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
     }
   });
 
-  app.post("/api/company", async (req, res) => {
+  app.post("/api/company", isAuthenticated, async (req, res) => {
     try {
       const data = insertCompanySchema.parse(req.body);
-      const company = await storage.createCompany(data);
+      const userId = (req.user as { id: string }).id;
+      const [company] = await db.insert(companies).values({ ...data, ownerId: userId }).returning();
       res.status(201).json(company);
     } catch (error) {
       res.status(400).json({ error: "Invalid company data" });
     }
   });
 
-  app.put("/api/company/:id", async (req, res) => {
+  app.put("/api/company/:id", isAuthenticated, async (req, res) => {
     try {
       const data = insertCompanySchema.parse(req.body);
-      const company = await storage.updateCompany(req.params.id, data);
+      const userId = (req.user as { id: string }).id;
+      const [company] = await db.update(companies)
+        .set({ ...data, ownerId: userId })
+        .where(and(eq(companies.id, String(req.params.id)), eq(companies.ownerId, userId)))
+        .returning();
+      if (!company) return res.status(404).json({ error: "Company not found" });
       res.json(company);
     } catch (error) {
       res.status(400).json({ error: "Invalid company data" });
@@ -490,38 +506,49 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
   });
 
   // FKAP Team Routes
-  app.get("/api/fkap", async (req, res) => {
+  app.get("/api/fkap", isAuthenticated, async (req, res) => {
     try {
-      const members = await storage.getFkapTeam();
+      const userId = (req.user as { id: string }).id;
+      const members = await db.select().from(fkapTeam).where(eq(fkapTeam.ownerId, userId));
       res.json(members);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch FKAP team" });
     }
   });
 
-  app.post("/api/fkap", async (req, res) => {
+  app.post("/api/fkap", isAuthenticated, async (req, res) => {
     try {
       const data = insertFkapSchema.parse(req.body);
-      const member = await storage.createFkap(data);
+      const userId = (req.user as { id: string }).id;
+      const [member] = await db.insert(fkapTeam).values({ ...data, ownerId: userId }).returning();
       res.status(201).json(member);
     } catch (error) {
       res.status(400).json({ error: "Invalid FKAP data" });
     }
   });
 
-  app.put("/api/fkap/:id", async (req, res) => {
+  app.put("/api/fkap/:id", isAuthenticated, async (req, res) => {
     try {
       const data = insertFkapSchema.parse(req.body);
-      const member = await storage.updateFkap(req.params.id, data);
+      const userId = (req.user as { id: string }).id;
+      const [member] = await db.update(fkapTeam)
+        .set({ ...data, ownerId: userId })
+        .where(and(eq(fkapTeam.id, String(req.params.id)), eq(fkapTeam.ownerId, userId)))
+        .returning();
+      if (!member) return res.status(404).json({ error: "FKAP member not found" });
       res.json(member);
     } catch (error) {
       res.status(400).json({ error: "Invalid FKAP data" });
     }
   });
 
-  app.delete("/api/fkap/:id", async (req, res) => {
+  app.delete("/api/fkap/:id", isAuthenticated, async (req, res) => {
     try {
-      await storage.deleteFkap(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [deleted] = await db.delete(fkapTeam)
+        .where(and(eq(fkapTeam.id, String(req.params.id)), eq(fkapTeam.ownerId, userId)))
+        .returning({ id: fkapTeam.id });
+      if (!deleted) return res.status(404).json({ error: "FKAP member not found" });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete FKAP member" });
@@ -646,77 +673,369 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
   });
 
   // Projects Routes
-  app.get("/api/projects", async (req, res) => {
+  app.get("/api/projects", isAuthenticated, async (req, res) => {
     try {
-      const projects = await storage.getProjects();
-      res.json(projects);
+      const userId = (req.user as { id: string }).id;
+      const userProjects = await db.select().from(projects).where(eq(projects.ownerId, userId));
+      res.json(userProjects);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch projects" });
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", isAuthenticated, async (req, res) => {
     try {
       const data = insertProjectSchema.parse(req.body);
-      const project = await storage.createProject(data);
+      const userId = (req.user as { id: string }).id;
+      const [project] = await db.insert(projects).values({ ...data, ownerId: userId }).returning();
       res.status(201).json(project);
     } catch (error) {
       res.status(400).json({ error: "Invalid project data" });
     }
   });
 
-  app.put("/api/projects/:id", async (req, res) => {
+  app.put("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
       const data = insertProjectSchema.parse(req.body);
-      const project = await storage.updateProject(req.params.id, data);
+      const userId = (req.user as { id: string }).id;
+      const [project] = await db.update(projects)
+        .set({ ...data, ownerId: userId })
+        .where(and(eq(projects.id, String(req.params.id)), eq(projects.ownerId, userId)))
+        .returning();
+      if (!project) return res.status(404).json({ error: "Project not found" });
       res.json(project);
     } catch (error) {
       res.status(400).json({ error: "Invalid project data" });
     }
   });
 
-  app.delete("/api/projects/:id", async (req, res) => {
+  app.delete("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
-      await storage.deleteProject(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [deleted] = await db.delete(projects)
+        .where(and(eq(projects.id, String(req.params.id)), eq(projects.ownerId, userId)))
+        .returning({ id: projects.id });
+      if (!deleted) return res.status(404).json({ error: "Project not found" });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete project" });
     }
   });
 
-  // Vendors Routes
-  app.get("/api/vendors", async (req, res) => {
+  // Project Integrity Readiness — internal workflow inspired by contractor ecosystems,
+  // focused on anti-bribery evidence and project-level controls.
+  app.get("/api/projects/:id/integrity-readiness", isAuthenticated, async (req, res) => {
     try {
-      const vendors = await storage.getVendors();
-      res.json(vendors);
+      const projectId = String(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [projectRows, companyRows, fkap, userVendors, userDocuments, userGeneratedDocuments, vendorMappings, assessments] = await Promise.all([
+        db.select().from(projects).where(and(eq(projects.id, projectId), eq(projects.ownerId, userId))).limit(1),
+        db.select().from(companies).where(eq(companies.ownerId, userId)).limit(1),
+        db.select().from(fkapTeam).where(eq(fkapTeam.ownerId, userId)),
+        db.select().from(vendors).where(eq(vendors.ownerId, userId)),
+        db.select().from(documents).where(eq(documents.ownerId, userId)),
+        db.select().from(generatedDocuments).where(eq(generatedDocuments.ownerId, userId)),
+        db.select().from(projectIntegrityVendors).where(eq(projectIntegrityVendors.projectId, projectId)),
+        db.select().from(projectIntegrityAssessments).where(eq(projectIntegrityAssessments.projectId, projectId)).limit(1),
+      ]);
+
+      const project = projectRows[0];
+      if (!project) return res.status(404).json({ error: "Project not found" });
+      const company = companyRows[0];
+      const assessment = assessments[0] || {
+        projectId: project.id,
+        riskAssessmentConfirmed: false,
+        antiBriberyClauseConfirmed: false,
+        conflictOfInterestDeclared: false,
+        fkapReviewed: false,
+        checklistReviewed: false,
+        updatedAt: null,
+      };
+
+      const [pancekProgress, userBlueprints] = await Promise.all([
+        storage.getPancekProgress(userId),
+        db.select({ id: gustafdaBlueprints.id })
+          .from(gustafdaBlueprints)
+          .where(eq(gustafdaBlueprints.userId, userId)),
+      ]);
+
+      const selectedVendorIds = vendorMappings.map((mapping) => mapping.vendorId);
+      const selectedVendors = userVendors.filter((vendor) => selectedVendorIds.includes(vendor.id));
+      const approvedVendors = selectedVendors.filter((vendor) => vendor.dueDiligenceStatus === "approved");
+      const vendorRisk =
+        selectedVendors.length === 0
+          ? "missing"
+          : approvedVendors.length === selectedVendors.length
+            ? "complete"
+            : "warning";
+
+      const allEvidence = [
+        ...userDocuments.map((document) => ({
+          title: document.title,
+          status: document.status,
+          href: "/documents",
+        })),
+        ...userGeneratedDocuments.map((document) => ({
+          title: document.title,
+          status: document.status,
+          href: "/documents",
+        })),
+      ];
+      const findEvidence = (terms: string[]) =>
+        allEvidence.find((evidence) => terms.some((term) => evidence.title.toLowerCase().includes(term)));
+      const antiBriberyEvidence = findEvidence(["anti penyuapan", "anti-penyuapan", "anti korupsi", "integritas"]);
+      const conflictEvidence = findEvidence(["konflik kepentingan", "benturan kepentingan"]);
+      const pancekStats = getPancekStats();
+      const pancekChecked = Object.entries(pancekProgress).filter(([, checked]) => checked).length;
+      const pancekChecklistStatus =
+        pancekChecked >= pancekStats.requiredItems
+          ? "complete"
+          : pancekChecked > 0
+            ? "warning"
+            : "missing";
+
+      const controls = [
+        {
+          id: "project-context",
+          title: "Konteks dan penanggung jawab proyek",
+          description: "Lokasi dan PIC proyek perlu jelas sebelum kontrol integritas dijalankan.",
+          status: project.location && project.projectManager ? "complete" : "warning",
+          detail: project.location && project.projectManager
+            ? `${project.location} · PIC ${project.projectManager}`
+            : "Lengkapi lokasi dan project manager pada data proyek.",
+          href: "/projects",
+          action: "Edit data proyek",
+        },
+        {
+          id: "project-risk-assessment",
+          title: "Penilaian risiko korupsi proyek",
+          description: "Risiko tender, perizinan, pembayaran, dan interaksi pihak ketiga harus direview untuk proyek ini.",
+          status: assessment.riskAssessmentConfirmed ? "complete" : userBlueprints.length > 0 ? "warning" : "missing",
+          detail: assessment.riskAssessmentConfirmed
+            ? "Penilaian risiko telah dikonfirmasi untuk proyek ini."
+            : userBlueprints.length > 0
+              ? `${userBlueprints.length} blueprint organisasi tersedia sebagai bahan review proyek.`
+              : "Belum ada konfirmasi penilaian risiko khusus proyek.",
+          href: "/gustafta-dialog",
+          action: "Susun blueprint risiko",
+          assessmentKey: "riskAssessmentConfirmed",
+        },
+        {
+          id: "vendor-due-diligence",
+          title: "Uji tuntas vendor dan mitra",
+          description: "Mitra yang terlibat harus dipetakan dan memiliki status due diligence.",
+          status: vendorRisk,
+          detail: selectedVendors.length === 0
+            ? "Belum ada vendor/mitra yang ditautkan ke proyek ini."
+            : `${approvedVendors.length} dari ${selectedVendors.length} vendor berstatus disetujui.`,
+          href: "#vendor-mapping",
+          action: "Petakan vendor",
+        },
+        {
+          id: "anti-bribery-clause",
+          title: "Klausul anti-penyuapan",
+          description: "Bukti kebijakan, komitmen, atau dokumen integritas harus tersedia dan berstatus final.",
+          status: assessment.antiBriberyClauseConfirmed ? "complete" : antiBriberyEvidence ? "warning" : "missing",
+          detail: assessment.antiBriberyClauseConfirmed
+            ? "Klausul anti-penyuapan telah dikonfirmasi berlaku untuk proyek ini."
+            : antiBriberyEvidence
+              ? `${antiBriberyEvidence.title} tersedia di tingkat organisasi; konfirmasi penerapannya pada proyek.`
+              : "Belum ditemukan dokumen pendukung anti-penyuapan atau integritas.",
+          href: "/documents",
+          action: "Buka generator dokumen",
+          assessmentKey: "antiBriberyClauseConfirmed",
+        },
+        {
+          id: "conflict-of-interest",
+          title: "Deklarasi konflik kepentingan",
+          description: "Catat deklarasi dan mitigasi benturan kepentingan untuk pihak proyek.",
+          status: assessment.conflictOfInterestDeclared ? "complete" : conflictEvidence ? "warning" : "missing",
+          detail: assessment.conflictOfInterestDeclared
+            ? "Deklarasi konflik kepentingan telah dikonfirmasi untuk proyek ini."
+            : conflictEvidence
+              ? `${conflictEvidence.title} tersedia di tingkat organisasi; konfirmasi penerapannya pada proyek.`
+              : "Belum ada bukti pendukung deklarasi atau register konflik kepentingan.",
+          href: "/documents",
+          action: "Siapkan bukti",
+          assessmentKey: "conflictOfInterestDeclared",
+        },
+        {
+          id: "fkap-oversight",
+          title: "Pengawasan oleh FKAP",
+          description: "Fungsi Kepatuhan Anti Penyuapan menjadi titik eskalasi dan review.",
+          status: assessment.fkapReviewed ? "complete" : fkap.length > 0 ? "warning" : "missing",
+          detail: assessment.fkapReviewed
+            ? "Review FKAP telah dikonfirmasi untuk proyek ini."
+            : fkap.length > 0
+              ? `${fkap.length} anggota FKAP terdaftar; review proyek belum dikonfirmasi.`
+              : "Belum ada anggota FKAP yang terdaftar.",
+          href: "/fkap",
+          action: "Kelola tim FKAP",
+          assessmentKey: "fkapReviewed",
+        },
+        {
+          id: "smap-pancek-checklist",
+          title: "Checklist SMAP/Pancek",
+          description: "Gunakan checklist sebagai bukti kontrol, bukan hanya daftar dokumen.",
+          status: assessment.checklistReviewed ? "complete" : pancekChecklistStatus,
+          detail: assessment.checklistReviewed
+            ? "Kontrol checklist telah direview dan dikonfirmasi untuk proyek ini."
+            : `${Math.min(pancekChecked, pancekStats.requiredItems)} dari ${pancekStats.requiredItems} item wajib Pancek organisasi selesai; review proyek belum dikonfirmasi.`,
+          href: "/pancek",
+          action: "Lanjutkan checklist",
+          assessmentKey: "checklistReviewed",
+        },
+      ];
+
+      const completedControls = controls.filter((control) => control.status === "complete").length;
+      const score = Math.round((completedControls / controls.length) * 100);
+      const readinessStatus = score >= 80 ? "siap" : score >= 50 ? "perlu perhatian" : "belum siap";
+      const riskSignals = [
+        {
+          title: "Pengadaan dan pihak ketiga",
+          level: vendorRisk === "warning" ? "tinggi" : vendorRisk === "missing" ? "sedang" : "rendah",
+          detail: vendorRisk === "complete"
+            ? "Seluruh vendor tertaut sudah disetujui."
+            : "Pastikan vendor tertaut, diverifikasi, dan komitmen anti-penyuapannya terdokumentasi.",
+        },
+        {
+          title: "Konflik kepentingan",
+          level: assessment.conflictOfInterestDeclared ? "rendah" : conflictEvidence ? "sedang" : "tinggi",
+          detail: assessment.conflictOfInterestDeclared
+            ? "Deklarasi konflik kepentingan telah dikonfirmasi untuk proyek."
+            : conflictEvidence
+              ? "Bukti organisasi tersedia, tetapi penerapannya pada proyek belum dikonfirmasi."
+              : "Deklarasi dan register konflik kepentingan perlu disiapkan.",
+        },
+        {
+          title: "Kesiapan bukti implementasi",
+          level: score >= 80 ? "rendah" : score >= 50 ? "sedang" : "tinggi",
+          detail: `${completedControls} dari ${controls.length} kontrol kesiapan sudah terpenuhi.`,
+        },
+      ];
+
+      res.json({
+        project,
+        company: company || null,
+        selectedVendors,
+        availableVendors: userVendors,
+        assessment,
+        controls,
+        riskSignals,
+        score,
+        readinessStatus,
+        blueprintCount: userBlueprints.length,
+        checklist: {
+          checked: pancekChecked,
+          required: pancekStats.requiredItems,
+          total: pancekStats.totalChecklistItems,
+        },
+      });
+    } catch (error) {
+      console.error("Project integrity readiness error:", error);
+      res.status(500).json({ error: "Failed to calculate project integrity readiness" });
+    }
+  });
+
+  app.patch("/api/projects/:id/integrity-vendors", isAuthenticated, async (req, res) => {
+    try {
+      const vendorIds = z.array(z.string()).max(100).parse(req.body?.vendorIds);
+      const userId = (req.user as { id: string }).id;
+      const [project] = await db.select().from(projects)
+        .where(and(eq(projects.id, String(req.params.id)), eq(projects.ownerId, userId)))
+        .limit(1);
+      if (!project) return res.status(404).json({ error: "Project not found" });
+      const userVendors = await db.select().from(vendors).where(eq(vendors.ownerId, userId));
+      const uniqueVendorIds = Array.from(new Set(vendorIds));
+      if (uniqueVendorIds.some((id) => !userVendors.some((vendor) => vendor.id === id))) {
+        return res.status(400).json({ error: "Unknown vendor in mapping" });
+      }
+      await db.transaction(async (tx) => {
+        await tx.delete(projectIntegrityVendors).where(eq(projectIntegrityVendors.projectId, project.id));
+        if (uniqueVendorIds.length > 0) {
+          await tx.insert(projectIntegrityVendors).values(
+            uniqueVendorIds.map((vendorId) => ({ projectId: project.id, vendorId })),
+          );
+        }
+      });
+      res.json({ projectId: project.id, vendorIds: uniqueVendorIds });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid vendor mapping" });
+    }
+  });
+
+  app.patch("/api/projects/:id/integrity-assessment", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const [project] = await db.select().from(projects)
+        .where(and(eq(projects.id, String(req.params.id)), eq(projects.ownerId, userId)))
+        .limit(1);
+      if (!project) return res.status(404).json({ error: "Project not found" });
+      const assessmentSchema = z.object({
+        riskAssessmentConfirmed: z.boolean().optional(),
+        antiBriberyClauseConfirmed: z.boolean().optional(),
+        conflictOfInterestDeclared: z.boolean().optional(),
+        fkapReviewed: z.boolean().optional(),
+        checklistReviewed: z.boolean().optional(),
+      }).refine((value) => Object.keys(value).length > 0, "At least one control is required");
+      const updates = assessmentSchema.parse(req.body);
+      const [assessment] = await db.insert(projectIntegrityAssessments)
+        .values({ projectId: project.id, ...updates, updatedAt: new Date() })
+        .onConflictDoUpdate({
+          target: projectIntegrityAssessments.projectId,
+          set: { ...updates, updatedAt: new Date() },
+        })
+        .returning();
+      res.json(assessment);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid project integrity assessment" });
+    }
+  });
+
+  // Vendors Routes
+  app.get("/api/vendors", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const userVendors = await db.select().from(vendors).where(eq(vendors.ownerId, userId));
+      res.json(userVendors);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch vendors" });
     }
   });
 
-  app.post("/api/vendors", async (req, res) => {
+  app.post("/api/vendors", isAuthenticated, async (req, res) => {
     try {
       const data = insertVendorSchema.parse(req.body);
-      const vendor = await storage.createVendor(data);
+      const userId = (req.user as { id: string }).id;
+      const [vendor] = await db.insert(vendors).values({ ...data, ownerId: userId }).returning();
       res.status(201).json(vendor);
     } catch (error) {
       res.status(400).json({ error: "Invalid vendor data" });
     }
   });
 
-  app.put("/api/vendors/:id", async (req, res) => {
+  app.put("/api/vendors/:id", isAuthenticated, async (req, res) => {
     try {
       const data = insertVendorSchema.parse(req.body);
-      const vendor = await storage.updateVendor(req.params.id, data);
+      const userId = (req.user as { id: string }).id;
+      const [vendor] = await db.update(vendors)
+        .set({ ...data, ownerId: userId })
+        .where(and(eq(vendors.id, String(req.params.id)), eq(vendors.ownerId, userId)))
+        .returning();
+      if (!vendor) return res.status(404).json({ error: "Vendor not found" });
       res.json(vendor);
     } catch (error) {
       res.status(400).json({ error: "Invalid vendor data" });
     }
   });
 
-  app.delete("/api/vendors/:id", async (req, res) => {
+  app.delete("/api/vendors/:id", isAuthenticated, async (req, res) => {
     try {
-      await storage.deleteVendor(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [deleted] = await db.delete(vendors)
+        .where(and(eq(vendors.id, String(req.params.id)), eq(vendors.ownerId, userId)))
+        .returning({ id: vendors.id });
+      if (!deleted) return res.status(404).json({ error: "Vendor not found" });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete vendor" });
@@ -834,29 +1153,43 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       const BASE_SYSTEM_PROMPT = getSystemPrompt(industryId);
       const SYSTEM_PROMPT = BASE_SYSTEM_PROMPT + dynamicContext;
 
-      // Use Replit AI Integration (Gemini via Google GenAI SDK)
-      if (!isGeminiAvailable()) {
-        return res.status(500).json({ error: "AI Integration tidak dikonfigurasi" });
+      let content: string;
+      if (isGeminiAvailable()) {
+        const contents = [
+          { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+          { role: "model", parts: [{ text: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." }] },
+          ...(history || []).map(m => ({
+            role: m.role === "user" ? "user" : "model",
+            parts: [{ text: m.content }]
+          })),
+          { role: "user", parts: [{ text: message }] }
+        ];
+
+        const result = await generateGeminiContent({ contents });
+        content = result.response.text || "Maaf, saya tidak dapat memproses permintaan Anda.";
+      } else {
+        const userId = (req.user as any)?.id || (req.user as any)?.claims?.sub;
+        if (!userId || !req.isAuthenticated()) {
+          return res.status(500).json({ error: "AI Integration tidak dikonfigurasi" });
+        }
+
+        const credential = await storage.getActiveAiCredential(userId);
+        if (!credential) {
+          return res.status(500).json({ error: "AI Integration tidak dikonfigurasi" });
+        }
+
+        content = await chatWithProvider({
+          provider: credential.provider,
+          apiKey: decryptSecret(credential.apiKey),
+          model: credential.model,
+          systemPrompt: SYSTEM_PROMPT,
+          history: (history || []).map((item) => ({
+            role: item.role,
+            content: item.content,
+          })),
+          message,
+        });
       }
-
-      const ai = getGeminiClient();
-
-      const contents = [
-        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
-        { role: "model", parts: [{ text: "Baik, saya siap menjadi SMAP Mentor untuk membantu Anda." }] },
-        ...(history || []).map(m => ({
-          role: m.role === "user" ? "user" : "model",
-          parts: [{ text: m.content }]
-        })),
-        { role: "user", parts: [{ text: message }] }
-      ];
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents,
-      });
-
-      const content = response.text || "Maaf, saya tidak dapat memproses permintaan Anda.";
 
       res.json({ content });
     } catch (error) {
@@ -869,23 +1202,26 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   });
 
   // Documents Routes
-  app.get("/api/documents", async (req, res) => {
+  app.get("/api/documents", isAuthenticated, async (req, res) => {
     try {
-      const documents = await storage.getDocuments();
-      res.json(documents);
+      const userId = (req.user as { id: string }).id;
+      const userDocuments = await db.select().from(documents).where(eq(documents.ownerId, userId));
+      res.json(userDocuments);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch documents" });
     }
   });
 
-  app.post("/api/documents/generate", async (req, res) => {
+  app.post("/api/documents/generate", isAuthenticated, async (req, res) => {
     try {
       const { type, title, clause } = req.body;
+      const userId = (req.user as { id: string }).id;
       
       // Generate document content based on type
       const content = generateDocumentContent(type, title);
       
       const document = await storage.createDocument({
+        ownerId: userId,
         type,
         title,
         clause,
@@ -899,9 +1235,13 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
     }
   });
 
-  app.delete("/api/documents/:id", async (req, res) => {
+  app.delete("/api/documents/:id", isAuthenticated, async (req, res) => {
     try {
-      await storage.deleteDocument(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [deleted] = await db.delete(documents)
+        .where(and(eq(documents.id, String(req.params.id)), eq(documents.ownerId, userId)))
+        .returning({ id: documents.id });
+      if (!deleted) return res.status(404).json({ error: "Document not found" });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete document" });
@@ -909,18 +1249,22 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   });
 
   // Generated Documents Routes
-  app.get("/api/generated-documents", async (req, res) => {
+  app.get("/api/generated-documents", isAuthenticated, async (req, res) => {
     try {
-      const docs = await storage.getGeneratedDocuments();
+      const userId = (req.user as { id: string }).id;
+      const docs = await db.select().from(generatedDocuments).where(eq(generatedDocuments.ownerId, userId));
       res.json(docs);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch generated documents" });
     }
   });
 
-  app.get("/api/generated-documents/:id", async (req, res) => {
+  app.get("/api/generated-documents/:id", isAuthenticated, async (req, res) => {
     try {
-      const doc = await storage.getGeneratedDocument(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [doc] = await db.select().from(generatedDocuments)
+        .where(and(eq(generatedDocuments.id, String(req.params.id)), eq(generatedDocuments.ownerId, userId)))
+        .limit(1);
       if (!doc) {
         return res.status(404).json({ error: "Document not found" });
       }
@@ -930,28 +1274,38 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
     }
   });
 
-  app.post("/api/generated-documents", async (req, res) => {
+  app.post("/api/generated-documents", isAuthenticated, async (req, res) => {
     try {
       const data = insertGeneratedDocumentSchema.parse(req.body);
-      const doc = await storage.createGeneratedDocument(data);
+      const userId = (req.user as { id: string }).id;
+      const doc = await storage.createGeneratedDocument({ ...data, ownerId: userId });
       res.status(201).json(doc);
     } catch (error) {
       res.status(400).json({ error: "Invalid document data" });
     }
   });
 
-  app.put("/api/generated-documents/:id", async (req, res) => {
+  app.put("/api/generated-documents/:id", isAuthenticated, async (req, res) => {
     try {
-      const doc = await storage.updateGeneratedDocument(req.params.id, req.body);
+      const userId = (req.user as { id: string }).id;
+      const [doc] = await db.update(generatedDocuments)
+        .set({ ...req.body, ownerId: userId, updatedAt: new Date() })
+        .where(and(eq(generatedDocuments.id, String(req.params.id)), eq(generatedDocuments.ownerId, userId)))
+        .returning();
+      if (!doc) return res.status(404).json({ error: "Document not found" });
       res.json(doc);
     } catch (error) {
       res.status(400).json({ error: "Failed to update document" });
     }
   });
 
-  app.delete("/api/generated-documents/:id", async (req, res) => {
+  app.delete("/api/generated-documents/:id", isAuthenticated, async (req, res) => {
     try {
-      await storage.deleteGeneratedDocument(req.params.id);
+      const userId = (req.user as { id: string }).id;
+      const [deleted] = await db.delete(generatedDocuments)
+        .where(and(eq(generatedDocuments.id, String(req.params.id)), eq(generatedDocuments.ownerId, userId)))
+        .returning({ id: generatedDocuments.id });
+      if (!deleted) return res.status(404).json({ error: "Document not found" });
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete document" });
@@ -982,23 +1336,25 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   });
 
   // Advanced Document Generation
-  app.post("/api/generate-smap-document", async (req, res) => {
+  app.post("/api/generate-smap-document", isAuthenticated, async (req, res) => {
     try {
       const { templateCode, customData } = req.body;
-      const company = await storage.getCompany();
+      const userId = (req.user as { id: string }).id;
+      const [company] = await db.select().from(companies).where(eq(companies.ownerId, userId)).limit(1);
       const management = await storage.getManagement();
-      const fkap = await storage.getFkapTeam();
-      const vendors = await storage.getVendors();
+      const fkap = await db.select().from(fkapTeam).where(eq(fkapTeam.ownerId, userId));
+      const userVendors = await db.select().from(vendors).where(eq(vendors.ownerId, userId));
       
       const documentContent = generateAdvancedDocument(templateCode, {
         company,
         management,
         fkap,
-        vendors,
+        vendors: userVendors,
         customData,
       });
       
       const doc = await storage.createGeneratedDocument({
+        ownerId: userId,
         title: documentContent.title,
         documentNumber: documentContent.documentNumber,
         templateType: templateCode,
@@ -1019,8 +1375,39 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   // AI configuration status — verifies credential access without generating content.
   // Response: { available, configured, status, reason?, model? }
   app.get("/api/ai/status", async (req, res) => {
-    const status = await checkGeminiStatus();
-    return res.json(status);
+    try {
+      const appStatus = await checkGeminiStatus();
+      if (appStatus.available) return res.json(appStatus);
+
+      const userId = (req.user as any)?.id || (req.user as any)?.claims?.sub;
+      if (!userId || !req.isAuthenticated()) return res.json(appStatus);
+
+      const credential = await storage.getActiveAiCredential(userId);
+      if (!credential) return res.json(appStatus);
+      if (credential.provider !== "gemini") {
+        return res.json({
+          available: true,
+          configured: true,
+          status: "valid",
+          model: credential.model,
+          provider: credential.provider,
+        });
+      }
+
+      const byokStatus = await checkGeminiCredentialStatus(
+        decryptSecret(credential.apiKey),
+        credential.model,
+      );
+      return res.json({ ...byokStatus, provider: credential.provider });
+    } catch (error) {
+      console.error("AI status error:", error);
+      return res.status(500).json({
+        available: false,
+        configured: false,
+        status: "unreachable",
+        reason: "Status layanan AI tidak dapat diperiksa.",
+      });
+    }
   });
 
   // Gemini AI Document Generation
@@ -1209,7 +1596,7 @@ Berikan jawaban singkat, jelas, dan membantu dalam Bahasa Indonesia. Jika ditany
       const appGeminiKey = process.env.GEMINI_API_KEY;
       let provider = "gemini";
       let apiKey = appGeminiKey || "";
-      let model: string | null = "gemini-2.5-flash";
+      let model: string | null = null;
 
       if (!appGeminiKey) {
         const cred = await storage.getActiveAiCredential(userId);
@@ -1324,10 +1711,7 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const genAI = getGeminiClient();
-
-      const stream = await genAI.models.generateContentStream({
-        model: "gemini-2.5-flash",
+      const { stream } = await generateGeminiContentStream({
         contents: [
           { role: "user", parts: [{ text: systemPrompt }] },
           { role: "model", parts: [{ text: "Saya siap membantu Anda dengan pertanyaan tentang platform Compliance Hub dan kepatuhan bisnis di Indonesia." }] },
@@ -1408,8 +1792,6 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
         res.setHeader("Cache-Control", "no-cache");
         res.setHeader("Connection", "keep-alive");
 
-        const genAI = getGeminiClient();
-
         const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
           { role: "user", parts: [{ text: PANCEK_DIALOG_PROMPT }] },
           { role: "model", parts: [{ text: "Siap. Saya akan memulai dialog untuk memetakan kesiapan Pancek KPK perusahaan Anda." }] },
@@ -1417,7 +1799,7 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
         for (const msg of validated.messages) {
           contents.push({ role: msg.role === "assistant" ? "model" : "user", parts: [{ text: msg.content }] });
         }
-        const stream = await genAI.models.generateContentStream({ model: "gemini-2.5-flash", contents });
+        const { stream } = await generateGeminiContentStream({ contents });
         for await (const chunk of stream) {
           const content = chunk.text || "";
           if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
@@ -1470,8 +1852,6 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const genAI = getGeminiClient();
-
       // Build conversation history for Gemini (must alternate user/model)
       const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
         { role: "user", parts: [{ text: GUSTAFTA_PROMPT }] },
@@ -1485,8 +1865,7 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
         });
       }
 
-      const stream = await genAI.models.generateContentStream({
-        model: "gemini-2.5-flash",
+      const { stream } = await generateGeminiContentStream({
         contents,
       });
 
@@ -1598,7 +1977,6 @@ Hasilkan HANYA JSON murni (tanpa markdown, tanpa teks tambahan):
 Pastikan rekomendasi realistis sesuai informasi yang digali dari dialog. Jika informasi kurang, buat asumsi yang reasonable dan sebutkan dalam kesimpulan.`;
 
       const genAI = getGeminiClient();
-
       const response = await genAI.models.generateContent({
         model: "gemini-2.5-pro",
         contents: [{ role: "user", parts: [{ text: blueprintPrompt }] }],
@@ -3483,8 +3861,6 @@ OUTPUT: SOP Benturan Kepentingan + Formulir Disclosure + Log BK + panduan D.5 + 
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const genAI = getGeminiClient();
-
       const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
         { role: "user", parts: [{ text: systemPrompt }] },
         { role: "model", parts: [{ text: "Siap. Saya akan membantu Anda sekarang." }] },
@@ -3496,8 +3872,7 @@ OUTPUT: SOP Benturan Kepentingan + Formulir Disclosure + Log BK + panduan D.5 + 
         });
       }
 
-      const stream = await genAI.models.generateContentStream({
-        model: "gemini-2.5-flash",
+      const { stream } = await generateGeminiContentStream({
         contents,
       });
 
@@ -3663,8 +4038,6 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const genAI = getGeminiClient();
-
       const systemPrompt = AGENT_PROMPTS[validated.agent];
       const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [
         { role: "user", parts: [{ text: systemPrompt }] },
@@ -3678,8 +4051,7 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
         });
       }
 
-      const stream = await genAI.models.generateContentStream({
-        model: "gemini-2.5-flash",
+      const { stream } = await generateGeminiContentStream({
         contents,
       });
 

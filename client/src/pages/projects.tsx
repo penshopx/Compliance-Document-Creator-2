@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +42,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Plus, Pencil, Trash2, FolderKanban } from "lucide-react";
+import { Plus, Pencil, Trash2, FolderKanban, ShieldCheck } from "lucide-react";
 import { insertProjectSchema, type Project, type InsertProject } from "@shared/schema";
 
 export default function ProjectsPage() {
@@ -362,6 +363,17 @@ export default function ProjectsPage() {
                       <TableCell>{getStatusBadge(item.status)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            asChild
+                            title="Lihat kesiapan integritas"
+                            data-testid={`button-integrity-project-${item.id}`}
+                          >
+                            <Link href={`/project-integrity?project=${item.id}`}>
+                              <ShieldCheck className="h-4 w-4" />
+                            </Link>
+                          </Button>
                           <Button
                             size="icon"
                             variant="ghost"

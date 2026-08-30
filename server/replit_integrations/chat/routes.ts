@@ -1,5 +1,8 @@
 import type { Express, Request, Response } from "express";
-import { getGeminiClient, isGeminiAvailable } from "../../lib/gemini-ai";
+import {
+  generateGeminiContentStream,
+  isGeminiAvailable,
+} from "../../lib/gemini-ai";
 import { chatStorage } from "./storage";
 
 /*
@@ -91,8 +94,7 @@ export function registerChatRoutes(app: Express): void {
       }
 
       // Stream response from Gemini
-      const stream = await getGeminiClient().models.generateContentStream({
-        model: "gemini-2.5-flash",
+      const { stream } = await generateGeminiContentStream({
         contents: chatMessages,
       });
 

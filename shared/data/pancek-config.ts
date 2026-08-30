@@ -84,6 +84,7 @@ export const pancekConfig: IndustryConfig = {
       label: "Dokumen Pancek",
       items: [
         { title: "Produk Siap Pancek", url: "/produk-siap", icon: "Package" },
+        { title: "Kesiapan Integritas Proyek", url: "/project-integrity", icon: "ShieldCheck", badge: "Baru" },
         { title: "Checklist Pancek", url: "/smap-checklist", icon: "ListChecks" },
         { title: "Template Repository", url: "/template-repository", icon: "Library" },
         { title: "Referensi Dokumen", url: "/smap-reference", icon: "BookOpen" },

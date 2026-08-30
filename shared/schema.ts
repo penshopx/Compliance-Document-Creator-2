@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, date, jsonb, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, date, jsonb, serial, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,6 +15,7 @@ const dateStringSchema = z.preprocess(
 // Company Profile
 export const companies = pgTable("companies", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: text("owner_id"),
   name: text("name").notNull(),
   address: text("address").notNull(),
   city: text("city").notNull(),
@@ -79,6 +80,7 @@ export type Employee = typeof employees.$inferSelect;
 // FKAP Team (Fungsi Kepatuhan Anti Penyuapan)
 export const fkapTeam = pgTable("fkap_team", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: text("owner_id"),
   name: text("name").notNull(),
   position: text("position").notNull(),
   role: text("role").notNull(),
@@ -159,6 +161,7 @@ export type Equipment = typeof equipment.$inferSelect;
 // Projects
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: text("owner_id"),
   name: text("name").notNull(),
   clientName: text("client_name").notNull(),
   contractValue: text("contract_value"),
@@ -168,6 +171,8 @@ export const projects = pgTable("projects", {
   status: text("status").default("ongoing"),
   description: text("description"),
   projectManager: text("project_manager"),
+  // Kept for backward-compatible schema rollout; relational mapping below is authoritative.
+  integrityVendorIds: jsonb("integrity_vendor_ids").$type<string[]>().default([]),
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({ id: true }).extend({
@@ -180,6 +185,7 @@ export type Project = typeof projects.$inferSelect;
 // Vendors
 export const vendors = pgTable("vendors", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: text("owner_id"),
   name: text("name").notNull(),
   type: text("type").notNull(),
   address: text("address"),
@@ -197,9 +203,30 @@ export const insertVendorSchema = createInsertSchema(vendors).omit({ id: true })
 export type InsertVendor = z.infer<typeof insertVendorSchema>;
 export type Vendor = typeof vendors.$inferSelect;
 
+// Project-level integrity workflow state
+export const projectIntegrityVendors = pgTable("project_integrity_vendors", {
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  vendorId: varchar("vendor_id").notNull().references(() => vendors.id, { onDelete: "cascade" }),
+}, (table) => [
+  primaryKey({ columns: [table.projectId, table.vendorId] }),
+]);
+
+export const projectIntegrityAssessments = pgTable("project_integrity_assessments", {
+  projectId: varchar("project_id").primaryKey().references(() => projects.id, { onDelete: "cascade" }),
+  riskAssessmentConfirmed: boolean("risk_assessment_confirmed").default(false),
+  antiBriberyClauseConfirmed: boolean("anti_bribery_clause_confirmed").default(false),
+  conflictOfInterestDeclared: boolean("conflict_of_interest_declared").default(false),
+  fkapReviewed: boolean("fkap_reviewed").default(false),
+  checklistReviewed: boolean("checklist_reviewed").default(false),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type ProjectIntegrityAssessment = typeof projectIntegrityAssessments.$inferSelect;
+
 // Documents
 export const documents = pgTable("documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: text("owner_id"),
   title: text("title").notNull(),
   type: text("type").notNull(),
   clause: text("clause"),
@@ -216,6 +243,7 @@ export type Document = typeof documents.$inferSelect;
 // Generated Documents (SMAP)
 export const generatedDocuments = pgTable("generated_documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: text("owner_id"),
   title: text("title").notNull(),
   documentNumber: text("document_number"),
   templateType: text("template_type").notNull(),

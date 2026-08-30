@@ -139,6 +139,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
   const now = Math.floor(Date.now() / 1000);
   if (now <= user.expires_at) {
+    if (!user.id && user.claims?.sub) user.id = user.claims.sub;
     return next();
   }
 
@@ -152,6 +153,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     const config = await getOidcConfig();
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
+    if (!user.id && user.claims?.sub) user.id = user.claims.sub;
     return next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });
