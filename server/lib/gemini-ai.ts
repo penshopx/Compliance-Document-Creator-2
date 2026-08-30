@@ -49,3 +49,46 @@ export function isGeminiAvailable(): boolean {
     process.env.GEMINI_API_KEY
   );
 }
+
+/**
+ * Parses a Gemini SDK error and returns a clean, human-readable message.
+ *
+ * The SDK throws errors where `error.message` is already a JSON string
+ * (e.g. `{"error":{"code":403,"message":"...","status":"PERMISSION_DENIED"}}`).
+ * Wrapping that directly into `res.json({ error: error.message })` produces
+ * double-encoded JSON that is unreadable.  This helper extracts the real
+ * message so callers can do `res.json({ error: parseGeminiError(e) })`.
+ */
+export function parseGeminiError(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "Terjadi kesalahan pada layanan AI.";
+  }
+
+  // Try to parse JSON embedded in the error message (SDK style)
+  try {
+    const parsed = JSON.parse(error.message);
+    const inner = parsed?.error;
+    if (inner) {
+      const status: string = inner.status || "";
+      const msg: string = inner.message || "";
+      switch (status) {
+        case "PERMISSION_DENIED":
+          return "Akses Gemini API ditolak. Pastikan GEMINI_API_KEY valid dan proyek Anda memiliki akses ke model yang diminta.";
+        case "UNAUTHENTICATED":
+          return "API key Gemini tidak valid atau telah kedaluwarsa.";
+        case "RESOURCE_EXHAUSTED":
+          return "Kuota Gemini API habis. Coba lagi beberapa saat atau periksa batas penggunaan Anda.";
+        case "NOT_FOUND":
+          return `Model AI tidak ditemukan: ${msg}`;
+        case "INVALID_ARGUMENT":
+          return `Permintaan tidak valid: ${msg}`;
+        default:
+          return msg || error.message;
+      }
+    }
+  } catch {
+    // Not a JSON error message — fall through to raw message
+  }
+
+  return error.message;
+}

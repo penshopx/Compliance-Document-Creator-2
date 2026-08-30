@@ -7,7 +7,7 @@ import { generateDocumentWithProvider, chatWithProvider } from "./lib/ai-provide
 import { encryptSecret, decryptSecret, maskSecret } from "./lib/crypto";
 import { setupAuth, registerAuthRoutes, isAuthenticated, authStorage } from "./replit_integrations/auth";
 import { registerChatRoutes } from "./replit_integrations/chat";
-import { getGeminiClient, isGeminiAvailable } from "./lib/gemini-ai";
+import { getGeminiClient, isGeminiAvailable, parseGeminiError } from "./lib/gemini-ai";
 import { industryConfigs } from "@shared/data/industry-configs";
 import {
   PEDOMAN_SMAP_STRUCTURE,
@@ -352,9 +352,9 @@ Hasilkan dokumen LENGKAP dan SUBSTANTIF — bukan template kosong. Gunakan data 
     } catch (error) {
       console.error("Pancek generate error:", error);
       if (!res.headersSent) {
-        res.status(500).json({ error: "Gagal generate dokumen" });
+        res.status(500).json({ error: parseGeminiError(error) });
       } else {
-        res.write(`data: ${JSON.stringify({ error: "Gagal generate" })}\n\n`);
+        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
         res.end();
       }
     }
@@ -846,7 +846,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
         return res.status(400).json({ error: "Invalid request data" });
       }
       console.error("Chat error:", error);
-      res.status(500).json({ error: "Gagal memproses permintaan chat" });
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 
@@ -998,6 +998,18 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
     }
   });
 
+  // AI configuration status — reports whether a Gemini credential is configured.
+  // This does NOT verify that the key is valid or that the provider is reachable;
+  // it only checks env-var presence so it never consumes quota.
+  // Response: { configured: boolean, reason?: string }
+  app.get("/api/ai/status", async (req, res) => {
+    const configured = isGeminiAvailable();
+    if (!configured) {
+      return res.json({ configured: false, reason: "GEMINI_API_KEY tidak dikonfigurasi." });
+    }
+    return res.json({ configured: true, model: "gemini-2.5-flash" });
+  });
+
   // Gemini AI Document Generation
   // List the current user's saved AI providers (keys are never returned in full)
   app.get("/api/ai/keys", isAuthenticated, async (req, res) => {
@@ -1098,9 +1110,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid request", details: error.errors });
       }
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to generate content" 
-      });
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 
@@ -1136,9 +1146,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid request", details: error.errors });
       }
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to generate SMAP document" 
-      });
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 
@@ -1218,9 +1226,7 @@ Berikan jawaban singkat, jelas, dan membantu dalam Bahasa Indonesia. Jika ditany
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid request", details: error.errors });
       }
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to process help request" 
-      });
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 
@@ -1328,15 +1334,13 @@ ${validated.industry ? `Konteks industri saat ini: ${validated.industry}` : ''}`
     } catch (error) {
       console.error("Helpdesk chat error:", error);
       if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Terjadi kesalahan. Silakan coba lagi." })}\n\n`);
+        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
         res.end();
       } else {
         if (error instanceof z.ZodError) {
           return res.status(400).json({ error: "Invalid request", details: error.errors });
         }
-        res.status(500).json({ 
-          error: error instanceof Error ? error.message : "Failed to process helpdesk request" 
-        });
+        res.status(500).json({ error: parseGeminiError(error) });
       }
     }
   });
@@ -1490,10 +1494,10 @@ Gunakan bahasa Indonesia yang natural dan profesional.`;
     } catch (error) {
       console.error("Gustafta chat error:", error);
       if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Terjadi kesalahan. Silakan coba lagi." })}\n\n`);
+        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
         res.end();
       } else {
-        res.status(500).json({ error: "Failed to process Gustafta dialog" });
+        res.status(500).json({ error: parseGeminiError(error) });
       }
     }
   });
@@ -1607,7 +1611,7 @@ Pastikan rekomendasi realistis sesuai informasi yang digali dari dialog. Jika in
       res.json({ blueprint });
     } catch (error) {
       console.error("Gustafta blueprint error:", error);
-      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to generate blueprint" });
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 
@@ -1765,7 +1769,7 @@ Sesuaikan dokumenPrioritas berdasarkan kondisi perusahaan dari dialog (dokumen y
       res.json({ blueprint });
     } catch (error) {
       console.error("Pancek blueprint error:", error);
-      res.status(500).json({ error: "Gagal generate Blueprint Pancek." });
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 
@@ -3503,10 +3507,10 @@ OUTPUT: SOP Benturan Kepentingan + Formulir Disclosure + Log BK + panduan D.5 + 
     } catch (error) {
       console.error("Gustafta subagent error:", error);
       if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Terjadi kesalahan." })}\n\n`);
+        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
         res.end();
       } else {
-        res.status(500).json({ error: "Failed to process sub-agent request" });
+        res.status(500).json({ error: parseGeminiError(error) });
       }
     }
   });
@@ -3693,10 +3697,10 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
     } catch (error) {
       console.error("Gustafta collab error:", error);
       if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Terjadi kesalahan." })}\n\n`);
+        res.write(`data: ${JSON.stringify({ error: parseGeminiError(error), done: true })}\n\n`);
         res.end();
       } else {
-        res.status(500).json({ error: "Failed to process Gustafta Collab" });
+        res.status(500).json({ error: parseGeminiError(error) });
       }
     }
   });

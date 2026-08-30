@@ -1,4 +1,4 @@
-import { getGeminiClient } from "../lib/gemini-ai";
+import { getGeminiClient, parseGeminiError } from "../lib/gemini-ai";
 
 /**
  * Gemini AI Client for SMAP Document Generation
@@ -34,9 +34,7 @@ export async function generateDocumentContent(
     return response.text || "";
   } catch (error) {
     console.error("Gemini API error:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Failed to generate content"
-    );
+    throw new Error(parseGeminiError(error));
   }
 }
 
