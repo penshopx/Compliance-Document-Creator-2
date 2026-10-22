@@ -5,6 +5,29 @@ import {
 } from "../../lib/gemini-ai";
 import { chatStorage } from "./storage";
 
+function endSseWithError(res: Response, message: string): void {
+  // A client can disconnect while the provider or persistence operation is
+  // still running. In that case there is nothing left to write, but the
+  // response is already closed and must not cause another exception.
+  if (res.writableEnded || res.destroyed) {
+    return;
+  }
+
+  try {
+    res.write(`data: ${JSON.stringify({ error: message, done: true })}\n\n`);
+  } catch (writeError) {
+    console.error("Error writing SSE error event:", writeError);
+  } finally {
+    if (!res.writableEnded && !res.destroyed) {
+      try {
+        res.end();
+      } catch (endError) {
+        console.error("Error closing SSE response:", endError);
+      }
+    }
+  }
+}
+
 /*
 Supported models: gemini-2.5-flash (fast), gemini-2.5-pro (advanced reasoning)
 Uses Replit AI credits (AI_INTEGRATIONS_GEMINI_API_KEY) when available,
@@ -84,12 +107,12 @@ export function registerChatRoutes(app: Express): void {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
+      res.flushHeaders();
       sseStarted = true;
 
       // Check AI availability
       if (!isGeminiAvailable()) {
-        res.write(`data: ${JSON.stringify({ error: "AI tidak tersedia. Silakan konfigurasi API key.", done: true })}\n\n`);
-        res.end();
+        endSseWithError(res, "AI tidak tersedia. Silakan konfigurasi API key.");
         return;
       }
 
@@ -117,8 +140,7 @@ export function registerChatRoutes(app: Express): void {
       console.error("Error sending message:", error);
       // Check if headers already sent (SSE streaming started)
       if (sseStarted || res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: "Failed to send message", done: true })}\n\n`);
-        res.end();
+        endSseWithError(res, "Failed to send message");
       } else {
         res.status(500).json({ error: "Failed to send message" });
       }

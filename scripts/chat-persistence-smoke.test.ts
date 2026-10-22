@@ -13,9 +13,10 @@ function getTestPort(): number {
 }
 
 async function startFakeGeminiProvider(): Promise<HttpServer> {
-  const responseChunksByRequest = [
-    ["Balasan AI pertama ", "tetap tersimpan."],
-    ["Balasan AI kedua ", "juga tetap tersimpan."],
+  const responsePlans = [
+    { chunks: ["Balasan AI pertama ", "tetap tersimpan."] },
+    { chunks: ["Balasan AI kedua ", "juga tetap tersimpan."] },
+    { statusCode: 503 },
   ];
   let requestCount = 0;
 
@@ -25,14 +26,23 @@ async function startFakeGeminiProvider(): Promise<HttpServer> {
       return;
     }
 
+    const responsePlan = responsePlans[requestCount] ?? {
+      chunks: ["Balasan AI tak terduga."],
+    };
+    requestCount += 1;
+
+    if (responsePlan.statusCode) {
+      response.writeHead(responsePlan.statusCode).end("provider failure");
+      return;
+    }
+
     response.writeHead(200, {
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
       "Content-Type": "text/event-stream",
     });
 
-    const chunks = responseChunksByRequest[requestCount] ?? ["Balasan AI tak terduga."];
-    requestCount += 1;
+    const chunks = responsePlan.chunks ?? ["Balasan AI tak terduga."];
     for (const content of chunks) {
       response.write(
         `data: ${JSON.stringify({
@@ -237,6 +247,40 @@ test("chat conversations and streamed messages survive a server restart", async 
       assert.deepEqual(sseEvents.at(-1), { done: true });
     }
 
+    const providerFailureResponse = await fetch(
+      `${baseUrl}/api/conversations/${conversationId}/messages`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "Provider failure after SSE started" }),
+        signal: AbortSignal.timeout(requestTimeoutMs),
+      },
+    );
+    assert.equal(providerFailureResponse.status, 200);
+    assert.match(
+      providerFailureResponse.headers.get("content-type") ?? "",
+      /^text\/event-stream/,
+    );
+    const providerFailureEvents = parseSseEvents(await providerFailureResponse.text());
+    assert.deepEqual(providerFailureEvents, [
+      { error: "Failed to send message", done: true },
+    ]);
+
+    const expectedMessagesAfterProviderFailure = [
+      ...expectedMessages,
+      { role: "user", content: "Provider failure after SSE started" },
+    ];
+
+    const preSseFailure = await requestJson<{ error: string }>(
+      `${baseUrl}/api/conversations/999999999/messages`,
+      {
+        method: "POST",
+        body: JSON.stringify({ content: "Storage failure before SSE started" }),
+      },
+    );
+    assert.equal(preSseFailure.response.status, 500);
+    assert.deepEqual(preSseFailure.body, { error: "Failed to send message" });
+
     const fetchedBeforeRestart = await requestJson<{
       id: number;
       title: string;
@@ -246,7 +290,7 @@ test("chat conversations and streamed messages survive a server restart", async 
     assert.equal(fetchedBeforeRestart.body.id, conversationId);
     assert.deepEqual(
       fetchedBeforeRestart.body.messages.map(({ role, content }) => ({ role, content })),
-      expectedMessages,
+      expectedMessagesAfterProviderFailure,
     );
 
     await stopServer(server);
@@ -276,7 +320,7 @@ test("chat conversations and streamed messages survive a server restart", async 
     assert.equal(fetchedAfterRestart.body.title, "Persistence smoke test");
     assert.deepEqual(
       fetchedAfterRestart.body.messages.map(({ role, content }) => ({ role, content })),
-      expectedMessages,
+      expectedMessagesAfterProviderFailure,
     );
   } finally {
     if (server) {
