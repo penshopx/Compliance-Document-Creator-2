@@ -96,6 +96,7 @@ export const smapConfig: IndustryConfig = {
         { title: "Template Repository", url: "/template-repository", icon: "Library" },
         { title: "Referensi Dokumen", url: "/smap-reference", icon: "BookOpen" },
         { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Simulator Pemeriksaan", url: "/document-simulator", icon: "FileSearch", badge: "Baru" },
         { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
         { title: "PDCA Generator", url: "/pdca", icon: "Zap" }
       ]

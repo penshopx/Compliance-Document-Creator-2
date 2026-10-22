@@ -43,6 +43,7 @@ import AdminPaymentsPage from "@/pages/admin-payments";
 import GustafdaDialog from "@/pages/gustafta-dialog";
 import GustafdaCollab from "@/pages/gustafta-collab";
 import ProjectIntegrityPage from "@/pages/project-integrity";
+import DocumentSimulatorPage from "@/pages/document-simulator";
 import AiAvailabilityBanner from "@/components/ai-availability-banner";
 import { isIndustryEnabled } from "@/data/industry-configs";
 
@@ -66,6 +67,7 @@ function Router() {
       <Route path="/project-integrity" component={ProjectIntegrityPage} />
       <Route path="/vendors" component={VendorsPage} />
       <Route path="/documents" component={DocumentsPage} />
+      <Route path="/document-simulator" component={DocumentSimulatorPage} />
       <Route path="/pdca" component={PDCAGenerator} />
       <Route path="/document-builder" component={DocumentBuilder} />
       <Route path="/smap-reference" component={SMAPReferencePage} />

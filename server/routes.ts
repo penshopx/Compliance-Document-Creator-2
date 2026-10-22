@@ -55,6 +55,7 @@ import {
   vendors,
   documents,
   generatedDocuments,
+  documentSimulatorReviews,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -88,6 +89,35 @@ const saveAiKeySchema = z.object({
   provider: z.enum(AI_PROVIDER_IDS as [string, ...string[]]),
   apiKey: z.string().min(8).max(400),
   model: z.string().max(100).optional(),
+});
+
+const documentSimulatorRequestSchema = z.object({
+  standard: z.enum(["smap", "pancek"]),
+  sourceType: z.enum(["saved", "pasted"]),
+  sourceId: z.string().optional(),
+  sourceTitle: z.string().trim().min(1).max(200).optional(),
+  content: z.string().max(30000).optional(),
+}).refine(
+  (value) => value.sourceType === "saved"
+    ? !!value.sourceId
+    : !!value.content?.trim(),
+  { message: "Pilih dokumen tersimpan atau masukkan isi dokumen." },
+);
+
+const documentSimulatorResultSchema = z.object({
+  overallScore: z.number().int().min(0).max(100),
+  overallStatus: z.enum(["memadai", "perlu_perbaikan", "belum_memadai"]),
+  executiveSummary: z.string().min(1),
+  findings: z.array(z.object({
+    severity: z.enum(["kritis", "tinggi", "sedang", "rendah"]),
+    criterion: z.string(),
+    reference: z.string(),
+    evidence: z.string(),
+    gap: z.string(),
+    recommendation: z.string(),
+  })),
+  strengths: z.array(z.string()),
+  missingEvidence: z.array(z.string()),
 });
 
 const smapGenerateSchema = z.object({
@@ -1309,6 +1339,180 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete document" });
+    }
+  });
+
+  // Document compliance simulator — informational review, not certification.
+  app.get("/api/document-simulator/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const reviews = await db.select()
+        .from(documentSimulatorReviews)
+        .where(eq(documentSimulatorReviews.ownerId, userId))
+        .orderBy(desc(documentSimulatorReviews.createdAt))
+        .limit(20);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Document simulator history error:", error);
+      res.status(500).json({ error: "Gagal memuat riwayat pemeriksaan" });
+    }
+  });
+
+  app.post("/api/document-simulator/review", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as { id: string }).id;
+      const input = documentSimulatorRequestSchema.parse(req.body);
+      let sourceTitle = input.sourceTitle?.trim() || "Dokumen tempel";
+      let documentContent = input.content?.trim() || "";
+
+      if (input.sourceType === "saved") {
+        const documentId = input.sourceId!;
+        const [generatedDocument] = await db.select()
+          .from(generatedDocuments)
+          .where(and(
+            eq(generatedDocuments.id, documentId),
+            eq(generatedDocuments.ownerId, userId),
+          ))
+          .limit(1);
+        if (generatedDocument) {
+          sourceTitle = generatedDocument.title;
+          documentContent = generatedDocument.content;
+        } else {
+          const [savedDocument] = await db.select()
+            .from(documents)
+            .where(and(
+              eq(documents.id, documentId),
+              eq(documents.ownerId, userId),
+            ))
+            .limit(1);
+          if (!savedDocument) return res.status(404).json({ error: "Dokumen tidak ditemukan" });
+          sourceTitle = savedDocument.title;
+          documentContent = savedDocument.content || "";
+        }
+      }
+
+      if (!documentContent.trim()) {
+        return res.status(400).json({ error: "Isi dokumen kosong atau belum tersedia." });
+      }
+      if (documentContent.length > 30000) {
+        return res.status(400).json({ error: "Isi dokumen melebihi batas 30.000 karakter." });
+      }
+
+      const standardName = input.standard === "smap"
+        ? "SMAP — SNI ISO 37001:2016"
+        : "Pancek KPK — Panduan Cegah Korupsi dan kesiapan bukti Jaga.id";
+      const prompt = `Anda adalah simulator pemeriksaan dokumen kepatuhan di Indonesia. Lakukan review awal dokumen berikut terhadap ${standardName}.
+
+BATASAN PENTING:
+- Ini simulasi berbantuan AI, bukan audit resmi, pendapat hukum, sertifikasi, atau penilaian KPK.
+- Nilai hanya isi yang benar-benar tampak di dokumen. Jangan menganggap bukti, persetujuan, pelaksanaan, atau efektivitas ada jika tidak tertulis.
+- Bedakan kecukupan redaksi dokumen dari bukti implementasi. Jika dokumen kebijakan/prosedur tidak membuktikan pelaksanaan, catat sebagai bukti implementasi yang masih perlu diverifikasi.
+- Jangan mengarang klausul/indikator. Jika rujukan tidak pasti, nyatakan secara umum dan sarankan verifikasi manual.
+- Jangan mengulang keseluruhan dokumen. Temuan harus spesifik, dapat ditindaklanjuti, dan menyebut bukti/redaksi yang terlihat.
+
+KRITERIA SMAP:
+Periksa kecocokan tujuan dan ruang lingkup; komitmen pimpinan dan kebijakan anti-penyuapan; peran, kewenangan, independensi serta akses pelaporan FKAP; identifikasi/evaluasi risiko penyuapan; uji tuntas personel/mitra sesuai risiko; pengendalian keuangan dan non-keuangan; hadiah, donasi, konflik kepentingan dan kanal pelaporan; kompetensi/komunikasi; pengendalian informasi terdokumentasi; pemantauan, audit internal, tinjauan manajemen, penanganan insiden dan tindakan korektif. Gunakan klausul SNI ISO 37001:2016 hanya bila dapat dirujuk dengan yakin.
+
+KRITERIA PANCEK:
+Periksa kejelasan komitmen dan kebijakan anti-korupsi; tata kelola, penanggung jawab dan pengawasan; identifikasi risiko korupsi; pencegahan pada proses rawan (pengadaan, tender, perizinan, pembayaran, interaksi pihak ketiga); benturan kepentingan dan uji tuntas; kanal pelaporan serta tindak lanjut; komunikasi/pelatihan; monitoring, evaluasi dan perbaikan; serta apakah dokumen menunjukkan bukti pelaksanaan yang dapat mendukung pengisian/verifikasi Jaga.id. Jangan mengklaim persetujuan atau keterhubungan dengan Jaga.id.
+
+FORMAT JAWABAN:
+Kembalikan JSON valid saja, tanpa markdown, dengan bentuk persis:
+{
+  "overallScore": 0,
+  "overallStatus": "memadai | perlu_perbaikan | belum_memadai",
+  "executiveSummary": "ringkasan singkat dan seimbang",
+  "findings": [
+    {
+      "severity": "kritis | tinggi | sedang | rendah",
+      "criterion": "kriteria yang dinilai",
+      "reference": "klausul/indikator jika dapat dipastikan, selain itu nama area",
+      "evidence": "kutipan singkat atau bagian dokumen yang menjadi dasar; tulis 'Tidak ditemukan' bila tidak ada",
+      "gap": "kesenjangan spesifik atau alasan belum dapat dipastikan",
+      "recommendation": "langkah koreksi konkret"
+    }
+  ],
+  "strengths": ["kekuatan yang memang tampak dalam dokumen"],
+  "missingEvidence": ["bukti pelaksanaan yang perlu diverifikasi terpisah"]
+}
+
+Skor 0-100 mengukur kelengkapan dokumen yang diperiksa saja, bukan tingkat kepatuhan perusahaan. Status: 80-100 memadai untuk review awal, 50-79 perlu perbaikan, 0-49 belum memadai. Batasi temuan pada 12 item paling penting.
+
+JUDUL DOKUMEN: ${sourceTitle}
+
+ISI DOKUMEN:
+${documentContent}`;
+
+      let rawResult: string;
+      let model: string | null = null;
+      if (isGeminiAvailable()) {
+        const generated = await generateGeminiContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+        rawResult = generated.response.text || "";
+        model = generated.model;
+      } else {
+        const credential = await storage.getActiveAiCredential(userId);
+        if (!credential) {
+          return res.status(400).json({
+            error: "AI belum tersedia. Konfigurasikan AI di Pengaturan AI untuk menjalankan simulator.",
+            code: "NO_AI_KEY",
+          });
+        }
+        rawResult = await generateDocumentWithProvider({
+          provider: credential.provider,
+          apiKey: decryptSecret(credential.apiKey),
+          model: credential.model,
+          prompt,
+        });
+        model = credential.model;
+      }
+
+      const jsonText = rawResult
+        .trim()
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/, "");
+      let parsed: unknown;
+      try {
+        try {
+          parsed = JSON.parse(jsonText);
+        } catch {
+          const objectText = jsonText.match(/\{[\s\S]*\}/)?.[0];
+          if (!objectText) throw new Error("invalid JSON");
+          parsed = JSON.parse(objectText);
+        }
+      } catch {
+        return res.status(502).json({
+          error: "AI tidak mengembalikan format hasil pemeriksaan yang valid. Silakan coba lagi.",
+          code: "INVALID_AI_REVIEW",
+        });
+      }
+      let result: z.infer<typeof documentSimulatorResultSchema>;
+      try {
+        result = documentSimulatorResultSchema.parse(parsed);
+      } catch {
+        return res.status(502).json({
+          error: "Format hasil AI tidak sesuai. Jalankan review kembali.",
+          code: "INVALID_AI_REVIEW",
+        });
+      }
+
+      const [savedReview] = await db.insert(documentSimulatorReviews).values({
+        ownerId: userId,
+        standard: input.standard,
+        sourceTitle,
+        overallScore: result.overallScore,
+        overallStatus: result.overallStatus,
+        result,
+      }).returning();
+
+      res.status(201).json({ ...savedReview, model });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Data pemeriksaan tidak valid.", details: error.errors });
+      }
+      console.error("Document simulator review error:", error);
+      res.status(500).json({ error: parseGeminiError(error) });
     }
   });
 

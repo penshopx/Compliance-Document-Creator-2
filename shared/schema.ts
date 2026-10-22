@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, integer, boolean, timestamp, date, jsonb, serial, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { users } from "./models/auth";
 
 const dateStringSchema = z.preprocess(
   (val) => {
@@ -266,6 +267,20 @@ export const insertGeneratedDocumentSchema = createInsertSchema(generatedDocumen
 });
 export type InsertGeneratedDocument = z.infer<typeof insertGeneratedDocumentSchema>;
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
+
+// Saved document simulator reviews
+export const documentSimulatorReviews = pgTable("document_simulator_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: varchar("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  standard: text("standard").notNull(),
+  sourceTitle: text("source_title").notNull(),
+  overallScore: integer("overall_score").notNull(),
+  overallStatus: text("overall_status").notNull(),
+  result: jsonb("result").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type DocumentSimulatorReview = typeof documentSimulatorReviews.$inferSelect;
 
 // Document Templates
 export const documentTemplates = pgTable("document_templates", {
