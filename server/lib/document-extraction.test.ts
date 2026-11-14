@@ -78,6 +78,17 @@ function makeScannedPdf(): Buffer {
   ]);
 }
 
+function makeBlankPdf(pageCount: number): Buffer {
+  const pageReferences = Array.from({ length: pageCount }, (_, index) => `${index + 3} 0 R`).join(" ");
+  return makePdf([
+    Buffer.from("<< /Type /Catalog /Pages 2 0 R >>"),
+    Buffer.from(`<< /Type /Pages /Kids [${pageReferences}] /Count ${pageCount} >>`),
+    ...Array.from({ length: pageCount }, () =>
+      Buffer.from("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>"),
+    ),
+  ]);
+}
+
 function crc32(buffer: Buffer): number {
   let crc = 0xffffffff;
   for (const byte of buffer) {
@@ -150,6 +161,13 @@ test("recognizes Indonesian and English text from scanned PDF pages", async () =
   assert.match(result.content.toUpperCase(), /SMAP/);
   assert.equal(result.pageCount, 1);
   assert.equal(result.ocrPageCount, 1);
+});
+
+test("rejects PDFs with more scanned pages than the OCR limit", async () => {
+  await assert.rejects(
+    extractDocumentText(makeBlankPdf(21), "large-scan.pdf"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "ocr_limit",
+  );
 });
 
 test("extracts raw text from Word DOCX files", async () => {

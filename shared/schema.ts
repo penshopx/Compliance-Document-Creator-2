@@ -285,6 +285,7 @@ export type DocumentSimulatorReview = typeof documentSimulatorReviews.$inferSele
 export const DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH = 30_000;
 export const DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 export const DOCUMENT_SIMULATOR_MAX_PDF_PAGES = 60;
+export const DOCUMENT_SIMULATOR_MAX_OCR_PAGES = 20;
 
 export const documentSimulatorRequestSchema = z.object({
   standard: z.enum(["smap", "pancek"]),

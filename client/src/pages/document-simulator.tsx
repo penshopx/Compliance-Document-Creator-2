@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import {
   DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
+  DOCUMENT_SIMULATOR_MAX_OCR_PAGES,
   DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
   DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES,
 } from "@shared/schema";
@@ -475,7 +476,7 @@ export default function DocumentSimulatorPage() {
                     className="min-h-[230px] resize-y leading-6"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>PDF/Word maksimal 8 MB; PDF maksimal {DOCUMENT_SIMULATOR_MAX_PDF_PAGES} halaman. OCR Indonesia/Inggris maksimal 20 halaman scan; periksa ulang teks hasilnya.</span>
+                    <span>PDF/Word maksimal 8 MB; PDF maksimal {DOCUMENT_SIMULATOR_MAX_PDF_PAGES} halaman. OCR Indonesia/Inggris maksimal {DOCUMENT_SIMULATOR_MAX_OCR_PAGES} halaman scan; periksa ulang teks hasilnya.</span>
                     <span>{pastedContent.length.toLocaleString("id-ID")} / {DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH.toLocaleString("id-ID")} karakter</span>
                   </div>
                 </div>
