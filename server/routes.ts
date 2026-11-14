@@ -64,10 +64,13 @@ import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { getPancekStats } from "@shared/data/pancek-data";
 import {
-  DocumentExtractionError,
   extractUploadedDocument,
   MAX_DOCUMENT_UPLOAD_BYTES,
 } from "./lib/document-extraction";
+import {
+  mapDocumentExtractionFailure,
+  mapDocumentUploadMiddlewareFailure,
+} from "./lib/document-upload-errors";
 
 const documentSimulatorUpload = multer({
   storage: multer.memoryStorage(),
@@ -1346,10 +1349,8 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   app.post("/api/document-simulator/extract", isAuthenticated, (req, res, next) => {
     documentSimulatorUpload(req, res, (error) => {
       if (!error) return next();
-      if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
-        return res.status(413).json({ error: "Ukuran file maksimal 8 MB." });
-      }
-      return res.status(400).json({ error: "File tidak dapat diterima. Pilih satu file PDF atau Word." });
+      const failure = mapDocumentUploadMiddlewareFailure(error);
+      return res.status(failure.status).json({ error: failure.error });
     });
   }, async (req, res) => {
     const file = req.file;
@@ -1359,21 +1360,9 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       const result = await extractUploadedDocument(file.buffer, file.originalname);
       res.json(result);
     } catch (error) {
-      if (error instanceof DocumentExtractionError) {
-        const status = error.code === "text_too_long" || error.code === "too_many_pages"
-          || error.code === "ocr_limit" || error.code === "upload_too_large"
-          ? 413
-          : error.code === "ocr_busy"
-            ? 429
-          : error.code === "empty_text" || error.code === "ocr_failed"
-            ? 422
-          : error.code === "legacy_doc_failed"
-            ? 422
-            : 400;
-        return res.status(status).json({ error: error.message });
-      }
-      console.error("Document simulator extraction error:", error);
-      return res.status(500).json({ error: "Dokumen gagal diproses. Coba lagi dengan file lain." });
+      const failure = mapDocumentExtractionFailure(error);
+      if (failure.status === 500) console.error("Document simulator extraction error:", error);
+      return res.status(failure.status).json({ error: failure.error });
     }
   });
 
