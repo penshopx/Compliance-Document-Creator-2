@@ -8,6 +8,7 @@ import {
   MAX_DOCUMENT_UPLOAD_BYTES,
   MAX_PDF_PAGES,
   MAX_OCR_PAGES,
+  parseOcrPage,
 } from "./document-extraction";
 
 import {
@@ -170,6 +171,7 @@ test("extracts selectable PDF text without invoking OCR", async () => {
   assert.equal(result.content, "SMAP evidence");
   assert.equal(result.pageCount, 1);
   assert.equal(result.ocrPageCount, undefined);
+  assert.equal(result.ocrPages, undefined);
 });
 
 test("recognizes Indonesian and English text from scanned PDF pages", async () => {
@@ -177,6 +179,30 @@ test("recognizes Indonesian and English text from scanned PDF pages", async () =
   assert.match(result.content.toUpperCase(), /SMAP/);
   assert.equal(result.pageCount, 1);
   assert.equal(result.ocrPageCount, 1);
+  assert.equal(result.ocrPages?.length, 1);
+  assert.equal(result.ocrPages?.[0].pageNumber, 1);
+  assert.ok(result.ocrPages?.[0].confidence !== null);
+  assert.equal(result.ocrPages?.[0].needsReview, true);
+});
+
+test("flags OCR pages with low or missing word confidence for review", () => {
+  const lowConfidence = parseOcrPage(
+    4,
+    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t42\tKebijakan\n",
+  );
+  const unreadable = parseOcrPage(
+    7,
+    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n",
+  );
+  const clearPage = parseOcrPage(
+    9,
+    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\tSMAP\n",
+  );
+
+  assert.equal(lowConfidence.text, "Kebijakan");
+  assert.deepEqual(lowConfidence.quality, { pageNumber: 4, confidence: 42, needsReview: true });
+  assert.deepEqual(unreadable.quality, { pageNumber: 7, confidence: null, needsReview: true });
+  assert.deepEqual(clearPage.quality, { pageNumber: 9, confidence: 95, needsReview: false });
 });
 
 test("rejects PDFs with more scanned pages than the OCR limit", async () => {

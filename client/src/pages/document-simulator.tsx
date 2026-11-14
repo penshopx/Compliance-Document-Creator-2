@@ -85,6 +85,16 @@ type SavedReview = {
 };
 
 type ReviewResponse = SavedReview & { model: string };
+type OcrPageQuality = {
+  pageNumber: number;
+  confidence: number | null;
+  needsReview: boolean;
+};
+type FileFeedback = {
+  kind: "success" | "warning";
+  message: string;
+  ocrPages?: OcrPageQuality[];
+};
 
 const severityStyles: Record<string, string> = {
   kritis: "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200",
@@ -141,7 +151,7 @@ export default function DocumentSimulatorPage() {
   const [pastedContent, setPastedContent] = useState("");
   const [pastedTitle, setPastedTitle] = useState("");
   const [isExtractingFile, setIsExtractingFile] = useState(false);
-  const [fileFeedback, setFileFeedback] = useState<{ kind: "success" | "warning"; message: string } | null>(null);
+  const [fileFeedback, setFileFeedback] = useState<FileFeedback | null>(null);
   const [activeReview, setActiveReview] = useState<SavedReview | ReviewResponse | null>(null);
   const [historySearch, setHistorySearch] = useState("");
 
@@ -232,6 +242,7 @@ export default function DocumentSimulatorPage() {
       let title = file.name.replace(/\.(txt|md|pdf|docx?)$/i, "").slice(0, 200);
       let pageCount: number | undefined;
       let ocrPageCount: number | undefined;
+      let ocrPages: OcrPageQuality[] | undefined;
       if (extension === "txt" || extension === "md") {
         const extracted = extractPlainTextDocument(file.name, await file.text());
         content = extracted.content;
@@ -248,6 +259,7 @@ export default function DocumentSimulatorPage() {
           title?: string;
           pageCount?: number;
           ocrPageCount?: number;
+          ocrPages?: OcrPageQuality[];
           error?: string;
         };
         if (!response.ok) throw new Error(result.error || "Dokumen gagal diproses.");
@@ -256,6 +268,7 @@ export default function DocumentSimulatorPage() {
         title = result.title || title;
         pageCount = result.pageCount;
         ocrPageCount = result.ocrPageCount;
+        ocrPages = result.ocrPages;
       }
       if (!content.trim()) {
         throw new Error("File tidak berisi teks yang bisa dibaca.");
@@ -269,7 +282,7 @@ export default function DocumentSimulatorPage() {
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
       const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
       const feedback = `${file.name} berhasil dimuat.${pageInfo}${ocrInfo} Periksa teks hasil ekstraksi, lalu jalankan review.`;
-      setFileFeedback({ kind: "success", message: feedback });
+      setFileFeedback({ kind: "success", message: feedback, ocrPages });
       toast({ title: "Dokumen berhasil dimuat", description: feedback });
     } catch (error) {
       const message = error instanceof Error
@@ -471,6 +484,28 @@ export default function DocumentSimulatorPage() {
                       {fileFeedback.message}
                     </div>
                   )}
+                  {fileFeedback?.ocrPages?.length ? (
+                    <div
+                      className={`rounded-md border px-3 py-2.5 text-sm ${
+                        fileFeedback.ocrPages.some((page) => page.needsReview)
+                          ? "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100"
+                          : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200"
+                      }`}
+                      role="status"
+                      aria-label="Kualitas OCR per halaman"
+                    >
+                      <p className="font-semibold">Pemeriksaan halaman hasil scan</p>
+                      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                        {fileFeedback.ocrPages.map((page) => (
+                          <li key={page.pageNumber}>
+                            Halaman {page.pageNumber}: {page.needsReview ? "perlu diperiksa ulang" : "keyakinan baik"}
+                            {page.confidence !== null ? ` (${page.confidence}%)` : " (teks tidak terbaca)"}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-1 text-xs opacity-80">Anda tetap dapat mengedit teks hasil ekstraksi di bawah ini sebelum menjalankan review.</p>
+                    </div>
+                  ) : null}
                   <Textarea
                     id="pasted-content"
                     value={pastedContent}

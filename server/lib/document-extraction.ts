@@ -23,6 +23,13 @@ export const MAX_OCR_PAGES = DOCUMENT_SIMULATOR_MAX_OCR_PAGES;
 const PDF_RENDER_TIMEOUT_MS = 20_000;
 const OCR_TIMEOUT_MS = 30_000;
 const LEGACY_WORD_TIMEOUT_MS = 15_000;
+const OCR_LOW_CONFIDENCE_THRESHOLD = 70;
+
+export type OcrPageQuality = {
+  pageNumber: number;
+  confidence: number | null;
+  needsReview: boolean;
+};
 
 let ocrBusy = false;
 
@@ -47,7 +54,40 @@ export class DocumentExtractionError extends Error {
   }
 }
 
-async function recognizePdfPages(buffer: Buffer, pageNumbers: number[], maxTextLength: number): Promise<string[]> {
+export function parseOcrPage(
+  pageNumber: number,
+  tsv: string,
+): { text: string; quality: OcrPageQuality } {
+  const rows = tsv.trim().split(/\r?\n/);
+  const words: Array<{ text: string; confidence: number }> = [];
+
+  for (const row of rows.slice(1)) {
+    const columns = row.split("\t");
+    if (columns[0] !== "5" || !columns[11]?.trim()) continue;
+    const confidence = Number(columns[10]);
+    if (Number.isFinite(confidence) && confidence >= 0) {
+      words.push({ text: columns[11].trim(), confidence });
+    }
+  }
+
+  const confidence = words.length
+      ? Math.round(words.reduce((total, word) => total + word.confidence, 0) / words.length)
+      : null;
+  return {
+    text: words.map((word) => word.text).join(" ").trim(),
+    quality: {
+      pageNumber,
+      confidence,
+      needsReview: confidence === null || confidence < OCR_LOW_CONFIDENCE_THRESHOLD,
+    },
+  };
+}
+
+async function recognizePdfPages(
+  buffer: Buffer,
+  pageNumbers: number[],
+  maxTextLength: number,
+): Promise<{ text: string; quality: OcrPageQuality }[]> {
   if (pageNumbers.length > MAX_OCR_PAGES) {
     throw new DocumentExtractionError(
       `Ditemukan ${pageNumbers.length} halaman hasil scan. Batas OCR adalah ${MAX_OCR_PAGES} halaman per file; bagi dokumen menjadi beberapa bagian.`,
@@ -65,7 +105,7 @@ async function recognizePdfPages(buffer: Buffer, pageNumbers: number[], maxTextL
     const pdfPath = join(workDirectory, "source.pdf");
     await writeFile(pdfPath, buffer, { mode: 0o600 });
 
-    const pageTexts: string[] = [];
+    const pages: { text: string; quality: OcrPageQuality }[] = [];
     let extractedLength = 0;
     for (const pageNumber of pageNumbers) {
       const imagePrefix = join(workDirectory, `page-${pageNumber}`);
@@ -86,8 +126,10 @@ async function recognizePdfPages(buffer: Buffer, pageNumbers: number[], maxTextL
         "stdout",
         "-l", "ind+eng",
         "--psm", "3",
+        "tsv",
       ], { timeout: OCR_TIMEOUT_MS, maxBuffer: 1024 * 1024 });
-      const pageText = stdout.trim();
+      const parsedPage = parseOcrPage(pageNumber, stdout);
+      const pageText = parsedPage.text;
       extractedLength += pageText.length;
       if (extractedLength > maxTextLength) {
         throw new DocumentExtractionError(
@@ -95,10 +137,10 @@ async function recognizePdfPages(buffer: Buffer, pageNumbers: number[], maxTextL
           "text_too_long",
         );
       }
-      pageTexts.push(pageText);
+      pages.push(parsedPage);
       await rm(imagePath, { force: true });
     }
-    return pageTexts;
+    return pages;
   } catch (error) {
     if (error instanceof DocumentExtractionError) throw error;
     throw new DocumentExtractionError(
@@ -199,11 +241,12 @@ function validateDocxArchive(buffer: Buffer) {
 export async function extractDocumentText(
   buffer: Buffer,
   fileName: string,
-): Promise<{ content: string; pageCount?: number; ocrPageCount?: number }> {
+): Promise<{ content: string; pageCount?: number; ocrPageCount?: number; ocrPages?: OcrPageQuality[] }> {
   const extension = fileName.toLowerCase().split(".").pop();
   let content: string;
   let pageCount: number | undefined;
   let ocrPageCount: number | undefined;
+  let ocrPages: OcrPageQuality[] | undefined;
 
   if (extension === "pdf") {
     if (buffer.length < 5 || buffer.subarray(0, 5).toString("ascii") !== "%PDF-") {
@@ -256,7 +299,8 @@ export async function extractDocumentText(
           MAX_DOCUMENT_TEXT_LENGTH - nativeTextLength,
         );
         ocrPageCount = pagesNeedingOcr.length;
-        recognizedPages.forEach((text, index) => { pageTexts[pagesNeedingOcr[index] - 1] = text; });
+        ocrPages = recognizedPages.map(({ quality }) => quality);
+        recognizedPages.forEach(({ text }, index) => { pageTexts[pagesNeedingOcr[index] - 1] = text; });
       }
       content = pageTexts.join("\n\n").trim();
     } catch (error) {
@@ -302,13 +346,20 @@ export async function extractDocumentText(
     );
   }
 
-  return { content, pageCount, ocrPageCount };
+  return { content, pageCount, ocrPageCount, ocrPages };
 }
 
 export async function extractUploadedDocument(
   buffer: Buffer,
   originalName: string,
-): Promise<{ title: string; fileName: string; content: string; pageCount?: number; ocrPageCount?: number }> {
+): Promise<{
+  title: string;
+  fileName: string;
+  content: string;
+  pageCount?: number;
+  ocrPageCount?: number;
+  ocrPages?: OcrPageQuality[];
+}> {
   if (buffer.length > MAX_DOCUMENT_UPLOAD_BYTES) {
     throw new DocumentExtractionError(
       `Ukuran file maksimal ${MAX_DOCUMENT_UPLOAD_BYTES / (1024 * 1024)} MB.`,
