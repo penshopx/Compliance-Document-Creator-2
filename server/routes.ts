@@ -1,7 +1,6 @@
 import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import { basename, extname } from "node:path";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
 import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
@@ -66,8 +65,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { getPancekStats } from "@shared/data/pancek-data";
 import {
   DocumentExtractionError,
-  extractDocumentText,
-  MAX_DOCUMENT_TEXT_LENGTH,
+  extractUploadedDocument,
   MAX_DOCUMENT_UPLOAD_BYTES,
 } from "./lib/document-extraction";
 
@@ -1357,19 +1355,13 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
     const file = req.file;
     if (!file) return res.status(400).json({ error: "Pilih file PDF atau Word." });
 
-    const originalName = basename(file.originalname).replace(/[\u0000-\u001f\u007f]/g, "").trim();
-    const extension = extname(originalName).toLowerCase();
-    if (![".pdf", ".doc", ".docx"].includes(extension)) {
-      return res.status(400).json({ error: "Format file tidak didukung. Pilih PDF atau Word .doc/.docx." });
-    }
-
     try {
-      const { content, pageCount, ocrPageCount } = await extractDocumentText(file.buffer, originalName);
-      const title = originalName.slice(0, -extension.length).trim().slice(0, 200) || "Dokumen impor";
-      res.json({ title, fileName: originalName, content, pageCount, ocrPageCount });
+      const result = await extractUploadedDocument(file.buffer, file.originalname);
+      res.json(result);
     } catch (error) {
       if (error instanceof DocumentExtractionError) {
-        const status = error.code === "text_too_long" || error.code === "too_many_pages" || error.code === "ocr_limit"
+        const status = error.code === "text_too_long" || error.code === "too_many_pages"
+          || error.code === "ocr_limit" || error.code === "upload_too_large"
           ? 413
           : error.code === "ocr_busy"
             ? 429

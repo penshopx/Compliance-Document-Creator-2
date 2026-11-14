@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
 import mammoth from "mammoth";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
@@ -34,7 +34,8 @@ export type DocumentExtractionErrorCode =
   | "ocr_limit"
   | "ocr_busy"
   | "ocr_failed"
-  | "legacy_doc_failed";
+  | "legacy_doc_failed"
+  | "upload_too_large";
 
 export class DocumentExtractionError extends Error {
   constructor(
@@ -302,4 +303,31 @@ export async function extractDocumentText(
   }
 
   return { content, pageCount, ocrPageCount };
+}
+
+export async function extractUploadedDocument(
+  buffer: Buffer,
+  originalName: string,
+): Promise<{ title: string; fileName: string; content: string; pageCount?: number; ocrPageCount?: number }> {
+  if (buffer.length > MAX_DOCUMENT_UPLOAD_BYTES) {
+    throw new DocumentExtractionError(
+      `Ukuran file maksimal ${MAX_DOCUMENT_UPLOAD_BYTES / (1024 * 1024)} MB.`,
+      "upload_too_large",
+    );
+  }
+
+  const fileName = basename(originalName.replaceAll("\\", "/"))
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  const extension = extname(fileName).toLowerCase();
+  if (!fileName || ![".pdf", ".doc", ".docx"].includes(extension)) {
+    throw new DocumentExtractionError(
+      "Format file tidak didukung. Pilih PDF atau Word .doc/.docx.",
+      "invalid_file",
+    );
+  }
+
+  const extracted = await extractDocumentText(buffer, fileName);
+  const title = fileName.slice(0, -extension.length).trim().slice(0, 200) || "Dokumen impor";
+  return { title, fileName, ...extracted };
 }

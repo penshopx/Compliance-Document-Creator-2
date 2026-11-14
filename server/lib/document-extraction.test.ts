@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { deflateSync, gunzipSync } from "node:zlib";
 import { test } from "node:test";
-import { DocumentExtractionError, extractDocumentText } from "./document-extraction";
+import {
+  DocumentExtractionError,
+  extractDocumentText,
+  extractUploadedDocument,
+  MAX_DOCUMENT_UPLOAD_BYTES,
+} from "./document-extraction";
 
 function makePdf(objects: Buffer[]): Buffer {
   const chunks = [Buffer.from("%PDF-1.4\n")];
@@ -180,6 +185,31 @@ test("extracts raw text from legacy Word DOC files", async () => {
   const result = await extractDocumentText(legacyWordSample, "policy.doc");
   assert.equal(result.content, "This is a simple file created with Word 97-SR2.");
   assert.equal(result.pageCount, undefined);
+});
+
+test("validates uploads and sanitizes the displayed PDF filename", async () => {
+  const result = await extractUploadedDocument(makeNativePdf("SMAP evidence"), "C:\\private\\policy.pdf");
+  assert.equal(result.fileName, "policy.pdf");
+  assert.equal(result.title, "policy");
+  assert.equal(result.content, "SMAP evidence");
+});
+
+test("accepts DOCX and legacy DOC through the upload path", async () => {
+  const docx = await extractUploadedDocument(makeMinimalDocx(), "policy.docx");
+  const doc = await extractUploadedDocument(legacyWordSample, "policy.doc");
+  assert.equal(docx.content, "Word anti bribery evidence");
+  assert.equal(doc.content, "This is a simple file created with Word 97-SR2.");
+});
+
+test("rejects unsupported and oversized uploads before extraction", async () => {
+  await assert.rejects(
+    extractUploadedDocument(Buffer.from("plain text"), "policy.rtf"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "invalid_file",
+  );
+  await assert.rejects(
+    extractUploadedDocument(Buffer.alloc(MAX_DOCUMENT_UPLOAD_BYTES + 1), "large.doc"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "upload_too_large",
+  );
 });
 
 test("rejects invalid file signatures and unsupported formats", async () => {
