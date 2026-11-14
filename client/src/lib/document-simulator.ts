@@ -19,6 +19,24 @@ export function isPastedDocumentReady(content: string, maxLength: number): boole
   return Boolean(content.trim()) && content.length <= maxLength;
 }
 
+export function getDocumentPageText(content: string, pageNumber: number): string | null {
+  if (!Number.isSafeInteger(pageNumber) || pageNumber < 1) return null;
+
+  const lines = content.split(/\r?\n/);
+  const start = lines.findIndex((line) => line.trim() === `--- Halaman ${pageNumber} ---`);
+  if (start < 0) return null;
+
+  let end = lines.length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    if (/^---\s*Halaman\s+\d+\s*---$/i.test(lines[index].trim())) {
+      end = index;
+      break;
+    }
+  }
+
+  return lines.slice(start + 1, end).join("\n").trim();
+}
+
 export function buildDocumentReviewPayload(input: {
   standard: DocumentReviewStandard;
   sourceType: DocumentSourceType;

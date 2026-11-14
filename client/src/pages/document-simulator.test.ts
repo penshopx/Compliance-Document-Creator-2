@@ -18,6 +18,8 @@ let reviewRequests: Array<Record<string, unknown>>;
 let extractionResponse: { status: number; body: Record<string, unknown> };
 let DocumentSimulatorPage: ComponentType;
 let originalFetch: typeof fetch;
+let originalCreateObjectURL: typeof URL.createObjectURL;
+let originalRevokeObjectURL: typeof URL.revokeObjectURL;
 
 const pause = (milliseconds = 20) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -51,6 +53,10 @@ beforeEach(async () => {
   dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost", pretendToBeVisual: true });
   setDomGlobals(dom.window as unknown as Window & typeof globalThis);
   originalFetch = globalThis.fetch;
+  originalCreateObjectURL = URL.createObjectURL;
+  originalRevokeObjectURL = URL.revokeObjectURL;
+  URL.createObjectURL = (() => "blob:scan-preview") as typeof URL.createObjectURL;
+  URL.revokeObjectURL = (() => undefined) as typeof URL.revokeObjectURL;
   reviewRequests = [];
   extractionResponse = { status: 200, body: { title: "Imported policy", content: "Extracted policy text." } };
   queryClient.clear();
@@ -102,6 +108,8 @@ afterEach(async () => {
   queryClient.clear();
   dom?.window.close();
   globalThis.fetch = originalFetch;
+  URL.createObjectURL = originalCreateObjectURL;
+  URL.revokeObjectURL = originalRevokeObjectURL;
 });
 
 async function switchToTextSource() {
@@ -173,6 +181,44 @@ for (const filename of ["policy.pdf", "policy.docx"]) {
     assert.equal(reviewRequests[0].content, "PDF/Word extracted text.");
   });
 }
+
+test("scanned PDF can be compared page by page with its editable extracted text", async () => {
+  extractionResponse = {
+    status: 200,
+    body: {
+      title: "Scanned policy",
+      content: "--- Halaman 2 ---\nOCR text from page two\n\n--- Halaman 4 ---\nOCR text from page four",
+      pageCount: 4,
+      ocrPageCount: 2,
+      ocrPages: [
+        { pageNumber: 2, confidence: 54, needsReview: true },
+        { pageNumber: 4, confidence: 88, needsReview: false },
+      ],
+    },
+  };
+  await switchToTextSource();
+  await selectFile("scanned-policy.pdf", "binary file content");
+
+  const pageSelector = container.querySelector<HTMLSelectElement>("#scan-preview-page");
+  assert.ok(pageSelector, "scan comparison should provide a page selector");
+  assert.equal(pageSelector.value, "2");
+  assert.equal(
+    container.querySelector<HTMLIFrameElement>('iframe[title="Scan asli halaman 2"]')?.getAttribute("src"),
+    "blob:scan-preview#page=2&view=FitH",
+  );
+  assert.equal(container.querySelector('[data-testid="ocr-page-comparison-text"]')?.textContent, "OCR text from page two");
+
+  await act(async () => {
+    pageSelector.value = "4";
+    pageSelector.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+    await pause();
+  });
+  assert.equal(
+    container.querySelector<HTMLIFrameElement>('iframe[title="Scan asli halaman 4"]')?.getAttribute("src"),
+    "blob:scan-preview#page=4&view=FitH",
+  );
+  assert.equal(container.querySelector('[data-testid="ocr-page-comparison-text"]')?.textContent, "OCR text from page four");
+});
 
 test("an empty text file shows feedback and cannot start a review", async () => {
   await switchToTextSource();

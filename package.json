@@ -10,7 +10,7 @@
     "check": "tsc",
     "test:gemini-status": "tsx --test server/lib/gemini-ai.test.ts",
     "test:document-extraction": "tsx --test server/lib/document-extraction.test.ts server/lib/document-upload-errors.test.ts",
-    "test:document-simulator": "tsx --test client/src/lib/document-simulator.test.ts",
+    "test:document-simulator": "tsx --test client/src/lib/document-simulator.test.ts client/src/pages/document-simulator.test.ts",
     "test:document-simulator-component": "tsx --test client/src/pages/document-simulator.test.ts",
     "test:document-review-pages": "tsx --test server/lib/document-review-pages.test.ts",
     "test:document-extraction-route": "tsx --test server/lib/document-extraction-route.test.ts",

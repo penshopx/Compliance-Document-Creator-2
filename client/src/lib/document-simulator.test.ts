@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   buildDocumentReviewPayload,
   createEditableDocument,
+  getDocumentPageText,
   isPastedDocumentReady,
 } from "./document-simulator";
 
@@ -18,6 +19,13 @@ test("review is ready only when editable text is present and within the limit", 
   assert.equal(isPastedDocumentReady(" \n ", 100), false);
   assert.equal(isPastedDocumentReady("abc", 3), true);
   assert.equal(isPastedDocumentReady("abcd", 3), false);
+});
+
+test("gets the editable text for one marked PDF page", () => {
+  const content = "--- Halaman 1 ---\nCover\n\n--- Halaman 3 ---\nOCR evidence\nMore evidence";
+
+  assert.equal(getDocumentPageText(content, 3), "OCR evidence\nMore evidence");
+  assert.equal(getDocumentPageText(content, 2), null);
 });
 
 test("the review request uses the edited text and preserves page markers", () => {

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
@@ -33,6 +33,7 @@ import { assertDocumentUploadSize, extractPlainTextDocument } from "@/lib/docume
 import {
   buildDocumentReviewPayload,
   createEditableDocument,
+  getDocumentPageText,
   isPastedDocumentReady,
   type DocumentReviewStandard,
   type DocumentSourceType,
@@ -104,6 +105,11 @@ type FileFeedback = {
   message: string;
   ocrPages?: OcrPageQuality[];
 };
+type ScanPreview = {
+  url: string;
+  title: string;
+  pages: OcrPageQuality[];
+};
 
 const severityStyles: Record<string, string> = {
   kritis: "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200",
@@ -160,8 +166,15 @@ export default function DocumentSimulatorPage() {
   const [pastedDocument, setPastedDocument] = useState<EditableDocument>(() => createEditableDocument("", ""));
   const [isExtractingFile, setIsExtractingFile] = useState(false);
   const [fileFeedback, setFileFeedback] = useState<FileFeedback | null>(null);
+  const [scanPreview, setScanPreview] = useState<ScanPreview | null>(null);
+  const [selectedScanPage, setSelectedScanPage] = useState<number | null>(null);
   const [activeReview, setActiveReview] = useState<SavedReview | ReviewResponse | null>(null);
   const [historySearch, setHistorySearch] = useState("");
+
+  useEffect(() => {
+    if (!scanPreview?.url) return;
+    return () => URL.revokeObjectURL(scanPreview.url);
+  }, [scanPreview?.url]);
 
   const generatedQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/generated-documents"] });
   const documentsQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/documents"] });
@@ -279,6 +292,13 @@ export default function DocumentSimulatorPage() {
       }
       setSourceType("pasted");
       setPastedDocument(createEditableDocument(title, content));
+      if (extension === "pdf" && ocrPages?.length) {
+        setScanPreview({ url: URL.createObjectURL(file), title, pages: ocrPages });
+        setSelectedScanPage(ocrPages[0].pageNumber);
+      } else {
+        setScanPreview(null);
+        setSelectedScanPage(null);
+      }
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
       const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
       const feedback = `${file.name} berhasil dimuat.${pageInfo}${ocrInfo} Periksa teks hasil ekstraksi, lalu jalankan review.`;
@@ -506,6 +526,53 @@ export default function DocumentSimulatorPage() {
                       </ul>
                       <p className="mt-1 text-xs opacity-80">Penanda halaman dan teks hasil OCR tetap dapat diedit di bawah ini sebelum menjalankan review.</p>
                     </div>
+                  ) : null}
+                  {scanPreview && selectedScanPage !== null ? (
+                    <section
+                      className="rounded-lg border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-900 dark:bg-blue-950/20"
+                      aria-label="Bandingkan hasil OCR dengan halaman scan asli"
+                    >
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <h3 className="text-sm font-semibold">Bandingkan dengan scan asli</h3>
+                          <p className="text-xs text-muted-foreground">{scanPreview.title}</p>
+                        </div>
+                        <label className="flex items-center gap-2 text-xs font-medium" htmlFor="scan-preview-page">
+                          Halaman
+                          <select
+                            id="scan-preview-page"
+                            value={selectedScanPage}
+                            onChange={(event) => setSelectedScanPage(Number(event.target.value))}
+                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                          >
+                            {scanPreview.pages.map((page) => (
+                              <option key={page.pageNumber} value={page.pageNumber}>Halaman {page.pageNumber}</option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                      <div className="grid gap-3 lg:grid-cols-2">
+                        <div className="min-w-0">
+                          <p className="mb-1.5 text-xs font-semibold">Halaman scan asli</p>
+                          <iframe
+                            key={`${scanPreview.url}-${selectedScanPage}`}
+                            src={`${scanPreview.url}#page=${selectedScanPage}&view=FitH`}
+                            title={`Scan asli halaman ${selectedScanPage}`}
+                            className="h-[360px] w-full rounded-md border bg-white"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="mb-1.5 text-xs font-semibold">Teks hasil ekstraksi</p>
+                          <pre
+                            data-testid="ocr-page-comparison-text"
+                            className="h-[360px] overflow-auto whitespace-pre-wrap rounded-md border bg-background p-3 text-sm leading-6"
+                          >
+                            {getDocumentPageText(pastedDocument.content, selectedScanPage)
+                              || "Tidak ada teks OCR yang terbaca untuk halaman ini. Periksa scan asli atau edit teks di editor."}
+                          </pre>
+                        </div>
+                      </div>
+                    </section>
                   ) : null}
                   <Textarea
                     id="pasted-content"
