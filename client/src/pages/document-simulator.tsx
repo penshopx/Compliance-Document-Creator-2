@@ -232,9 +232,14 @@ export default function DocumentSimulatorPage() {
 
   const handleFile = async (file?: File) => {
     if (!file) return;
+    const hasExistingValidDraft = sourceType === "pasted"
+      && isPastedDocumentReady(pastedDocument.content, DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH);
+    const withDraftNotice = (message: string) => hasExistingValidDraft
+      ? `${message} Draf sebelumnya tetap tersedia dan tidak diubah.`
+      : message;
     const extension = file.name.split(".").pop()?.toLowerCase();
     if (!extension || !["txt", "md", "pdf", "doc", "docx"].includes(extension)) {
-      const message = "Pilih file .txt, .md, .pdf, .doc, atau .docx.";
+      const message = withDraftNotice("Pilih file .txt, .md, .pdf, .doc, atau .docx.");
       setFileFeedback({ kind: "warning", message });
       toast({ title: "Format file tidak didukung", description: message, variant: "destructive" });
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -243,7 +248,7 @@ export default function DocumentSimulatorPage() {
     try {
       assertDocumentUploadSize(file.size);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Ukuran file maksimal 8 MB.";
+      const message = withDraftNotice(error instanceof Error ? error.message : "Ukuran file maksimal 8 MB.");
       setFileFeedback({ kind: "warning", message });
       toast({ title: "File terlalu besar", description: message, variant: "destructive" });
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -290,15 +295,14 @@ export default function DocumentSimulatorPage() {
       if (content.length > DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH) {
         throw new Error("Teks dokumen melebihi batas 30.000 karakter. Bagi dokumen menjadi beberapa bagian.");
       }
+      const nextScanPreview = extension === "pdf" && ocrPages?.length
+        ? { url: URL.createObjectURL(file), title, pages: ocrPages }
+        : null;
+
       setSourceType("pasted");
       setPastedDocument(createEditableDocument(title, content));
-      if (extension === "pdf" && ocrPages?.length) {
-        setScanPreview({ url: URL.createObjectURL(file), title, pages: ocrPages });
-        setSelectedScanPage(ocrPages[0].pageNumber);
-      } else {
-        setScanPreview(null);
-        setSelectedScanPage(null);
-      }
+      setScanPreview(nextScanPreview);
+      setSelectedScanPage(nextScanPreview?.pages[0].pageNumber ?? null);
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
       const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
       const feedback = `${file.name} berhasil dimuat.${pageInfo}${ocrInfo} Periksa teks hasil ekstraksi, lalu jalankan review.`;
@@ -308,8 +312,9 @@ export default function DocumentSimulatorPage() {
       const message = error instanceof Error
         ? error.message
         : "Pastikan format file didukung dan dokumen tidak rusak.";
-      setFileFeedback({ kind: "warning", message });
-      toast({ title: "Dokumen tidak dapat dibaca", description: message, variant: "destructive" });
+      const feedback = withDraftNotice(message);
+      setFileFeedback({ kind: "warning", message: feedback });
+      toast({ title: "Dokumen tidak dapat dibaca", description: feedback, variant: "destructive" });
     } finally {
       setIsExtractingFile(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

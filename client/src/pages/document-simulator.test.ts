@@ -220,6 +220,42 @@ test("scanned PDF can be compared page by page with its editable extracted text"
   assert.equal(container.querySelector('[data-testid="ocr-page-comparison-text"]')?.textContent, "OCR text from page four");
 });
 
+test("failed replacement imports preserve the current draft and scan preview", async () => {
+  extractionResponse = {
+    status: 200,
+    body: {
+      title: "Current policy",
+      content: "--- Halaman 2 ---\nCurrent OCR text",
+      pageCount: 2,
+      ocrPageCount: 1,
+      ocrPages: [{ pageNumber: 2, confidence: 60, needsReview: true }],
+    },
+  };
+  await switchToTextSource();
+  await selectFile("current-policy.pdf", "binary file content");
+
+  const assertDraftRetained = () => {
+    assert.equal((container.querySelector<HTMLInputElement>("#source-title"))?.value, "Current policy");
+    assert.equal((container.querySelector<HTMLTextAreaElement>("#pasted-content"))?.value, "--- Halaman 2 ---\nCurrent OCR text");
+    assert.equal(
+      container.querySelector<HTMLIFrameElement>('iframe[title="Scan asli halaman 2"]')?.getAttribute("src"),
+      "blob:scan-preview#page=2&view=FitH",
+    );
+    assert.match(container.textContent || "", /Draf sebelumnya tetap tersedia dan tidak diubah/i);
+    assert.equal(reviewButton().disabled, false);
+  };
+
+  await selectFile("unsupported.rtf", "replacement content");
+  assertDraftRetained();
+
+  await selectFile("too-large.pdf", "", DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES + 1);
+  assertDraftRetained();
+
+  extractionResponse = { status: 422, body: { error: "Dokumen pengganti rusak." } };
+  await selectFile("broken-replacement.pdf", "binary file content");
+  assertDraftRetained();
+});
+
 test("an empty text file shows feedback and cannot start a review", async () => {
   await switchToTextSource();
   await selectFile("empty.txt", " \n ");
