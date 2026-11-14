@@ -31,13 +31,21 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { assertDocumentUploadSize, extractPlainTextDocument } from "@/lib/document-extraction";
 import {
+  buildDocumentReviewPayload,
+  createEditableDocument,
+  isPastedDocumentReady,
+  type DocumentReviewStandard,
+  type DocumentSourceType,
+  type EditableDocument,
+} from "@/lib/document-simulator";
+import {
   DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
   DOCUMENT_SIMULATOR_MAX_OCR_PAGES,
   DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
 } from "@shared/schema";
 
-type Standard = "smap" | "pancek";
-type SourceType = "saved" | "pasted";
+type Standard = DocumentReviewStandard;
+type SourceType = DocumentSourceType;
 
 type SavedDocument = {
   id: string;
@@ -148,8 +156,7 @@ export default function DocumentSimulatorPage() {
   const [standard, setStandard] = useState<Standard>("smap");
   const [sourceType, setSourceType] = useState<SourceType>("saved");
   const [selectedDocumentId, setSelectedDocumentId] = useState("");
-  const [pastedContent, setPastedContent] = useState("");
-  const [pastedTitle, setPastedTitle] = useState("");
+  const [pastedDocument, setPastedDocument] = useState<EditableDocument>(() => createEditableDocument("", ""));
   const [isExtractingFile, setIsExtractingFile] = useState(false);
   const [fileFeedback, setFileFeedback] = useState<FileFeedback | null>(null);
   const [activeReview, setActiveReview] = useState<SavedReview | ReviewResponse | null>(null);
@@ -172,23 +179,16 @@ export default function DocumentSimulatorPage() {
   const selectedDocument = savedDocuments.find((document) => document.id === selectedDocumentId);
   const sourceReady = sourceType === "saved"
     ? Boolean(selectedDocument?.content?.trim()) && (selectedDocument?.content.length ?? 0) <= DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH
-    : Boolean(pastedContent.trim()) && pastedContent.length <= DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH;
+    : isPastedDocumentReady(pastedDocument.content, DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH);
 
   const reviewMutation = useMutation({
     mutationFn: async () => {
-      const payload = sourceType === "saved"
-        ? {
-            standard,
-            sourceType,
-            sourceId: selectedDocument?.id,
-            sourceTitle: selectedDocument?.title,
-          }
-        : {
-            standard,
-            sourceType,
-            sourceTitle: pastedTitle.trim() || "Teks yang ditempel",
-            content: pastedContent.trim(),
-          };
+      const payload = buildDocumentReviewPayload({
+        standard,
+        sourceType,
+        selectedDocument,
+        pastedDocument,
+      });
       const response = await apiRequest("POST", "/api/document-simulator/review", payload);
       return response.json() as Promise<ReviewResponse>;
     },
@@ -277,8 +277,7 @@ export default function DocumentSimulatorPage() {
         throw new Error("Teks dokumen melebihi batas 30.000 karakter. Bagi dokumen menjadi beberapa bagian.");
       }
       setSourceType("pasted");
-      setPastedTitle(title);
-      setPastedContent(content);
+      setPastedDocument(createEditableDocument(title, content));
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
       const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
       const feedback = `${file.name} berhasil dimuat.${pageInfo}${ocrInfo} Periksa teks hasil ekstraksi, lalu jalankan review.`;
@@ -452,8 +451,9 @@ export default function DocumentSimulatorPage() {
                   <label className="text-sm font-semibold" htmlFor="source-title">Judul sumber <span className="font-normal text-muted-foreground">(opsional)</span></label>
                   <input
                     id="source-title"
-                    value={pastedTitle}
-                    onChange={(event) => setPastedTitle(event.target.value)}
+                    value={pastedDocument.title}
+                    onChange={(event) => setPastedDocument((current) => ({ ...current, title: event.target.value }))}
+                    disabled={isExtractingFile}
                     placeholder="Contoh: Prosedur uji tuntas mitra"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
@@ -508,15 +508,16 @@ export default function DocumentSimulatorPage() {
                   ) : null}
                   <Textarea
                     id="pasted-content"
-                    value={pastedContent}
+                    value={pastedDocument.content}
                     maxLength={DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH}
-                    onChange={(event) => setPastedContent(event.target.value)}
+                    onChange={(event) => setPastedDocument((current) => ({ ...current, content: event.target.value }))}
+                    disabled={isExtractingFile}
                     placeholder="Tempelkan isi dokumen yang ingin ditinjau…"
                     className="min-h-[230px] resize-y leading-6"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>PDF/Word maksimal 8 MB; PDF maksimal {DOCUMENT_SIMULATOR_MAX_PDF_PAGES} halaman. OCR Indonesia/Inggris maksimal {DOCUMENT_SIMULATOR_MAX_OCR_PAGES} halaman scan; periksa ulang teks hasilnya.</span>
-                    <span>{pastedContent.length.toLocaleString("id-ID")} / {DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH.toLocaleString("id-ID")} karakter</span>
+                    <span>{pastedDocument.content.length.toLocaleString("id-ID")} / {DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH.toLocaleString("id-ID")} karakter</span>
                   </div>
                   <p className="text-xs text-muted-foreground">Penanda halaman PDF ditambahkan ke isi dokumen dan dapat diedit sebelum review.</p>
                 </div>
@@ -530,7 +531,7 @@ export default function DocumentSimulatorPage() {
               </p>
               <Button
                 onClick={() => reviewMutation.mutate()}
-                disabled={!sourceReady || isLoadingDocuments || reviewMutation.isPending || (sourceType === "saved" && documentLoadError)}
+                disabled={!sourceReady || isLoadingDocuments || isExtractingFile || reviewMutation.isPending || (sourceType === "saved" && documentLoadError)}
                 className="h-11 shrink-0 bg-blue-700 px-5 text-white hover:bg-blue-800 dark:bg-blue-500 dark:text-slate-950 dark:hover:bg-blue-400"
               >
                 {reviewMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
