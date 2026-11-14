@@ -136,6 +136,7 @@ export default function DocumentSimulatorPage() {
   const [pastedTitle, setPastedTitle] = useState("");
   const [activeReview, setActiveReview] = useState<SavedReview | ReviewResponse | null>(null);
   const [historySearch, setHistorySearch] = useState("");
+  const [isExtractingFile, setIsExtractingFile] = useState(false);
 
   const generatedQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/generated-documents"] });
   const documentsQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/documents"] });
@@ -200,12 +201,43 @@ export default function DocumentSimulatorPage() {
 
   const handleFile = async (file?: File) => {
     if (!file) return;
-    if (!/\.(txt|md)$/i.test(file.name)) {
-      toast({ title: "Format file tidak didukung", description: "Pilih file .txt atau .md.", variant: "destructive" });
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    if (!extension || !["txt", "md", "pdf", "docx"].includes(extension)) {
+      toast({ title: "Format file tidak didukung", description: "Pilih file .txt, .md, .pdf, atau .docx.", variant: "destructive" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
+    if (file.size > 8 * 1024 * 1024) {
+      toast({ title: "File terlalu besar", description: "Ukuran file maksimal 8 MB.", variant: "destructive" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    setIsExtractingFile(true);
     try {
-      const content = await file.text();
+      let content: string;
+      let title = file.name.replace(/\.(txt|md|pdf|docx)$/i, "");
+      let pageCount: number | undefined;
+      if (extension === "txt" || extension === "md") {
+        content = await file.text();
+      } else {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/document-simulator/extract", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json().catch(() => ({})) as {
+          content?: string;
+          title?: string;
+          pageCount?: number;
+          error?: string;
+        };
+        if (!response.ok) throw new Error(result.error || "Dokumen gagal diproses.");
+        if (!result.content) throw new Error("Teks tidak ditemukan di dalam dokumen.");
+        content = result.content;
+        title = result.title || title;
+        pageCount = result.pageCount;
+      }
       if (content.length > 30000) {
         toast({
           title: "Dokumen terlalu panjang",
@@ -215,12 +247,18 @@ export default function DocumentSimulatorPage() {
         return;
       }
       setSourceType("pasted");
-      setPastedTitle(file.name.replace(/\.(txt|md)$/i, ""));
+      setPastedTitle(title);
       setPastedContent(content);
-      toast({ title: "File berhasil dimuat", description: `${file.name} siap ditinjau.` });
-    } catch {
-      toast({ title: "File tidak dapat dibaca", description: "Coba pilih file teks lain.", variant: "destructive" });
+      const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
+      toast({ title: "Dokumen berhasil dimuat", description: `${file.name} siap ditinjau.${pageInfo}` });
+    } catch (error) {
+      toast({
+        title: "Dokumen tidak dapat dibaca",
+        description: error instanceof Error ? error.message : "Pastikan format file didukung dan tidak rusak.",
+        variant: "destructive",
+      });
     } finally {
+      setIsExtractingFile(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -390,16 +428,19 @@ export default function DocumentSimulatorPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <label className="text-sm font-semibold" htmlFor="pasted-content">Isi dokumen</label>
-                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                      <Upload className="mr-2 h-3.5 w-3.5" /> Impor .txt / .md
+                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isExtractingFile}>
+                      {isExtractingFile
+                        ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        : <Upload className="mr-2 h-3.5 w-3.5" />}
+                      {isExtractingFile ? "Mengekstrak…" : "Impor file"}
                     </Button>
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept=".txt,.md,text/plain,text/markdown"
+                      accept=".txt,.md,.pdf,.docx,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                       className="hidden"
                       onChange={(event) => void handleFile(event.target.files?.[0])}
-                      aria-label="Impor file teks"
+                      aria-label="Impor TXT, Markdown, PDF, atau Word"
                     />
                   </div>
                   <Textarea
@@ -411,7 +452,7 @@ export default function DocumentSimulatorPage() {
                     className="min-h-[230px] resize-y leading-6"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Konten hanya dikirim saat Anda menjalankan review.</span>
+                    <span>PDF/Word diekstrak sementara; isi dikirim untuk review saat Anda menjalankannya.</span>
                     <span>{pastedContent.length.toLocaleString("id-ID")} / 30.000 karakter</span>
                   </div>
                 </div>

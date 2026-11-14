@@ -1,5 +1,7 @@
 import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import { basename, extname } from "node:path";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
 import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
@@ -60,6 +62,17 @@ import {
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { getPancekStats } from "@shared/data/pancek-data";
+import {
+  DocumentExtractionError,
+  extractDocumentText,
+  MAX_DOCUMENT_TEXT_LENGTH,
+  MAX_DOCUMENT_UPLOAD_BYTES,
+} from "./lib/document-extraction";
+
+const documentSimulatorUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_DOCUMENT_UPLOAD_BYTES, files: 1 },
+}).single("file");
 
 // AI Request Validation Schemas
 const aiGenerateSchema = z.object({
@@ -1343,6 +1356,42 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   });
 
   // Document compliance simulator — informational review, not certification.
+  app.post("/api/document-simulator/extract", isAuthenticated, (req, res, next) => {
+    documentSimulatorUpload(req, res, (error) => {
+      if (!error) return next();
+      if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({ error: "Ukuran file maksimal 8 MB." });
+      }
+      return res.status(400).json({ error: "File tidak dapat diterima. Pilih satu file PDF atau Word .docx." });
+    });
+  }, async (req, res) => {
+    const file = req.file;
+    if (!file) return res.status(400).json({ error: "Pilih file PDF atau Word .docx." });
+
+    const originalName = basename(file.originalname).replace(/[\u0000-\u001f\u007f]/g, "").trim();
+    const extension = extname(originalName).toLowerCase();
+    if (![".pdf", ".docx"].includes(extension)) {
+      return res.status(400).json({ error: "Format file tidak didukung. Pilih PDF atau Word .docx." });
+    }
+
+    try {
+      const { content, pageCount } = await extractDocumentText(file.buffer, originalName);
+      const title = originalName.slice(0, -extension.length).trim().slice(0, 200) || "Dokumen impor";
+      res.json({ title, fileName: originalName, content, pageCount });
+    } catch (error) {
+      if (error instanceof DocumentExtractionError) {
+        const status = error.code === "text_too_long" || error.code === "too_many_pages"
+          ? 413
+          : error.code === "empty_text"
+            ? 422
+            : 400;
+        return res.status(status).json({ error: error.message });
+      }
+      console.error("Document simulator extraction error:", error);
+      return res.status(500).json({ error: "Dokumen gagal diproses. Coba lagi dengan file lain." });
+    }
+  });
+
   app.get("/api/document-simulator/reviews", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as { id: string }).id;
