@@ -8,3 +8,5 @@ When a page is rendered through `tsx --test`, initialize jsdom globals before dy
 **Why:** The browser build supplies these globals and transforms JSX differently, while the Node test environment does not.
 
 **How to apply:** For new component tests, render with React DOM under the project's QueryClientProvider, set up jsdom first, and restore global fetch after each test.
+
+For document editors that transform page-scoped text, test the pure replacement logic directly alongside render assertions. Synthetic textarea input events have not reliably exercised controlled editor callbacks in this harness.

@@ -33,7 +33,6 @@ import { assertDocumentUploadSize, extractPlainTextDocument } from "@/lib/docume
 import {
   buildDocumentReviewPayload,
   createEditableDocument,
-  getDocumentPageText,
   isPastedDocumentReady,
   type DocumentReviewStandard,
   type DocumentSourceType,
@@ -44,6 +43,8 @@ import {
   DOCUMENT_SIMULATOR_MAX_OCR_PAGES,
   DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
 } from "@shared/schema";
+
+import DocumentScanComparison from "@/components/document-scan-comparison";
 
 type Standard = DocumentReviewStandard;
 type SourceType = DocumentSourceType;
@@ -167,7 +168,6 @@ export default function DocumentSimulatorPage() {
   const [isExtractingFile, setIsExtractingFile] = useState(false);
   const [fileFeedback, setFileFeedback] = useState<FileFeedback | null>(null);
   const [scanPreview, setScanPreview] = useState<ScanPreview | null>(null);
-  const [selectedScanPage, setSelectedScanPage] = useState<number | null>(null);
   const [activeReview, setActiveReview] = useState<SavedReview | ReviewResponse | null>(null);
   const [historySearch, setHistorySearch] = useState("");
 
@@ -302,7 +302,6 @@ export default function DocumentSimulatorPage() {
       setSourceType("pasted");
       setPastedDocument(createEditableDocument(title, content));
       setScanPreview(nextScanPreview);
-      setSelectedScanPage(nextScanPreview?.pages[0].pageNumber ?? null);
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
       const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
       const feedback = `${file.name} berhasil dimuat.${pageInfo}${ocrInfo} Periksa teks hasil ekstraksi, lalu jalankan review.`;
@@ -532,52 +531,17 @@ export default function DocumentSimulatorPage() {
                       <p className="mt-1 text-xs opacity-80">Penanda halaman dan teks hasil OCR tetap dapat diedit di bawah ini sebelum menjalankan review.</p>
                     </div>
                   ) : null}
-                  {scanPreview && selectedScanPage !== null ? (
-                    <section
-                      className="rounded-lg border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-900 dark:bg-blue-950/20"
-                      aria-label="Bandingkan hasil OCR dengan halaman scan asli"
-                    >
-                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <div>
-                          <h3 className="text-sm font-semibold">Bandingkan dengan scan asli</h3>
-                          <p className="text-xs text-muted-foreground">{scanPreview.title}</p>
-                        </div>
-                        <label className="flex items-center gap-2 text-xs font-medium" htmlFor="scan-preview-page">
-                          Halaman
-                          <select
-                            id="scan-preview-page"
-                            value={selectedScanPage}
-                            onChange={(event) => setSelectedScanPage(Number(event.target.value))}
-                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                          >
-                            {scanPreview.pages.map((page) => (
-                              <option key={page.pageNumber} value={page.pageNumber}>Halaman {page.pageNumber}</option>
-                            ))}
-                          </select>
-                        </label>
-                      </div>
-                      <div className="grid gap-3 lg:grid-cols-2">
-                        <div className="min-w-0">
-                          <p className="mb-1.5 text-xs font-semibold">Halaman scan asli</p>
-                          <iframe
-                            key={`${scanPreview.url}-${selectedScanPage}`}
-                            src={`${scanPreview.url}#page=${selectedScanPage}&view=FitH`}
-                            title={`Scan asli halaman ${selectedScanPage}`}
-                            className="h-[360px] w-full rounded-md border bg-white"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="mb-1.5 text-xs font-semibold">Teks hasil ekstraksi</p>
-                          <pre
-                            data-testid="ocr-page-comparison-text"
-                            className="h-[360px] overflow-auto whitespace-pre-wrap rounded-md border bg-background p-3 text-sm leading-6"
-                          >
-                            {getDocumentPageText(pastedDocument.content, selectedScanPage)
-                              || "Tidak ada teks OCR yang terbaca untuk halaman ini. Periksa scan asli atau edit teks di editor."}
-                          </pre>
-                        </div>
-                      </div>
-                    </section>
+                  {scanPreview ? (
+                    <div className="mt-3">
+                      <DocumentScanComparison
+                        pages={scanPreview.pages}
+                        pdfUrl={scanPreview.url}
+                        title={scanPreview.title}
+                        content={pastedDocument.content}
+                        onContentChange={(content) => setPastedDocument((current) => ({ ...current, content }))}
+                        disabled={isExtractingFile}
+                      />
+                    </div>
                   ) : null}
                   <Textarea
                     id="pasted-content"

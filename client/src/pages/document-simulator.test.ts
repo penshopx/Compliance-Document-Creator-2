@@ -199,14 +199,14 @@ test("scanned PDF can be compared page by page with its editable extracted text"
   await switchToTextSource();
   await selectFile("scanned-policy.pdf", "binary file content");
 
-  const pageSelector = container.querySelector<HTMLSelectElement>("#scan-preview-page");
+  const pageSelector = container.querySelector<HTMLSelectElement>("#scan-comparison-page");
   assert.ok(pageSelector, "scan comparison should provide a page selector");
   assert.equal(pageSelector.value, "2");
   assert.equal(
-    container.querySelector<HTMLIFrameElement>('iframe[title="Scan asli halaman 2"]')?.getAttribute("src"),
+    container.querySelector<HTMLIFrameElement>('iframe[title="Dokumen asli, halaman 2"]')?.getAttribute("src"),
     "blob:scan-preview#page=2&view=FitH",
   );
-  assert.equal(container.querySelector('[data-testid="ocr-page-comparison-text"]')?.textContent, "OCR text from page two");
+  assert.equal(container.querySelector<HTMLTextAreaElement>("#scan-extracted-page-text")?.value, "OCR text from page two");
 
   await act(async () => {
     pageSelector.value = "4";
@@ -214,10 +214,10 @@ test("scanned PDF can be compared page by page with its editable extracted text"
     await pause();
   });
   assert.equal(
-    container.querySelector<HTMLIFrameElement>('iframe[title="Scan asli halaman 4"]')?.getAttribute("src"),
+    container.querySelector<HTMLIFrameElement>('iframe[title="Dokumen asli, halaman 4"]')?.getAttribute("src"),
     "blob:scan-preview#page=4&view=FitH",
   );
-  assert.equal(container.querySelector('[data-testid="ocr-page-comparison-text"]')?.textContent, "OCR text from page four");
+  assert.equal(container.querySelector<HTMLTextAreaElement>("#scan-extracted-page-text")?.value, "OCR text from page four");
 });
 
 test("failed replacement imports preserve the current draft and scan preview", async () => {
@@ -238,7 +238,7 @@ test("failed replacement imports preserve the current draft and scan preview", a
     assert.equal((container.querySelector<HTMLInputElement>("#source-title"))?.value, "Current policy");
     assert.equal((container.querySelector<HTMLTextAreaElement>("#pasted-content"))?.value, "--- Halaman 2 ---\nCurrent OCR text");
     assert.equal(
-      container.querySelector<HTMLIFrameElement>('iframe[title="Scan asli halaman 2"]')?.getAttribute("src"),
+      container.querySelector<HTMLIFrameElement>('iframe[title="Dokumen asli, halaman 2"]')?.getAttribute("src"),
       "blob:scan-preview#page=2&view=FitH",
     );
     assert.match(container.textContent || "", /Draf sebelumnya tetap tersedia dan tidak diubah/i);
@@ -296,4 +296,40 @@ test("an extraction response without readable text shows feedback and cannot sta
 
   assert.match(container.textContent || "", /Tidak ada teks/i);
   await assertReviewBlockedByImport();
+});
+
+test("a scanned PDF opens a side-by-side editor and syncs page edits to the document", async () => {
+  extractionResponse = {
+    status: 200,
+    body: {
+      title: "Scanned policy",
+      content: "--- Halaman 1 ---\n[Halaman 1 — hasil OCR]\nSMAP policy text",
+      pageCount: 1,
+      ocrPageCount: 1,
+      ocrPages: [{ pageNumber: 1, confidence: 55, needsReview: true }],
+    },
+  };
+  await switchToTextSource();
+  await selectFile("scanned-policy.pdf", "binary file content");
+
+  const compare = container.querySelector("#scan-comparison-title");
+  assert.ok(compare, "scan comparison should open for scanned PDF imports");
+  const originalPage = container.querySelector<HTMLIFrameElement>('iframe[title="Dokumen asli, halaman 1"]');
+  assert.ok(originalPage);
+  assert.match(originalPage.src, /#page=1/);
+  const pageEditor = container.querySelector<HTMLTextAreaElement>("#scan-extracted-page-text");
+  assert.equal(pageEditor?.value, "[Halaman 1 — hasil OCR]\nSMAP policy text");
+  const { replaceScannedPageText } = await import("../components/document-scan-comparison");
+  const content = "--- Halaman 1 ---\nOriginal OCR\n\n--- Halaman 2 ---\nOther page";
+  const updatedContent = replaceScannedPageText(content, 1, "Corrected OCR");
+  assert.equal(updatedContent, "--- Halaman 1 ---\nCorrected OCR\n\n--- Halaman 2 ---\nOther page");
+  assert.equal(replaceScannedPageText(content, 3, "Unexpected"), null);
+});
+
+test("plain text imports do not show scan comparison controls", async () => {
+  await switchToTextSource();
+  await selectFile("policy.txt", "Plain policy text.");
+
+  assert.equal(container.querySelector("#scan-comparison-title"), null);
+  assert.equal(container.querySelector("#scan-extracted-page-text"), null);
 });
