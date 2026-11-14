@@ -71,6 +71,10 @@ import {
   mapDocumentExtractionFailure,
   mapDocumentUploadMiddlewareFailure,
 } from "./lib/document-upload-errors";
+import {
+  extractDocumentPageNumbers,
+  sanitizeFindingPageNumbers,
+} from "./lib/document-review-pages";
 
 const documentSimulatorUpload = multer({
   storage: multer.memoryStorage(),
@@ -118,6 +122,7 @@ const documentSimulatorResultSchema = z.object({
     evidence: z.string(),
     gap: z.string(),
     recommendation: z.string(),
+    pageNumbers: z.array(z.number().int().positive()).catch([]),
   })),
   strengths: z.array(z.string()),
   missingEvidence: z.array(z.string()),
@@ -1432,6 +1437,7 @@ BATASAN PENTING:
 - Bedakan kecukupan redaksi dokumen dari bukti implementasi. Jika dokumen kebijakan/prosedur tidak membuktikan pelaksanaan, catat sebagai bukti implementasi yang masih perlu diverifikasi.
 - Jangan mengarang klausul/indikator. Jika rujukan tidak pasti, nyatakan secara umum dan sarankan verifikasi manual.
 - Jangan mengulang keseluruhan dokumen. Temuan harus spesifik, dapat ditindaklanjuti, dan menyebut bukti/redaksi yang terlihat.
+- Jika dokumen memuat penanda halaman seperti "--- Halaman 3 ---", isi pageNumbers pada setiap temuan dengan nomor halaman yang benar-benar mendukung bukti. Jika lokasi bukti tidak dapat dipastikan, isi [] dan jangan menebak.
 
 KRITERIA SMAP:
 Periksa kecocokan tujuan dan ruang lingkup; komitmen pimpinan dan kebijakan anti-penyuapan; peran, kewenangan, independensi serta akses pelaporan FKAP; identifikasi/evaluasi risiko penyuapan; uji tuntas personel/mitra sesuai risiko; pengendalian keuangan dan non-keuangan; hadiah, donasi, konflik kepentingan dan kanal pelaporan; kompetensi/komunikasi; pengendalian informasi terdokumentasi; pemantauan, audit internal, tinjauan manajemen, penanganan insiden dan tindakan korektif. Gunakan klausul SNI ISO 37001:2016 hanya bila dapat dirujuk dengan yakin.
@@ -1452,7 +1458,8 @@ Kembalikan JSON valid saja, tanpa markdown, dengan bentuk persis:
       "reference": "klausul/indikator jika dapat dipastikan, selain itu nama area",
       "evidence": "kutipan singkat atau bagian dokumen yang menjadi dasar; tulis 'Tidak ditemukan' bila tidak ada",
       "gap": "kesenjangan spesifik atau alasan belum dapat dipastikan",
-      "recommendation": "langkah koreksi konkret"
+      "recommendation": "langkah koreksi konkret",
+      "pageNumbers": [3]
     }
   ],
   "strengths": ["kekuatan yang memang tampak dalam dokumen"],
@@ -1519,6 +1526,11 @@ ${documentContent}`;
           code: "INVALID_AI_REVIEW",
         });
       }
+      const sourcePageNumbers = extractDocumentPageNumbers(documentContent);
+      result.findings = result.findings.map((finding) => ({
+        ...finding,
+        pageNumbers: sanitizeFindingPageNumbers(finding.pageNumbers, sourcePageNumbers),
+      }));
 
       const [savedReview] = await db.insert(documentSimulatorReviews).values({
         ownerId: userId,

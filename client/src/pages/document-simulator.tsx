@@ -66,6 +66,7 @@ type Finding = {
   evidence: string;
   gap: string;
   recommendation: string;
+  pageNumbers?: number[];
 };
 
 type AssessmentResult = {
@@ -718,6 +719,11 @@ function AssessmentPanel({ review, result }: { review: SavedReview | ReviewRespo
                     <div>
                       <h4 className="text-sm font-semibold">{finding.criterion || `Temuan ${index + 1}`}</h4>
                       {finding.reference && <p className="mt-1 text-xs font-mono text-muted-foreground">{finding.reference}</p>}
+                      {finding.pageNumbers?.length ? (
+                        <p className="mt-1 text-xs font-medium text-blue-700 dark:text-blue-300">
+                          Halaman sumber: {finding.pageNumbers.join(", ")}
+                        </p>
+                      ) : null}
                     </div>
                     <Badge variant="outline" className={`capitalize ${severityClass(finding.severity || "")}`}>{finding.severity || "Belum ditentukan"}</Badge>
                   </div>
