@@ -40,16 +40,25 @@ function makePdf(objects: Buffer[]): Buffer {
   return Buffer.concat(chunks);
 }
 
-function makeNativePdf(text: string): Buffer {
-  const escaped = text.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
-  const stream = Buffer.from(`BT /F1 12 Tf 72 720 Td (${escaped}) Tj ET`);
-  return makePdf([
+function makeNativePdf(text: string | string[]): Buffer {
+  const pages = Array.isArray(text) ? text : [text];
+  const fontReference = 3 + pages.length * 2;
+  const objects = [
     Buffer.from("<< /Type /Catalog /Pages 2 0 R >>"),
-    Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"),
-    Buffer.from("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>"),
-    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"),
-    Buffer.concat([Buffer.from(`<< /Length ${stream.length} >>\nstream\n`), stream, Buffer.from("\nendstream")]),
-  ]);
+    Buffer.from(`<< /Type /Pages /Kids [${pages.map((_, index) => `${3 + index * 2} 0 R`).join(" ")}] /Count ${pages.length} >>`),
+  ];
+  pages.forEach((pageText, index) => {
+    const pageReference = 3 + index * 2;
+    const contentReference = pageReference + 1;
+    const escaped = pageText.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
+    const stream = Buffer.from(`BT /F1 12 Tf 72 720 Td (${escaped}) Tj ET`);
+    objects.push(
+      Buffer.from(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 ${fontReference} 0 R >> >> /Contents ${contentReference} 0 R >>`),
+      Buffer.concat([Buffer.from(`<< /Length ${stream.length} >>\nstream\n`), stream, Buffer.from("\nendstream")]),
+    );
+  });
+  objects.push(Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"));
+  return makePdf(objects);
 }
 
 function makeScannedPdf(scannedPageNumber = 1): Buffer {
@@ -194,14 +203,27 @@ const legacyWordSample = gunzipSync(Buffer.from(
 
 test("extracts selectable PDF text without invoking OCR", async () => {
   const result = await extractDocumentText(makeNativePdf("SMAP evidence"), "policy.pdf");
-  assert.equal(result.content, "SMAP evidence");
+  assert.equal(result.content, "--- Halaman 1 ---\nSMAP evidence");
   assert.equal(result.pageCount, 1);
   assert.equal(result.ocrPageCount, undefined);
   assert.equal(result.ocrPages, undefined);
 });
 
+test("preserves page boundaries and selectable text from multi-page PDFs", async () => {
+  const result = await extractDocumentText(
+    makeNativePdf(["Policy evidence", "Audit trail"]),
+    "multi-page-policy.pdf",
+  );
+  assert.equal(
+    result.content,
+    "--- Halaman 1 ---\nPolicy evidence\n\n--- Halaman 2 ---\nAudit trail",
+  );
+  assert.equal(result.pageCount, 2);
+});
+
 test("recognizes Indonesian and English text from scanned PDF pages", async () => {
   const result = await extractDocumentText(makeScannedPdf(), "scanned-policy.pdf");
+  assert.match(result.content, /^--- Halaman 1 ---\n/);
   assert.match(result.content.toUpperCase(), /SMAP/);
   assert.equal(result.pageCount, 1);
   assert.equal(result.ocrPageCount, 1);
@@ -273,7 +295,7 @@ test("validates uploads and sanitizes the displayed PDF filename", async () => {
   const result = await extractUploadedDocument(makeNativePdf("SMAP evidence"), "C:\\private\\policy.pdf");
   assert.equal(result.fileName, "policy.pdf");
   assert.equal(result.title, "policy");
-  assert.equal(result.content, "SMAP evidence");
+  assert.equal(result.content, "--- Halaman 1 ---\nSMAP evidence");
 });
 
 test("accepts DOCX and legacy DOC through the upload path", async () => {

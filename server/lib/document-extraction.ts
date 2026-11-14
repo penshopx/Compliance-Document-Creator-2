@@ -83,6 +83,13 @@ export function parseOcrPage(
   };
 }
 
+function formatPdfPages(pageTexts: string[]): string {
+  return pageTexts
+    .map((text, index) => `--- Halaman ${index + 1} ---\n${text}`)
+    .join("\n\n")
+    .trim();
+}
+
 async function recognizePdfPages(
   buffer: Buffer,
   pageNumbers: number[],
@@ -296,7 +303,7 @@ export async function extractDocumentText(
         const recognizedPages = await recognizePdfPages(
           buffer,
           pagesNeedingOcr,
-          MAX_DOCUMENT_TEXT_LENGTH - nativeTextLength,
+          MAX_DOCUMENT_TEXT_LENGTH - formatPdfPages(pageTexts).length,
         );
         ocrPageCount = pagesNeedingOcr.length;
         ocrPages = recognizedPages.map(({ quality }) => quality);
@@ -307,7 +314,13 @@ export async function extractDocumentText(
             : "";
         });
       }
-      content = pageTexts.join("\n\n").trim();
+      if (!pageTexts.some((text) => text.trim())) {
+        throw new DocumentExtractionError(
+          "Tidak ada teks yang dapat diekstrak. Periksa kualitas pindai atau tempelkan teks dokumen secara manual.",
+          "empty_text",
+        );
+      }
+      content = formatPdfPages(pageTexts);
     } catch (error) {
       if (error instanceof DocumentExtractionError) throw error;
       throw new DocumentExtractionError(

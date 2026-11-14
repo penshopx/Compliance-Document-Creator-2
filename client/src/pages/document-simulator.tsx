@@ -503,7 +503,7 @@ export default function DocumentSimulatorPage() {
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-1 text-xs opacity-80">Anda tetap dapat mengedit teks hasil ekstraksi di bawah ini sebelum menjalankan review.</p>
+                      <p className="mt-1 text-xs opacity-80">Penanda halaman dan teks hasil OCR tetap dapat diedit di bawah ini sebelum menjalankan review.</p>
                     </div>
                   ) : null}
                   <Textarea
@@ -518,6 +518,7 @@ export default function DocumentSimulatorPage() {
                     <span>PDF/Word maksimal 8 MB; PDF maksimal {DOCUMENT_SIMULATOR_MAX_PDF_PAGES} halaman. OCR Indonesia/Inggris maksimal {DOCUMENT_SIMULATOR_MAX_OCR_PAGES} halaman scan; periksa ulang teks hasilnya.</span>
                     <span>{pastedContent.length.toLocaleString("id-ID")} / {DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH.toLocaleString("id-ID")} karakter</span>
                   </div>
+                  <p className="text-xs text-muted-foreground">Penanda halaman PDF ditambahkan ke isi dokumen dan dapat diedit sebelum review.</p>
                 </div>
               </div>
             )}
