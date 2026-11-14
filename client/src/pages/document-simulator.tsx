@@ -29,11 +29,11 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { assertDocumentUploadSize, extractPlainTextDocument } from "@/lib/document-extraction";
 import {
   DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
   DOCUMENT_SIMULATOR_MAX_OCR_PAGES,
   DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
-  DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES,
 } from "@shared/schema";
 
 type Standard = "smap" | "pancek";
@@ -216,8 +216,10 @@ export default function DocumentSimulatorPage() {
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
-    if (file.size > DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES) {
-      const message = "Ukuran file maksimal 8 MB.";
+    try {
+      assertDocumentUploadSize(file.size);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Ukuran file maksimal 8 MB.";
       setFileFeedback({ kind: "warning", message });
       toast({ title: "File terlalu besar", description: message, variant: "destructive" });
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -231,7 +233,9 @@ export default function DocumentSimulatorPage() {
       let pageCount: number | undefined;
       let ocrPageCount: number | undefined;
       if (extension === "txt" || extension === "md") {
-        content = await file.text();
+        const extracted = extractPlainTextDocument(file.name, await file.text());
+        content = extracted.content;
+        title = extracted.title;
       } else {
         const formData = new FormData();
         formData.append("file", file);

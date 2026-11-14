@@ -6,7 +6,18 @@ import {
   extractDocumentText,
   extractUploadedDocument,
   MAX_DOCUMENT_UPLOAD_BYTES,
+  MAX_PDF_PAGES,
+  MAX_OCR_PAGES,
 } from "./document-extraction";
+
+import {
+  DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
+  DOCUMENT_SIMULATOR_MAX_OCR_PAGES,
+  DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
+  DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES,
+  documentSimulatorRequestSchema,
+} from "@shared/schema";
+import { assertDocumentUploadSize, extractPlainTextDocument } from "../../client/src/lib/document-extraction";
 
 function makePdf(objects: Buffer[]): Buffer {
   const chunks = [Buffer.from("%PDF-1.4\n")];
@@ -103,11 +114,11 @@ function crc32(buffer: Buffer): number {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-function makeMinimalDocx(): Buffer {
+function makeMinimalDocx(documentText = "Word anti bribery evidence"): Buffer {
   const entries = [
     ["[Content_Types].xml", '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'],
     ["_rels/.rels", '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
-    ["word/document.xml", '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Word anti bribery evidence</w:t></w:r></w:p></w:body></w:document>'],
+    ["word/document.xml", `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>${documentText}</w:t></w:r></w:p></w:body></w:document>`],
   ];
   const localParts: Buffer[] = [];
   const centralParts: Buffer[] = [];
@@ -175,6 +186,15 @@ test("rejects PDFs with more scanned pages than the OCR limit", async () => {
   );
 });
 
+test("rejects PDFs that exceed the total page limit before OCR", async () => {
+  await assert.rejects(
+    extractDocumentText(makeBlankPdf(MAX_PDF_PAGES + 1), "too-many-pages.pdf"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "too_many_pages",
+  );
+  assert.equal(MAX_PDF_PAGES, DOCUMENT_SIMULATOR_MAX_PDF_PAGES);
+  assert.equal(MAX_OCR_PAGES, DOCUMENT_SIMULATOR_MAX_OCR_PAGES);
+});
+
 test("extracts raw text from Word DOCX files", async () => {
   const result = await extractDocumentText(makeMinimalDocx(), "policy.docx");
   assert.equal(result.content, "Word anti bribery evidence");
@@ -221,6 +241,14 @@ test("rejects invalid file signatures and unsupported formats", async () => {
     extractDocumentText(Buffer.from("plain text"), "policy.doc"),
     (error: unknown) => error instanceof DocumentExtractionError && error.code === "invalid_file",
   );
+  await assert.rejects(
+    extractDocumentText(Buffer.from("not a docx archive"), "policy.docx"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "invalid_file",
+  );
+  await assert.rejects(
+    extractDocumentText(Buffer.from("%PDF-1.4\nnot a valid PDF body"), "damaged.pdf"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "invalid_file",
+  );
 });
 
 test("reports a corrupt legacy Word file without returning arbitrary bytes", async () => {
@@ -229,5 +257,48 @@ test("reports a corrupt legacy Word file without returning arbitrary bytes", asy
   await assert.rejects(
     extractDocumentText(corruptDoc, "damaged.doc"),
     (error: unknown) => error instanceof DocumentExtractionError && error.code === "legacy_doc_failed",
+  );
+});
+
+test("extracts TXT and Markdown text and accepts every supported import in the review schema", async () => {
+  const pdf = await extractDocumentText(makeNativePdf("PDF compliance evidence"), "policy.pdf");
+  const docx = await extractDocumentText(makeMinimalDocx(), "policy.docx");
+  const txt = extractPlainTextDocument("policy.txt", "Plain text compliance evidence");
+  const markdown = extractPlainTextDocument("policy.md", "# Markdown evidence\n\nEvidence text");
+
+  for (const [sourceTitle, content] of [
+    ["policy.pdf", pdf.content],
+    ["policy.docx", docx.content],
+    [txt.title, txt.content],
+    [markdown.title, markdown.content],
+  ]) {
+    assert.equal(documentSimulatorRequestSchema.safeParse({
+      standard: "smap",
+      sourceType: "pasted",
+      sourceTitle,
+      content,
+    }).success, true);
+  }
+});
+
+test("rejects empty or oversized plain text and unsupported text-file extensions", () => {
+  assert.throws(() => extractPlainTextDocument("empty.txt", "  "), /tidak berisi teks/i);
+  assert.throws(
+    () => extractPlainTextDocument("too-long.md", "x".repeat(DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH + 1)),
+    /melebihi batas/i,
+  );
+  assert.throws(() => extractPlainTextDocument("policy.rtf", "content"), /format file tidak didukung/i);
+});
+
+test("enforces the shared upload-size limit at the exact boundary", () => {
+  assert.equal(MAX_DOCUMENT_UPLOAD_BYTES, DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES);
+  assert.doesNotThrow(() => assertDocumentUploadSize(DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES));
+  assert.throws(() => assertDocumentUploadSize(DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES + 1), /maksimal 8 MB/i);
+});
+
+test("rejects extracted DOCX text above the shared character limit", async () => {
+  await assert.rejects(
+    extractDocumentText(makeMinimalDocx("x".repeat(DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH + 1)), "too-long.docx"),
+    (error: unknown) => error instanceof DocumentExtractionError && error.code === "text_too_long",
   );
 });
