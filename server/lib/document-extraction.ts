@@ -300,7 +300,12 @@ export async function extractDocumentText(
         );
         ocrPageCount = pagesNeedingOcr.length;
         ocrPages = recognizedPages.map(({ quality }) => quality);
-        recognizedPages.forEach(({ text }, index) => { pageTexts[pagesNeedingOcr[index] - 1] = text; });
+        recognizedPages.forEach(({ text }, index) => {
+          const pageNumber = pagesNeedingOcr[index];
+          pageTexts[pageNumber - 1] = text
+            ? `[Halaman ${pageNumber} — hasil OCR]\n${text}`
+            : "";
+        });
       }
       content = pageTexts.join("\n\n").trim();
     } catch (error) {

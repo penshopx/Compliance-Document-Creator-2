@@ -52,7 +52,7 @@ function makeNativePdf(text: string): Buffer {
   ]);
 }
 
-function makeScannedPdf(): Buffer {
+function makeScannedPdf(scannedPageNumber = 1): Buffer {
   const glyphs = {
     S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
     M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
@@ -81,17 +81,43 @@ function makeScannedPdf(): Buffer {
   });
 
   const image = deflateSync(pixels);
-  const pageContent = Buffer.from(`q ${width} 0 0 ${height} 60 300 cm /Im1 Do Q`);
+  const pageCount = Math.max(1, scannedPageNumber);
+  const firstPageId = 3;
+  const firstContentId = firstPageId + pageCount;
+  const fontId = firstContentId + pageCount;
+  const imageId = fontId + 1;
+  const pageObjects = Array.from({ length: pageCount }, (_, index) => {
+    const pageNumber = index + 1;
+    const resource = pageNumber === scannedPageNumber
+      ? `<< /XObject << /Im1 ${imageId} 0 R >> >>`
+      : `<< /Font << /F1 ${fontId} 0 R >> >>`;
+    return Buffer.from(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources ${resource} /Contents ${firstContentId + index} 0 R >>`,
+    );
+  });
+  const contentStreams = Array.from({ length: pageCount }, (_, index) => {
+    const pageNumber = index + 1;
+    const stream = pageNumber === scannedPageNumber
+      ? Buffer.from(`q ${width} 0 0 ${height} 60 300 cm /Im1 Do Q`)
+      : Buffer.from(`BT /F1 12 Tf 72 720 Td (Cover page ${pageNumber}) Tj ET`);
+    return Buffer.concat([
+      Buffer.from(`<< /Length ${stream.length} >>\nstream\n`),
+      stream,
+      Buffer.from("\nendstream"),
+    ]);
+  });
+  const imageObject = Buffer.concat([
+    Buffer.from(`<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${image.length} >>\nstream\n`),
+    image,
+    Buffer.from("\nendstream"),
+  ]);
   return makePdf([
     Buffer.from("<< /Type /Catalog /Pages 2 0 R >>"),
-    Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"),
-    Buffer.from("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>"),
-    Buffer.concat([
-      Buffer.from(`<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${image.length} >>\nstream\n`),
-      image,
-      Buffer.from("\nendstream"),
-    ]),
-    Buffer.concat([Buffer.from(`<< /Length ${pageContent.length} >>\nstream\n`), pageContent, Buffer.from("\nendstream")]),
+    Buffer.from(`<< /Type /Pages /Kids [${Array.from({ length: pageCount }, (_, index) => `${firstPageId + index} 0 R`).join(" ")}] /Count ${pageCount} >>`),
+    ...pageObjects,
+    ...contentStreams,
+    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"),
+    imageObject,
   ]);
 }
 
@@ -183,6 +209,16 @@ test("recognizes Indonesian and English text from scanned PDF pages", async () =
   assert.equal(result.ocrPages?.[0].pageNumber, 1);
   assert.ok(result.ocrPages?.[0].confidence !== null);
   assert.equal(result.ocrPages?.[0].needsReview, true);
+  assert.match(result.content, /\[Halaman 1 — hasil OCR\]\s+SMAP/i);
+});
+
+test("preserves the original page number when OCR follows selectable PDF text", async () => {
+  const result = await extractDocumentText(makeScannedPdf(2), "mixed-policy.pdf");
+
+  assert.equal(result.pageCount, 2);
+  assert.equal(result.ocrPages?.[0].pageNumber, 2);
+  assert.match(result.content, /Cover page 1/);
+  assert.match(result.content, /\[Halaman 2 — hasil OCR\]\s+SMAP/i);
 });
 
 test("flags OCR pages with low or missing word confidence for review", () => {
