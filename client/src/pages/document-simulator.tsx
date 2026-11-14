@@ -202,8 +202,8 @@ export default function DocumentSimulatorPage() {
   const handleFile = async (file?: File) => {
     if (!file) return;
     const extension = file.name.split(".").pop()?.toLowerCase();
-    if (!extension || !["txt", "md", "pdf", "docx"].includes(extension)) {
-      toast({ title: "Format file tidak didukung", description: "Pilih file .txt, .md, .pdf, atau .docx.", variant: "destructive" });
+    if (!extension || !["txt", "md", "pdf", "doc", "docx"].includes(extension)) {
+      toast({ title: "Format file tidak didukung", description: "Pilih file .txt, .md, .pdf, .doc, atau .docx.", variant: "destructive" });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -215,7 +215,7 @@ export default function DocumentSimulatorPage() {
     setIsExtractingFile(true);
     try {
       let content: string;
-      let title = file.name.replace(/\.(txt|md|pdf|docx)$/i, "");
+      let title = file.name.replace(/\.(txt|md|pdf|docx?)$/i, "");
       let pageCount: number | undefined;
       let ocrPageCount: number | undefined;
       if (extension === "txt" || extension === "md") {
@@ -444,7 +444,7 @@ export default function DocumentSimulatorPage() {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept=".txt,.md,.pdf,.docx,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      accept=".txt,.md,.pdf,.doc,.docx,text/plain,text/markdown,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                       className="hidden"
                       onChange={(event) => void handleFile(event.target.files?.[0])}
                       aria-label="Impor TXT, Markdown, PDF, atau Word"

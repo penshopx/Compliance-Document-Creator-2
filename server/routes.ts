@@ -1362,16 +1362,16 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       if (error instanceof multer.MulterError && error.code === "LIMIT_FILE_SIZE") {
         return res.status(413).json({ error: "Ukuran file maksimal 8 MB." });
       }
-      return res.status(400).json({ error: "File tidak dapat diterima. Pilih satu file PDF atau Word .docx." });
+      return res.status(400).json({ error: "File tidak dapat diterima. Pilih satu file PDF atau Word." });
     });
   }, async (req, res) => {
     const file = req.file;
-    if (!file) return res.status(400).json({ error: "Pilih file PDF atau Word .docx." });
+    if (!file) return res.status(400).json({ error: "Pilih file PDF atau Word." });
 
     const originalName = basename(file.originalname).replace(/[\u0000-\u001f\u007f]/g, "").trim();
     const extension = extname(originalName).toLowerCase();
-    if (![".pdf", ".docx"].includes(extension)) {
-      return res.status(400).json({ error: "Format file tidak didukung. Pilih PDF atau Word .docx." });
+    if (![".pdf", ".doc", ".docx"].includes(extension)) {
+      return res.status(400).json({ error: "Format file tidak didukung. Pilih PDF atau Word .doc/.docx." });
     }
 
     try {
@@ -1385,6 +1385,8 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
           : error.code === "ocr_busy"
             ? 429
           : error.code === "empty_text" || error.code === "ocr_failed"
+            ? 422
+          : error.code === "legacy_doc_failed"
             ? 422
             : 400;
         return res.status(status).json({ error: error.message });

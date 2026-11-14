@@ -13,6 +13,7 @@ export const MAX_PDF_PAGES = 60;
 export const MAX_OCR_PAGES = 20;
 const PDF_RENDER_TIMEOUT_MS = 20_000;
 const OCR_TIMEOUT_MS = 30_000;
+const LEGACY_WORD_TIMEOUT_MS = 15_000;
 
 let ocrBusy = false;
 
@@ -23,7 +24,8 @@ export type DocumentExtractionErrorCode =
   | "too_many_pages"
   | "ocr_limit"
   | "ocr_busy"
-  | "ocr_failed";
+  | "ocr_failed"
+  | "legacy_doc_failed";
 
 export class DocumentExtractionError extends Error {
   constructor(
@@ -99,6 +101,32 @@ async function recognizePdfPages(buffer: Buffer, pageNumbers: number[], maxTextL
     } finally {
       ocrBusy = false;
     }
+  }
+}
+
+async function extractLegacyWordText(buffer: Buffer): Promise<string> {
+  const oleSignature = Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
+  if (buffer.length < oleSignature.length || !buffer.subarray(0, oleSignature.length).equals(oleSignature)) {
+    throw new DocumentExtractionError("File bukan dokumen Word lama .doc yang valid.", "invalid_file");
+  }
+
+  let workDirectory: string | undefined;
+  try {
+    workDirectory = await mkdtemp(join(tmpdir(), "document-simulator-word-"));
+    const filePath = join(workDirectory, "document.doc");
+    await writeFile(filePath, buffer, { mode: 0o600 });
+    const { stdout } = await execFileAsync("antiword", ["-m", "UTF-8.txt", "-t", filePath], {
+      timeout: LEGACY_WORD_TIMEOUT_MS,
+      maxBuffer: 1024 * 1024,
+    });
+    return stdout.trim();
+  } catch {
+    throw new DocumentExtractionError(
+      "Dokumen Word .doc tidak dapat dibaca. Pastikan file tidak rusak atau dikunci kata sandi.",
+      "legacy_doc_failed",
+    );
+  } finally {
+    if (workDirectory) await rm(workDirectory, { recursive: true, force: true });
   }
 }
 
@@ -187,8 +215,10 @@ export async function extractDocumentText(
         "invalid_file",
       );
     }
+  } else if (extension === "doc") {
+    content = await extractLegacyWordText(buffer);
   } else {
-    throw new DocumentExtractionError("Format file tidak didukung. Pilih PDF atau Word .docx.", "invalid_file");
+    throw new DocumentExtractionError("Format file tidak didukung. Pilih PDF atau Word .doc/.docx.", "invalid_file");
   }
 
   if (!content.trim()) {
