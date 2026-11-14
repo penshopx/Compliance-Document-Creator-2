@@ -7,3 +7,4 @@
 - [Real data injection pattern](real-data-injection.md) — Document Builder + PDCA + sub-agents all use same pattern: useQuery /api/company+/api/fkap+/api/management on frontend; backend subagent route auto-injects via Promise.all before building ctx string.
 - [Pancek Generator standalone routing](pancek-generator-routing.md) — /pancek-generator is standalone (no sidebar) — must be in isStandalonePage list in App.tsx same as /pancek. Route gated by isIndustryEnabled("pancek").
 - [Project integrity evidence scope](project-integrity-evidence-scope.md) — organization evidence is supporting context; readiness requires explicit confirmation per project.
+- [React component tests with tsx](tsx-react-component-tests.md) — use jsdom globals before dynamic page imports; React JSX and query client defaults need explicit setup in Node tests.
