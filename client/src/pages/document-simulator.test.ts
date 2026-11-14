@@ -191,8 +191,8 @@ test("scanned PDF can be compared page by page with its editable extracted text"
       pageCount: 4,
       ocrPageCount: 2,
       ocrPages: [
-        { pageNumber: 2, confidence: 54, needsReview: true },
-        { pageNumber: 4, confidence: 88, needsReview: false },
+        { pageNumber: 2, confidence: 79, lowConfidenceWordPercent: 20, needsReview: true },
+        { pageNumber: 4, confidence: 88, lowConfidenceWordPercent: 10, needsReview: false },
       ],
     },
   };
@@ -202,6 +202,10 @@ test("scanned PDF can be compared page by page with its editable extracted text"
   const pageSelector = container.querySelector<HTMLSelectElement>("#scan-comparison-page");
   assert.ok(pageSelector, "scan comparison should provide a page selector");
   assert.equal(pageSelector.value, "2");
+  assert.match(container.textContent || "", /20% kata rendah/);
+  assert.match(container.textContent || "", /ada kata yang perlu dicocokkan/);
+  assert.match(container.textContent || "", /10% kata rendah/);
+  assert.match(container.textContent || "", /skor tinggi bukan jaminan/i);
   assert.equal(
     container.querySelector<HTMLIFrameElement>('iframe[title="Dokumen asli, halaman 2"]')?.getAttribute("src"),
     "blob:scan-preview#page=2&view=FitH",

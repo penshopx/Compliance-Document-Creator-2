@@ -258,9 +258,55 @@ test("flags OCR pages with low or missing word confidence for review", () => {
   );
 
   assert.equal(lowConfidence.text, "Kebijakan");
-  assert.deepEqual(lowConfidence.quality, { pageNumber: 4, confidence: 42, needsReview: true });
-  assert.deepEqual(unreadable.quality, { pageNumber: 7, confidence: null, needsReview: true });
-  assert.deepEqual(clearPage.quality, { pageNumber: 9, confidence: 95, needsReview: false });
+  assert.deepEqual(lowConfidence.quality, {
+    pageNumber: 4,
+    confidence: 42,
+    lowConfidenceWordPercent: 100,
+    needsReview: true,
+  });
+  assert.deepEqual(unreadable.quality, {
+    pageNumber: 7,
+    confidence: null,
+    lowConfidenceWordPercent: null,
+    needsReview: true,
+  });
+  assert.deepEqual(clearPage.quality, {
+    pageNumber: 9,
+    confidence: 95,
+    lowConfidenceWordPercent: 0,
+    needsReview: false,
+  });
+});
+
+test("flags pages with many uncertain words even when their average score is high", () => {
+  const header = "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext";
+  const mixedConfidenceRows = Array.from({ length: 10 }, (_, index) => {
+    const confidence = index < 8 ? 95 : 16;
+    return `5\t1\t1\t1\t1\t${index + 1}\t0\t0\t10\t10\t${confidence}\tWord${index + 1}`;
+  });
+  const page = parseOcrPage(2, [header, ...mixedConfidenceRows].join("\n"));
+
+  assert.equal(page.quality.confidence, 79);
+  assert.equal(page.quality.lowConfidenceWordPercent, 20);
+  assert.equal(page.quality.needsReview, true);
+
+  const mostlyClearRows = Array.from({ length: 10 }, (_, index) => {
+    const confidence = index === 0 ? 40 : 90;
+    return `5\t1\t1\t1\t1\t${index + 1}\t0\t0\t10\t10\t${confidence}\tWord${index + 1}`;
+  });
+  const mostlyClearPage = parseOcrPage(3, [header, ...mostlyClearRows].join("\n"));
+  assert.equal(mostlyClearPage.quality.confidence, 85);
+  assert.equal(mostlyClearPage.quality.lowConfidenceWordPercent, 10);
+  assert.equal(mostlyClearPage.quality.needsReview, false);
+
+  const belowWarningRows = Array.from({ length: 50 }, (_, index) => {
+    const confidence = index < 43 ? 90 : 16;
+    return `5\t1\t1\t1\t1\t${index + 1}\t0\t0\t10\t10\t${confidence}\tWord${index + 1}`;
+  });
+  const belowWarningPage = parseOcrPage(4, [header, ...belowWarningRows].join("\n"));
+  assert.equal(belowWarningPage.quality.confidence, 80);
+  assert.equal(belowWarningPage.quality.lowConfidenceWordPercent, 14);
+  assert.equal(belowWarningPage.quality.needsReview, false);
 });
 
 test("rejects PDFs with more scanned pages than the OCR limit", async () => {

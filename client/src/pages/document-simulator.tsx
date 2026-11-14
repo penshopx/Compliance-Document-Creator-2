@@ -99,6 +99,7 @@ type ReviewResponse = SavedReview & { model: string };
 type OcrPageQuality = {
   pageNumber: number;
   confidence: number | null;
+  lowConfidenceWordPercent?: number | null;
   needsReview: boolean;
 };
 type FileFeedback = {
@@ -194,6 +195,10 @@ export default function DocumentSimulatorPage() {
   const sourceReady = sourceType === "saved"
     ? Boolean(selectedDocument?.content?.trim()) && (selectedDocument?.content.length ?? 0) <= DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH
     : isPastedDocumentReady(pastedDocument.content, DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH);
+  const hasLowConfidenceOcrWords = Boolean(
+    fileFeedback?.ocrPages?.some((page) => (page.lowConfidenceWordPercent ?? 0) > 0),
+  );
+  const needsOcrReview = Boolean(fileFeedback?.ocrPages?.some((page) => page.needsReview));
 
   const reviewMutation = useMutation({
     mutationFn: async () => {
@@ -512,22 +517,31 @@ export default function DocumentSimulatorPage() {
                   {fileFeedback?.ocrPages?.length ? (
                     <div
                       className={`rounded-md border px-3 py-2.5 text-sm ${
-                        fileFeedback.ocrPages.some((page) => page.needsReview)
+                        needsOcrReview
                           ? "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100"
-                          : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200"
+                          : hasLowConfidenceOcrWords
+                            ? "border-blue-200 bg-blue-50 text-blue-950 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-100"
+                            : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200"
                       }`}
                       role="status"
                       aria-label="Kualitas OCR per halaman"
                     >
-                      <p className="font-semibold">Pemeriksaan halaman hasil scan</p>
+                      <p className="font-semibold">Indikasi kualitas OCR</p>
                       <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
                         {fileFeedback.ocrPages.map((page) => (
                           <li key={page.pageNumber}>
-                            Halaman {page.pageNumber}: {page.needsReview ? "perlu diperiksa ulang" : "keyakinan baik"}
-                            {page.confidence !== null ? ` (${page.confidence}%)` : " (teks tidak terbaca)"}
+                            Halaman {page.pageNumber}: {page.needsReview
+                              ? "perlu diperiksa ulang"
+                              : (page.lowConfidenceWordPercent ?? 0) > 0
+                                ? "ada kata yang perlu dicocokkan"
+                                : "tidak terdeteksi kata berkeyakinan rendah"}
+                            {page.confidence !== null
+                              ? ` (rata-rata ${page.confidence}%${page.lowConfidenceWordPercent ? `; ${page.lowConfidenceWordPercent}% kata rendah` : ""})`
+                              : " (teks tidak terbaca)"}
                           </li>
                         ))}
                       </ul>
+                      <p className="mt-1 text-xs opacity-80">Peringatan diberikan jika rata-rata di bawah 70% atau ≥15% kata skornya di bawah 60%. Persentase yang lebih kecil tetap ditampilkan. Cocokkan dengan scan asli; skor tinggi bukan jaminan teks pasti benar.</p>
                       <p className="mt-1 text-xs opacity-80">Penanda halaman dan teks hasil OCR tetap dapat diedit di bawah ini sebelum menjalankan review.</p>
                     </div>
                   ) : null}

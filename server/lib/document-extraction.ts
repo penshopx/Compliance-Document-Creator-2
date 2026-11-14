@@ -24,10 +24,13 @@ const PDF_RENDER_TIMEOUT_MS = 20_000;
 const OCR_TIMEOUT_MS = 30_000;
 const LEGACY_WORD_TIMEOUT_MS = 15_000;
 const OCR_LOW_CONFIDENCE_THRESHOLD = 70;
+const OCR_LOW_CONFIDENCE_WORD_THRESHOLD = 60;
+const OCR_LOW_CONFIDENCE_WORD_PERCENT_THRESHOLD = 15;
 
 export type OcrPageQuality = {
   pageNumber: number;
   confidence: number | null;
+  lowConfidenceWordPercent: number | null;
   needsReview: boolean;
 };
 
@@ -73,12 +76,19 @@ export function parseOcrPage(
   const confidence = words.length
       ? Math.round(words.reduce((total, word) => total + word.confidence, 0) / words.length)
       : null;
+  const lowConfidenceWordCount = words.filter((word) => word.confidence < OCR_LOW_CONFIDENCE_WORD_THRESHOLD).length;
+  const lowConfidenceWordPercent = words.length
+    ? Math.round((lowConfidenceWordCount / words.length) * 100)
+    : null;
   return {
     text: words.map((word) => word.text).join(" ").trim(),
     quality: {
       pageNumber,
       confidence,
-      needsReview: confidence === null || confidence < OCR_LOW_CONFIDENCE_THRESHOLD,
+      lowConfidenceWordPercent,
+      needsReview: confidence === null
+        || confidence < OCR_LOW_CONFIDENCE_THRESHOLD
+        || (lowConfidenceWordPercent ?? 0) >= OCR_LOW_CONFIDENCE_WORD_PERCENT_THRESHOLD,
     },
   };
 }
