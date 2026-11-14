@@ -12,6 +12,7 @@
     "test:document-extraction": "tsx --test server/lib/document-extraction.test.ts server/lib/document-upload-errors.test.ts",
     "test:document-simulator": "tsx --test client/src/lib/document-simulator.test.ts",
     "test:document-review-pages": "tsx --test server/lib/document-review-pages.test.ts",
+    "test:document-extraction-route": "tsx --test server/lib/document-extraction-route.test.ts",
     "test:server-sse": "tsx --test server/routes.sse.test.ts",
     "test:sse": "tsx --test client/src/lib/sse.test.ts",
     "db:push": "drizzle-kit push",

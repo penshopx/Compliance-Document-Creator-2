@@ -1,6 +1,5 @@
 import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
-import multer from "multer";
 import { storage } from "./storage";
 import { generateDocumentContent as generateAIContent, generateSMAPDocument } from "./replit_integrations/gemini";
 import { AI_PROVIDER_IDS, getProviderMeta } from "@shared/ai-providers";
@@ -64,22 +63,14 @@ import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { getPancekStats } from "@shared/data/pancek-data";
 import {
-  extractUploadedDocument,
-  MAX_DOCUMENT_UPLOAD_BYTES,
-} from "./lib/document-extraction";
+  extractDocumentPageNumbers,
+  sanitizeFindingPageNumbers,
+} from "./lib/document-review-pages";
+import { registerDocumentExtractionRoute } from "./lib/document-extraction-route";
 import {
   mapDocumentExtractionFailure,
   mapDocumentUploadMiddlewareFailure,
 } from "./lib/document-upload-errors";
-import {
-  extractDocumentPageNumbers,
-  sanitizeFindingPageNumbers,
-} from "./lib/document-review-pages";
-
-const documentSimulatorUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_DOCUMENT_UPLOAD_BYTES, files: 1 },
-}).single("file");
 
 // AI Request Validation Schemas
 const aiGenerateSchema = z.object({
@@ -1351,25 +1342,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
   });
 
   // Document compliance simulator — informational review, not certification.
-  app.post("/api/document-simulator/extract", isAuthenticated, (req, res, next) => {
-    documentSimulatorUpload(req, res, (error) => {
-      if (!error) return next();
-      const failure = mapDocumentUploadMiddlewareFailure(error);
-      return res.status(failure.status).json({ error: failure.error });
-    });
-  }, async (req, res) => {
-    const file = req.file;
-    if (!file) return res.status(400).json({ error: "Pilih file PDF atau Word." });
-
-    try {
-      const result = await extractUploadedDocument(file.buffer, file.originalname);
-      res.json(result);
-    } catch (error) {
-      const failure = mapDocumentExtractionFailure(error);
-      if (failure.status === 500) console.error("Document simulator extraction error:", error);
-      return res.status(failure.status).json({ error: failure.error });
-    }
-  });
+  registerDocumentExtractionRoute(app, isAuthenticated);
 
   app.get("/api/document-simulator/reviews", isAuthenticated, async (req, res) => {
     try {
