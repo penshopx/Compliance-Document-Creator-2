@@ -6,10 +6,18 @@ import { promisify } from "node:util";
 import mammoth from "mammoth";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
+import {
+  DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
+  DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
+  DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES,
+} from "@shared/schema";
+
 const execFileAsync = promisify(execFile);
-export const MAX_DOCUMENT_UPLOAD_BYTES = 8 * 1024 * 1024;
-export const MAX_DOCUMENT_TEXT_LENGTH = 30_000;
-export const MAX_PDF_PAGES = 60;
+export const MAX_DOCUMENT_UPLOAD_BYTES = DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES;
+export const MAX_DOCUMENT_TEXT_LENGTH = DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH;
+export const MAX_PDF_PAGES = DOCUMENT_SIMULATOR_MAX_PDF_PAGES;
+const MAX_DOCX_EXPANDED_BYTES = 20 * 1024 * 1024;
+const MAX_DOCX_ENTRIES = 500;
 export const MAX_OCR_PAGES = 20;
 const PDF_RENDER_TIMEOUT_MS = 20_000;
 const OCR_TIMEOUT_MS = 30_000;
@@ -130,6 +138,62 @@ async function extractLegacyWordText(buffer: Buffer): Promise<string> {
   }
 }
 
+function validateDocxArchive(buffer: Buffer) {
+  const minimumEndRecordLength = 22;
+  const searchStart = Math.max(0, buffer.length - 65_557);
+  let endRecord = -1;
+  for (let offset = buffer.length - minimumEndRecordLength; offset >= searchStart; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === 0x06054b50) {
+      endRecord = offset;
+      break;
+    }
+  }
+  if (endRecord < 0) {
+    throw new DocumentExtractionError("File DOCX tidak valid atau tidak dapat dibaca.", "invalid_file");
+  }
+
+  const entryCount = buffer.readUInt16LE(endRecord + 10);
+  const directorySize = buffer.readUInt32LE(endRecord + 12);
+  const directoryOffset = buffer.readUInt32LE(endRecord + 16);
+  if (
+    entryCount === 0xffff ||
+    directorySize === 0xffffffff ||
+    directoryOffset === 0xffffffff ||
+    entryCount > MAX_DOCX_ENTRIES ||
+    directoryOffset + directorySize > buffer.length
+  ) {
+    throw new DocumentExtractionError("Struktur DOCX terlalu besar atau tidak didukung.", "invalid_file");
+  }
+
+  let offset = directoryOffset;
+  let expandedBytes = 0;
+  let hasMainDocument = false;
+  for (let entry = 0; entry < entryCount; entry += 1) {
+    if (offset + 46 > buffer.length || buffer.readUInt32LE(offset) !== 0x02014b50) {
+      throw new DocumentExtractionError("File DOCX tidak valid atau tidak dapat dibaca.", "invalid_file");
+    }
+    const uncompressedSize = buffer.readUInt32LE(offset + 24);
+    const fileNameLength = buffer.readUInt16LE(offset + 28);
+    const extraLength = buffer.readUInt16LE(offset + 30);
+    const commentLength = buffer.readUInt16LE(offset + 32);
+    const nameStart = offset + 46;
+    const nextEntry = nameStart + fileNameLength + extraLength + commentLength;
+    if (nextEntry > buffer.length) {
+      throw new DocumentExtractionError("File DOCX tidak valid atau tidak dapat dibaca.", "invalid_file");
+    }
+    const fileName = buffer.toString("utf8", nameStart, nameStart + fileNameLength);
+    if (fileName === "word/document.xml") hasMainDocument = true;
+    expandedBytes += uncompressedSize;
+    if (expandedBytes > MAX_DOCX_EXPANDED_BYTES) {
+      throw new DocumentExtractionError("Isi DOCX terlalu besar untuk diproses dengan aman.", "invalid_file");
+    }
+    offset = nextEntry;
+  }
+  if (!hasMainDocument) {
+    throw new DocumentExtractionError("File bukan dokumen Word DOCX yang valid.", "invalid_file");
+  }
+}
+
 export async function extractDocumentText(
   buffer: Buffer,
   fileName: string,
@@ -207,9 +271,11 @@ export async function extractDocumentText(
       throw new DocumentExtractionError("File bukan dokumen Word .docx yang valid.", "invalid_file");
     }
     try {
+      validateDocxArchive(buffer);
       const result = await mammoth.extractRawText({ buffer });
       content = result.value.trim();
-    } catch {
+    } catch (error) {
+      if (error instanceof DocumentExtractionError) throw error;
       throw new DocumentExtractionError(
         "Dokumen Word tidak dapat dibaca. Pastikan file berformat .docx dan tidak rusak.",
         "invalid_file",

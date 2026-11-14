@@ -282,6 +282,23 @@ export const documentSimulatorReviews = pgTable("document_simulator_reviews", {
 
 export type DocumentSimulatorReview = typeof documentSimulatorReviews.$inferSelect;
 
+export const DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH = 30_000;
+export const DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+export const DOCUMENT_SIMULATOR_MAX_PDF_PAGES = 60;
+
+export const documentSimulatorRequestSchema = z.object({
+  standard: z.enum(["smap", "pancek"]),
+  sourceType: z.enum(["saved", "pasted"]),
+  sourceId: z.string().optional(),
+  sourceTitle: z.string().trim().min(1).max(200).optional(),
+  content: z.string().max(DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH).optional(),
+}).refine(
+  (value) => value.sourceType === "saved"
+    ? !!value.sourceId
+    : !!value.content?.trim(),
+  { message: "Pilih dokumen tersimpan atau masukkan isi dokumen." },
+);
+
 // Document Templates
 export const documentTemplates = pgTable("document_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

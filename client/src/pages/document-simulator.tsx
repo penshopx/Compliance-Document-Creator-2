@@ -29,6 +29,11 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import {
+  DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
+  DOCUMENT_SIMULATOR_MAX_PDF_PAGES,
+  DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES,
+} from "@shared/schema";
 
 type Standard = "smap" | "pancek";
 type SourceType = "saved" | "pasted";
@@ -134,9 +139,10 @@ export default function DocumentSimulatorPage() {
   const [selectedDocumentId, setSelectedDocumentId] = useState("");
   const [pastedContent, setPastedContent] = useState("");
   const [pastedTitle, setPastedTitle] = useState("");
+  const [isExtractingFile, setIsExtractingFile] = useState(false);
+  const [fileFeedback, setFileFeedback] = useState<{ kind: "success" | "warning"; message: string } | null>(null);
   const [activeReview, setActiveReview] = useState<SavedReview | ReviewResponse | null>(null);
   const [historySearch, setHistorySearch] = useState("");
-  const [isExtractingFile, setIsExtractingFile] = useState(false);
 
   const generatedQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/generated-documents"] });
   const documentsQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/documents"] });
@@ -154,8 +160,8 @@ export default function DocumentSimulatorPage() {
 
   const selectedDocument = savedDocuments.find((document) => document.id === selectedDocumentId);
   const sourceReady = sourceType === "saved"
-    ? Boolean(selectedDocument?.content?.trim()) && (selectedDocument?.content.length ?? 0) <= 30000
-    : Boolean(pastedContent.trim()) && pastedContent.length <= 30000;
+    ? Boolean(selectedDocument?.content?.trim()) && (selectedDocument?.content.length ?? 0) <= DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH
+    : Boolean(pastedContent.trim()) && pastedContent.length <= DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH;
 
   const reviewMutation = useMutation({
     mutationFn: async () => {
@@ -203,19 +209,24 @@ export default function DocumentSimulatorPage() {
     if (!file) return;
     const extension = file.name.split(".").pop()?.toLowerCase();
     if (!extension || !["txt", "md", "pdf", "doc", "docx"].includes(extension)) {
-      toast({ title: "Format file tidak didukung", description: "Pilih file .txt, .md, .pdf, .doc, atau .docx.", variant: "destructive" });
+      const message = "Pilih file .txt, .md, .pdf, .doc, atau .docx.";
+      setFileFeedback({ kind: "warning", message });
+      toast({ title: "Format file tidak didukung", description: message, variant: "destructive" });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      toast({ title: "File terlalu besar", description: "Ukuran file maksimal 8 MB.", variant: "destructive" });
+    if (file.size > DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES) {
+      const message = "Ukuran file maksimal 8 MB.";
+      setFileFeedback({ kind: "warning", message });
+      toast({ title: "File terlalu besar", description: message, variant: "destructive" });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
     setIsExtractingFile(true);
+    setFileFeedback(null);
     try {
       let content: string;
-      let title = file.name.replace(/\.(txt|md|pdf|docx?)$/i, "");
+      let title = file.name.replace(/\.(txt|md|pdf|docx?)$/i, "").slice(0, 200);
       let pageCount: number | undefined;
       let ocrPageCount: number | undefined;
       if (extension === "txt" || extension === "md") {
@@ -235,35 +246,32 @@ export default function DocumentSimulatorPage() {
           error?: string;
         };
         if (!response.ok) throw new Error(result.error || "Dokumen gagal diproses.");
-        if (!result.content) throw new Error("Teks tidak ditemukan di dalam dokumen.");
+        if (!result.content?.trim()) throw new Error("Tidak ada teks yang dapat diekstrak dari dokumen.");
         content = result.content;
         title = result.title || title;
         pageCount = result.pageCount;
         ocrPageCount = result.ocrPageCount;
       }
-      if (content.length > 30000) {
-        toast({
-          title: "Dokumen terlalu panjang",
-          description: "Simulator menerima maksimal 30.000 karakter. Bagi dokumen menjadi beberapa bagian.",
-          variant: "destructive",
-        });
-        return;
+      if (!content.trim()) {
+        throw new Error("File tidak berisi teks yang bisa dibaca.");
+      }
+      if (content.length > DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH) {
+        throw new Error("Teks dokumen melebihi batas 30.000 karakter. Bagi dokumen menjadi beberapa bagian.");
       }
       setSourceType("pasted");
       setPastedTitle(title);
       setPastedContent(content);
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
       const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
-      toast({
-        title: "Dokumen berhasil dimuat",
-        description: `${file.name} siap ditinjau.${pageInfo}${ocrInfo}`,
-      });
+      const feedback = `${file.name} berhasil dimuat.${pageInfo}${ocrInfo} Periksa teks hasil ekstraksi, lalu jalankan review.`;
+      setFileFeedback({ kind: "success", message: feedback });
+      toast({ title: "Dokumen berhasil dimuat", description: feedback });
     } catch (error) {
-      toast({
-        title: "Dokumen tidak dapat dibaca",
-        description: error instanceof Error ? error.message : "Pastikan format file didukung dan tidak rusak.",
-        variant: "destructive",
-      });
+      const message = error instanceof Error
+        ? error.message
+        : "Pastikan format file didukung dan dokumen tidak rusak.";
+      setFileFeedback({ kind: "warning", message });
+      toast({ title: "Dokumen tidak dapat dibaca", description: message, variant: "destructive" });
     } finally {
       setIsExtractingFile(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -407,7 +415,7 @@ export default function DocumentSimulatorPage() {
                       <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-900 dark:bg-blue-950/35 dark:text-blue-200">
                         <FileText className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{selectedDocument.title}</span>
-                        <span className="ml-auto shrink-0 text-blue-800/65 dark:text-blue-200/60">{selectedDocument.content.length.toLocaleString("id-ID")} / 30.000 karakter</span>
+                        <span className="ml-auto shrink-0 text-blue-800/65 dark:text-blue-200/60">{selectedDocument.content.length.toLocaleString("id-ID")} / {DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH.toLocaleString("id-ID")} karakter</span>
                       </div>
                     )}
                   </>
@@ -439,7 +447,7 @@ export default function DocumentSimulatorPage() {
                       {isExtractingFile
                         ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                         : <Upload className="mr-2 h-3.5 w-3.5" />}
-                      {isExtractingFile ? "Mengekstrak…" : "Impor file"}
+                      {isExtractingFile ? "Mengekstrak teks…" : "Impor PDF / Word / teks"}
                     </Button>
                     <input
                       ref={fileInputRef}
@@ -447,20 +455,28 @@ export default function DocumentSimulatorPage() {
                       accept=".txt,.md,.pdf,.doc,.docx,text/plain,text/markdown,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                       className="hidden"
                       onChange={(event) => void handleFile(event.target.files?.[0])}
-                      aria-label="Impor TXT, Markdown, PDF, atau Word"
+                      aria-label="Impor file PDF, DOC, DOCX, TXT, atau Markdown"
                     />
                   </div>
+                  {fileFeedback && (
+                    <div
+                      className={`rounded-md border px-3 py-2.5 text-sm ${fileFeedback.kind === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200" : "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100"}`}
+                      role={fileFeedback.kind === "warning" ? "alert" : "status"}
+                    >
+                      {fileFeedback.message}
+                    </div>
+                  )}
                   <Textarea
                     id="pasted-content"
                     value={pastedContent}
-                    maxLength={30000}
+                    maxLength={DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH}
                     onChange={(event) => setPastedContent(event.target.value)}
                     placeholder="Tempelkan isi dokumen yang ingin ditinjau…"
                     className="min-h-[230px] resize-y leading-6"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>PDF scan memakai OCR lokal Indonesia/Inggris, maksimal 20 halaman scan per file. Periksa ulang hasilnya.</span>
-                    <span>{pastedContent.length.toLocaleString("id-ID")} / 30.000 karakter</span>
+                    <span>PDF/Word maksimal 8 MB; PDF maksimal {DOCUMENT_SIMULATOR_MAX_PDF_PAGES} halaman. OCR Indonesia/Inggris maksimal 20 halaman scan; periksa ulang teks hasilnya.</span>
+                    <span>{pastedContent.length.toLocaleString("id-ID")} / {DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH.toLocaleString("id-ID")} karakter</span>
                   </div>
                 </div>
               </div>

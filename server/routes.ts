@@ -58,6 +58,8 @@ import {
   documents,
   generatedDocuments,
   documentSimulatorReviews,
+  documentSimulatorRequestSchema,
+  DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -103,19 +105,6 @@ const saveAiKeySchema = z.object({
   apiKey: z.string().min(8).max(400),
   model: z.string().max(100).optional(),
 });
-
-const documentSimulatorRequestSchema = z.object({
-  standard: z.enum(["smap", "pancek"]),
-  sourceType: z.enum(["saved", "pasted"]),
-  sourceId: z.string().optional(),
-  sourceTitle: z.string().trim().min(1).max(200).optional(),
-  content: z.string().max(30000).optional(),
-}).refine(
-  (value) => value.sourceType === "saved"
-    ? !!value.sourceId
-    : !!value.content?.trim(),
-  { message: "Pilih dokumen tersimpan atau masukkan isi dokumen." },
-);
 
 const documentSimulatorResultSchema = z.object({
   overallScore: z.number().int().min(0).max(100),
@@ -1447,7 +1436,7 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
       if (!documentContent.trim()) {
         return res.status(400).json({ error: "Isi dokumen kosong atau belum tersedia." });
       }
-      if (documentContent.length > 30000) {
+      if (documentContent.length > DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH) {
         return res.status(400).json({ error: "Isi dokumen melebihi batas 30.000 karakter." });
       }
 
