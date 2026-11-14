@@ -217,6 +217,7 @@ export default function DocumentSimulatorPage() {
       let content: string;
       let title = file.name.replace(/\.(txt|md|pdf|docx)$/i, "");
       let pageCount: number | undefined;
+      let ocrPageCount: number | undefined;
       if (extension === "txt" || extension === "md") {
         content = await file.text();
       } else {
@@ -230,6 +231,7 @@ export default function DocumentSimulatorPage() {
           content?: string;
           title?: string;
           pageCount?: number;
+          ocrPageCount?: number;
           error?: string;
         };
         if (!response.ok) throw new Error(result.error || "Dokumen gagal diproses.");
@@ -237,6 +239,7 @@ export default function DocumentSimulatorPage() {
         content = result.content;
         title = result.title || title;
         pageCount = result.pageCount;
+        ocrPageCount = result.ocrPageCount;
       }
       if (content.length > 30000) {
         toast({
@@ -250,7 +253,11 @@ export default function DocumentSimulatorPage() {
       setPastedTitle(title);
       setPastedContent(content);
       const pageInfo = pageCount ? ` ${pageCount} halaman berhasil dibaca.` : "";
-      toast({ title: "Dokumen berhasil dimuat", description: `${file.name} siap ditinjau.${pageInfo}` });
+      const ocrInfo = ocrPageCount ? ` OCR lokal mengenali teks pada ${ocrPageCount} halaman scan.` : "";
+      toast({
+        title: "Dokumen berhasil dimuat",
+        description: `${file.name} siap ditinjau.${pageInfo}${ocrInfo}`,
+      });
     } catch (error) {
       toast({
         title: "Dokumen tidak dapat dibaca",
@@ -452,7 +459,7 @@ export default function DocumentSimulatorPage() {
                     className="min-h-[230px] resize-y leading-6"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>PDF/Word diekstrak sementara; isi dikirim untuk review saat Anda menjalankannya.</span>
+                    <span>PDF scan memakai OCR lokal Indonesia/Inggris, maksimal 20 halaman scan per file. Periksa ulang hasilnya.</span>
                     <span>{pastedContent.length.toLocaleString("id-ID")} / 30.000 karakter</span>
                   </div>
                 </div>

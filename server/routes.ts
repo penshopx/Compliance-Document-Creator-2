@@ -1375,14 +1375,16 @@ Gaya komunikasi: Ramah namun substantif — berikan jawaban seperti konsultan se
     }
 
     try {
-      const { content, pageCount } = await extractDocumentText(file.buffer, originalName);
+      const { content, pageCount, ocrPageCount } = await extractDocumentText(file.buffer, originalName);
       const title = originalName.slice(0, -extension.length).trim().slice(0, 200) || "Dokumen impor";
-      res.json({ title, fileName: originalName, content, pageCount });
+      res.json({ title, fileName: originalName, content, pageCount, ocrPageCount });
     } catch (error) {
       if (error instanceof DocumentExtractionError) {
-        const status = error.code === "text_too_long" || error.code === "too_many_pages"
+        const status = error.code === "text_too_long" || error.code === "too_many_pages" || error.code === "ocr_limit"
           ? 413
-          : error.code === "empty_text"
+          : error.code === "ocr_busy"
+            ? 429
+          : error.code === "empty_text" || error.code === "ocr_failed"
             ? 422
             : 400;
         return res.status(status).json({ error: error.message });
