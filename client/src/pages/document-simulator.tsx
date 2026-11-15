@@ -336,6 +336,19 @@ export default function DocumentSimulatorPage() {
   const displayedResult = parseAssessment(activeReview?.result);
   const isLoadingDocuments = generatedQuery.isLoading || documentsQuery.isLoading;
   const documentLoadError = generatedQuery.isError && documentsQuery.isError;
+  const downloadEditedText = () => {
+    const filenameBase = pastedDocument.title
+      .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
+      .trim()
+      .replace(/\s+/g, " ") || "teks-dokumen";
+    const blob = new Blob([pastedDocument.content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${filenameBase}.txt`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
 
   return (
     <div className="mx-auto w-full max-w-[1440px] space-y-6 pb-10">
@@ -498,12 +511,24 @@ export default function DocumentSimulatorPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <label className="text-sm font-semibold" htmlFor="pasted-content">Isi dokumen</label>
-                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isExtractingFile}>
-                      {isExtractingFile
-                        ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                        : <Upload className="mr-2 h-3.5 w-3.5" />}
-                      {isExtractingFile ? "Mengekstrak teks…" : "Impor PDF / Word / teks"}
-                    </Button>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={downloadEditedText}
+                        disabled={!pastedDocument.content || isExtractingFile}
+                      >
+                        <ArrowDownToLine className="mr-2 h-3.5 w-3.5" />
+                        Unduh TXT
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isExtractingFile}>
+                        {isExtractingFile
+                          ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                          : <Upload className="mr-2 h-3.5 w-3.5" />}
+                        {isExtractingFile ? "Mengekstrak teks…" : "Impor PDF / Word / teks"}
+                      </Button>
+                    </div>
                     <input
                       ref={fileInputRef}
                       type="file"

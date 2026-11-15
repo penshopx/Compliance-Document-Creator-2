@@ -212,6 +212,58 @@ for (const filename of ["policy.pdf", "policy.docx"]) {
   });
 }
 
+test("downloading PDF text preserves page markers and leaves the review input unchanged", async () => {
+  extractionResponse = {
+    status: 200,
+    body: {
+      title: "Revisi / kebijakan",
+      content: "--- Halaman 1 ---\nTeks OCR yang sudah diperbaiki\n\n--- Halaman 3 ---\nTeks halaman tiga",
+      pageCount: 3,
+    },
+  };
+  await switchToTextSource();
+  await selectFile("policy.pdf", "binary file content");
+
+  const editor = container.querySelector<HTMLTextAreaElement>("#pasted-content");
+  assert.ok(editor);
+  const editorText = editor.value;
+
+  let downloadedBlob: Blob | undefined;
+  let downloadedFilename = "";
+  const originalAnchorClick = dom.window.HTMLAnchorElement.prototype.click;
+  URL.createObjectURL = ((blob: Blob) => {
+    downloadedBlob = blob;
+    return "blob:edited-text";
+  }) as typeof URL.createObjectURL;
+  dom.window.HTMLAnchorElement.prototype.click = function () {
+    downloadedFilename = this.download;
+  };
+
+  try {
+    const downloadButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.includes("Unduh TXT"));
+    assert.ok(downloadButton, "the edited text download button should be available");
+    await act(async () => {
+      downloadButton.click();
+      await pause();
+    });
+  } finally {
+    dom.window.HTMLAnchorElement.prototype.click = originalAnchorClick;
+  }
+
+  assert.ok(downloadedBlob);
+  assert.equal(await downloadedBlob.text(), editorText);
+  assert.equal(downloadedFilename, "Revisi - kebijakan.txt");
+  assert.equal(editor.value, editorText, "downloading must not change the editor");
+  assert.equal(reviewRequests.length, 0, "downloading must not start or alter a review");
+
+  await act(async () => {
+    reviewButton().click();
+    await pause();
+  });
+  assert.equal(reviewRequests[0].content, editorText, "review should still use the unchanged editor text");
+});
+
 test("scanned PDF can be compared page by page with its editable extracted text", async () => {
   extractionResponse = {
     status: 200,
