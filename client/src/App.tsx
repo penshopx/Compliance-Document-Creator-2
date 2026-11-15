@@ -53,7 +53,9 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/welcome" component={WelcomePage} />
       <Route path="/checkout" component={CheckoutPage} />
-      {isIndustryEnabled("pancek") && <Route path="/pancek" component={PancekPage} />}
+      {isIndustryEnabled("pancek") && <Route path="/pancek/checklist">{() => <PancekPage initialTab="checklist" />}</Route>}
+      {isIndustryEnabled("pancek") && <Route path="/pancek/documents">{() => <PancekPage initialTab="documents" />}</Route>}
+      {isIndustryEnabled("pancek") && <Route path="/pancek">{() => <PancekPage />}</Route>}
       {isIndustryEnabled("pancek") && <Route path="/pancek-generator" component={PancekGenerator} />}
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/company" component={CompanyPage} />
@@ -90,7 +92,7 @@ function AppContent() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const isFullWidthPage = location === "/pdca";
-  const isStandalonePage = location === "/" || location === "/welcome" || location === "/pancek" || location === "/pancek-generator" || location.startsWith("/checkout") || location.startsWith("/pathway") || location.startsWith("/admin");
+  const isStandalonePage = location === "/" || location === "/welcome" || location.startsWith("/pancek") || location.startsWith("/checkout") || location.startsWith("/pathway") || location.startsWith("/admin");
 
   if (isStandalonePage) {
     return (

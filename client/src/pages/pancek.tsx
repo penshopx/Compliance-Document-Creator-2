@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -22,7 +22,7 @@ import {
   type PancekPhase,
   type PancekChecklistItem,
   type PancekDocument
-} from "@/data/pancek-data";
+} from "@shared/data/pancek-data";
 
 const PHASE_ICONS: Record<string, any> = {
   "Shield": Shield,
@@ -51,34 +51,50 @@ const ICON_COLORS: Record<string, string> = {
   "teal": "text-teal-600 dark:text-teal-400"
 };
 
-export default function PancekPage() {
+type PancekTab = "overview" | "checklist" | "documents";
+
+export default function PancekPage({ initialTab }: { initialTab?: PancekTab } = {}) {
   const { toast } = useToast();
   const [selectedPhase, setSelectedPhase] = useState<string>("komitmen");
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<PancekTab>(initialTab || "overview");
+  const checkedItemsRef = useRef(checkedItems);
+  const hasLoadedProgressRef = useRef(false);
 
-  const { data: progressData, isLoading: progressLoading } = useQuery<{ progress: Record<string, boolean> }>({
+  const progressQuery = useQuery<{ progress: Record<string, boolean> }>({
     queryKey: ["/api/pancek/progress"],
     retry: false,
   });
 
   useEffect(() => {
-    if (progressData?.progress) {
-      setCheckedItems(progressData.progress);
+    if (progressQuery.data && !hasLoadedProgressRef.current) {
+      checkedItemsRef.current = progressQuery.data.progress;
+      setCheckedItems(progressQuery.data.progress);
+      hasLoadedProgressRef.current = true;
     }
-  }, [progressData]);
+  }, [progressQuery.data]);
+
+  useEffect(() => {
+    setActiveTab(initialTab || "overview");
+  }, [initialTab]);
 
   const saveMutation = useMutation({
     mutationFn: (items: Record<string, boolean>) =>
       apiRequest("POST", "/api/pancek/progress", { items }),
+    scope: { id: "pancek-progress" },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] }),
+    onError: () => toast({
+      title: "Progress belum tersimpan",
+      description: "Periksa koneksi lalu coba simpan kembali.",
+      variant: "destructive",
+    }),
   });
 
   const stats = getPancekStats();
   const currentPhase = PANCEK_PHASES.find(p => p.id === selectedPhase);
 
-  const VERIFICATION_THRESHOLD = 70;
+  const READINESS_TARGET = 70;
 
   const overallProgress = useMemo(() => {
     const totalRequired = PANCEK_PHASES.flatMap(p => p.checklistItems).filter(i => i.required).length;
@@ -87,8 +103,8 @@ export default function PancekPage() {
     return totalRequired > 0 ? Math.round((completedRequired / totalRequired) * 100) : 0;
   }, [checkedItems]);
 
-  const isVerified = overallProgress >= VERIFICATION_THRESHOLD;
-  const remainingForVerification = Math.max(0, VERIFICATION_THRESHOLD - overallProgress);
+  const readinessTargetReached = overallProgress >= READINESS_TARGET;
+  const remainingForReadinessTarget = Math.max(0, READINESS_TARGET - overallProgress);
 
   const phaseProgress = useMemo(() => {
     return PANCEK_PHASES.reduce((acc, phase) => {
@@ -111,10 +127,11 @@ export default function PancekPage() {
   }, [searchQuery]);
 
   const handleCheckItem = useCallback((itemId: string, checked: boolean) => {
-    const updated = { ...checkedItems, [itemId]: checked };
+    const updated = { ...checkedItemsRef.current, [itemId]: checked };
+    checkedItemsRef.current = updated;
     setCheckedItems(updated);
     saveMutation.mutate(updated);
-  }, [checkedItems, saveMutation]);
+  }, [saveMutation]);
 
   const copyPrompt = (doc: PancekDocument) => {
     const prompt = `${doc.promptTemplate}
@@ -157,7 +174,7 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
       thin,
       "  RINGKASAN PROGRESS",
       thin,
-      `  Progress Keseluruhan : ${overallProgress}%  ${overallProgress >= 70 ? "✓ SIAP VERIFIKASI" : `(butuh ${70 - overallProgress}% lagi untuk verifikasi)` }`,
+      `  Progress Keseluruhan : ${overallProgress}%  ${readinessTargetReached ? "✓ TARGET KESIAPAN INTERNAL TERCAPAI" : `(butuh ${remainingForReadinessTarget}% lagi untuk target kesiapan internal)`}`,
       `  Item Wajib           : ${completedRequired} / ${totalRequired} selesai`,
       `  Item Opsional        : ${completedOptional} / ${totalOptional} selesai`,
       "",
@@ -261,11 +278,11 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
         </div>
       </div>
 
-      <Card className={`border-2 ${isVerified ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-verification-status">
+      <Card className={`border-2 ${readinessTargetReached ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-readiness-status">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              {isVerified ? (
+              {readinessTargetReached ? (
                 <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50">
                   <Award className="h-8 w-8 text-green-600" />
                 </div>
@@ -275,38 +292,38 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
                 </div>
               )}
               <div>
-                <h3 className="text-lg font-bold" data-testid="text-verification-status">
-                  {isVerified ? "PANCEK TERVERIFIKASI" : "BELUM TERVERIFIKASI"}
+                <h3 className="text-lg font-bold" data-testid="text-readiness-status">
+                  {readinessTargetReached ? "TARGET KESIAPAN PANCEK TERCAPAI" : "TARGET KESIAPAN BELUM TERCAPAI"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {isVerified 
-                    ? "Selamat! Kesesuaian dan kecukupan telah mencapai threshold 70%"
-                    : `Diperlukan ${remainingForVerification}% lagi untuk mencapai status Terverifikasi`
+                  {readinessTargetReached
+                    ? "Checklist internal mencapai target 70%; ini bukan hasil verifikasi KPK atau Jaga.id."
+                    : `Perlu ${remainingForReadinessTarget}% lagi untuk mencapai target checklist internal.`
                   }
                 </p>
               </div>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-2">
-                <TrendingUp className={`h-5 w-5 ${isVerified ? 'text-green-600' : 'text-orange-600'}`} />
-                <span className={`text-3xl font-bold ${isVerified ? 'text-green-600' : 'text-orange-600'}`}>
+                <TrendingUp className={`h-5 w-5 ${readinessTargetReached ? 'text-green-600' : 'text-orange-600'}`} />
+                <span className={`text-3xl font-bold ${readinessTargetReached ? 'text-green-600' : 'text-orange-600'}`}>
                   {overallProgress}%
                 </span>
               </div>
-              <div className="text-sm text-muted-foreground">Target: {VERIFICATION_THRESHOLD}%</div>
+              <div className="text-sm text-muted-foreground">Target checklist internal: {READINESS_TARGET}%</div>
             </div>
           </div>
           <div className="mt-4">
             <div className="flex items-center justify-between text-sm mb-1">
-              <span>Progress Kesesuaian</span>
-              <span className="font-medium">{overallProgress}% / {VERIFICATION_THRESHOLD}%</span>
+              <span>Progres checklist internal</span>
+              <span className="font-medium">{overallProgress}% / {READINESS_TARGET}%</span>
             </div>
             <div className="relative">
               <Progress value={overallProgress} className="h-3" />
               <div 
                 className="absolute top-0 h-3 w-0.5 bg-red-500" 
-                style={{ left: `${VERIFICATION_THRESHOLD}%` }}
-                title="Threshold 70%"
+                style={{ left: `${READINESS_TARGET}%` }}
+                title="Target kesiapan internal 70%"
               />
             </div>
           </div>
@@ -336,14 +353,32 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-2xl font-bold text-blue-600">{overallProgress}%</span>
-              <span className="text-sm text-muted-foreground">Kesesuaian</span>
+              <span className="text-sm text-muted-foreground">Progres checklist</span>
             </div>
             <Progress value={overallProgress} className="h-2" />
           </CardContent>
         </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      {progressQuery.isLoading ? (
+        <p className="text-sm text-muted-foreground" role="status">Memuat progres Pancek tersimpan…</p>
+      ) : progressQuery.isError ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100" role="alert">
+          <span>Progres tersimpan tidak dapat dimuat. Checklist dikunci agar data lokal tidak menimpa data tersimpan.</span>
+          <Button variant="outline" size="sm" onClick={() => void progressQuery.refetch()}>Coba lagi</Button>
+        </div>
+      ) : saveMutation.isPending ? (
+        <p className="text-sm text-blue-700 dark:text-blue-300" role="status">Menyimpan progres checklist…</p>
+      ) : saveMutation.isError ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100" role="alert">
+          <span>Perubahan belum tersimpan. Coba simpan lagi sebelum meninggalkan halaman.</span>
+          <Button variant="outline" size="sm" onClick={() => saveMutation.mutate(checkedItemsRef.current)}>Simpan lagi</Button>
+        </div>
+      ) : (
+        <p className="text-sm text-emerald-700 dark:text-emerald-300" role="status">Progres checklist tersimpan otomatis.</p>
+      )}
+
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PancekTab)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" data-testid="tab-overview">
             <BookOpen className="h-4 w-4 mr-2" />
@@ -482,6 +517,7 @@ Penanggung Jawab: ${doc.penanggungJawab}`;
                       id={item.id}
                       checked={checkedItems[item.id] || false}
                       onCheckedChange={(checked) => handleCheckItem(item.id, checked as boolean)}
+                      disabled={progressQuery.isLoading || progressQuery.isError}
                       data-testid={`checkbox-${item.id}`}
                     />
                     <div className="flex-1">

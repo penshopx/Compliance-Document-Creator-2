@@ -14,7 +14,7 @@ import {
   Search, Database, FileText, Zap, Building2, Users, Shield,
   ChevronRight, RotateCcw, BookOpen, AlertCircle,
 } from "lucide-react";
-import { PANCEK_PHASES, getAllPancekDocuments, type PancekDocument } from "@/data/pancek-data";
+import { PANCEK_PHASES, getAllPancekDocuments, type PancekDocument } from "@shared/data/pancek-data";
 
 const PHASE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   komitmen:    { bg: "bg-red-50 dark:bg-red-950/20",     text: "text-red-700 dark:text-red-300",    border: "border-red-200 dark:border-red-800" },

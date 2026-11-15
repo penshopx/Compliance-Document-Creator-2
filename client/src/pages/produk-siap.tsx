@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { PRODUK_SIAP, PRODUK_COLORS, getProdukStats } from "@/data/produk-siap";
 import { SMAP_TEMPLATES } from "@/data/smap-templates-full";
+import { useIndustry } from "@/hooks/use-industry";
 import { Link } from "wouter";
 
 const iconMap: Record<string, any> = {
@@ -25,10 +26,11 @@ const iconMap: Record<string, any> = {
   RefreshCw
 };
 
-const VERIFICATION_THRESHOLD = 70;
+const READINESS_TARGET = 70;
 
 export default function ProdukSiap() {
   const { toast } = useToast();
+  const { currentIndustryId } = useIndustry();
   const [selectedProduk, setSelectedProduk] = useState<string | null>(null);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
@@ -58,14 +60,14 @@ export default function ProdukSiap() {
       const progress = total > 0 ? Math.round((checked / total) * 100) : 0;
       acc[p.id] = {
         progress,
-        isVerified: progress >= VERIFICATION_THRESHOLD,
-        remaining: Math.max(0, VERIFICATION_THRESHOLD - progress)
+        targetReached: progress >= READINESS_TARGET,
+        remaining: Math.max(0, READINESS_TARGET - progress)
       };
       return acc;
-    }, {} as Record<string, { progress: number; isVerified: boolean; remaining: number }>);
+    }, {} as Record<string, { progress: number; targetReached: boolean; remaining: number }>);
   }, [checkedItems]);
 
-  const isCurrentPhaseVerified = produk ? allPhasesProgress[produk.id]?.isVerified : false;
+  const currentPhaseTargetReached = produk ? allPhasesProgress[produk.id]?.targetReached : false;
   const currentPhaseRemaining = produk ? allPhasesProgress[produk.id]?.remaining : 0;
 
   const handleCheckItem = (itemId: string, checked: boolean) => {
@@ -108,6 +110,26 @@ export default function ProdukSiap() {
     toast({ title: "Daftar template berhasil disalin" });
   };
 
+  if (currentIndustryId === "pancek") {
+    return (
+      <div className="p-6">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Alur ini khusus persiapan SMAP</CardTitle>
+            <CardDescription>
+              Checklist Produk Siap di halaman ini memakai tahapan SMAP. Untuk checklist dan dokumen Pancek, gunakan alur PDCAR Pancek.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/pancek">Buka alur Pancek</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Overview cards for all products
   if (!selectedProduk) {
     return (
@@ -124,28 +146,27 @@ export default function ProdukSiap() {
           </Badge>
         </div>
 
-        {/* Overall Verification Status */}
+        {/* Internal readiness checklist status */}
         <Card className="border-2 border-primary/30 bg-primary/5" data-testid="card-overall-smap-status">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <ShieldCheck className="w-5 h-5" />
-              Status Kesiapan SMAP (Threshold: {VERIFICATION_THRESHOLD}%)
+              Target Checklist Kesiapan SMAP: {READINESS_TARGET}%
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {PRODUK_SIAP.map((p) => {
-                const phaseData = allPhasesProgress[p.id] || { progress: 0, isVerified: false };
-                const pColors = PRODUK_COLORS[p.color];
+                const phaseData = allPhasesProgress[p.id] || { progress: 0, targetReached: false };
                 return (
                   <div 
                     key={p.id} 
-                    className={`p-3 rounded-lg border-2 ${phaseData.isVerified ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-muted'}`}
+                    className={`p-3 rounded-lg border-2 ${phaseData.targetReached ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-muted'}`}
                     data-testid={`status-${p.id}`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-medium truncate">{p.nama}</span>
-                      {phaseData.isVerified ? (
+                      {phaseData.targetReached ? (
                         <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
                       ) : (
                         <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0" />
@@ -153,12 +174,12 @@ export default function ProdukSiap() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Progress value={phaseData.progress} className="h-2 flex-1" />
-                      <span className={`text-xs font-bold ${phaseData.isVerified ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      <span className={`text-xs font-bold ${phaseData.targetReached ? 'text-green-600' : 'text-muted-foreground'}`}>
                         {phaseData.progress}%
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {phaseData.isVerified ? "Terverifikasi" : `Kurang ${phaseData.remaining}%`}
+                      {phaseData.targetReached ? "Target tercapai" : `Kurang ${phaseData.remaining}%`}
                     </div>
                   </div>
                 );
@@ -172,7 +193,7 @@ export default function ProdukSiap() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Target className="w-5 h-5" />
-              Perjalanan Sertifikasi SMAP
+              Tahapan Persiapan SMAP
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -180,11 +201,11 @@ export default function ProdukSiap() {
               {PRODUK_SIAP.map((p, idx) => {
                 const Icon = iconMap[p.icon];
                 const pColors = PRODUK_COLORS[p.color];
-                const phaseData = allPhasesProgress[p.id] || { progress: 0, isVerified: false };
+                const phaseData = allPhasesProgress[p.id] || { progress: 0, targetReached: false };
                 return (
                   <div key={p.id} className="flex items-center">
                     <div className={`flex flex-col items-center p-4 rounded-lg ${pColors.bg} ${pColors.text} relative`}>
-                      {phaseData.isVerified && (
+                      {phaseData.targetReached && (
                         <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1">
                           <CheckCircle2 className="w-4 h-4 text-white" />
                         </div>
@@ -341,12 +362,12 @@ export default function ProdukSiap() {
         </div>
       </div>
 
-      {/* Verification Status Card */}
-      <Card className={`border-2 ${isCurrentPhaseVerified ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-phase-verification">
+      {/* Internal readiness target status; not a certification or audit result. */}
+      <Card className={`border-2 ${currentPhaseTargetReached ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'}`} data-testid="card-phase-verification">
         <CardContent className="py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              {isCurrentPhaseVerified ? (
+              {currentPhaseTargetReached ? (
                 <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50">
                   <Award className="h-8 w-8 text-green-600" />
                 </div>
@@ -357,37 +378,37 @@ export default function ProdukSiap() {
               )}
               <div>
                 <h3 className="text-lg font-bold" data-testid="text-phase-verification-status">
-                  {isCurrentPhaseVerified ? `${produk!.nama} TERVERIFIKASI` : "BELUM TERVERIFIKASI"}
+                  {currentPhaseTargetReached ? "TARGET CHECKLIST FASE TERCAPAI" : "TARGET CHECKLIST FASE BELUM TERCAPAI"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {isCurrentPhaseVerified 
-                    ? `Selamat! Kesiapan ${produk!.nama} telah mencapai threshold ${VERIFICATION_THRESHOLD}%`
-                    : `Diperlukan ${currentPhaseRemaining}% lagi untuk mencapai status Terverifikasi`
+                  {currentPhaseTargetReached
+                    ? "Checklist internal mencapai target. Ini bukan hasil audit atau sertifikasi resmi."
+                    : `Perlu ${currentPhaseRemaining}% lagi untuk mencapai target checklist internal.`
                   }
                 </p>
               </div>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-2">
-                <TrendingUp className={`h-5 w-5 ${isCurrentPhaseVerified ? 'text-green-600' : 'text-orange-600'}`} />
-                <span className={`text-3xl font-bold ${isCurrentPhaseVerified ? 'text-green-600' : 'text-orange-600'}`}>
+                <TrendingUp className={`h-5 w-5 ${currentPhaseTargetReached ? 'text-green-600' : 'text-orange-600'}`} />
+                <span className={`text-3xl font-bold ${currentPhaseTargetReached ? 'text-green-600' : 'text-orange-600'}`}>
                   {checklistProgress}%
                 </span>
               </div>
-              <div className="text-sm text-muted-foreground">Target: {VERIFICATION_THRESHOLD}%</div>
+              <div className="text-sm text-muted-foreground">Target internal: {READINESS_TARGET}%</div>
             </div>
           </div>
           <div className="mt-4">
             <div className="flex items-center justify-between text-sm mb-1">
               <span>Progress Kesiapan</span>
-              <span className="font-medium">{checklistProgress}% / {VERIFICATION_THRESHOLD}%</span>
+              <span className="font-medium">{checklistProgress}% / {READINESS_TARGET}%</span>
             </div>
             <div className="relative">
               <Progress value={checklistProgress} className="h-3" />
               <div 
                 className="absolute top-0 h-3 w-0.5 bg-red-500" 
-                style={{ left: `${VERIFICATION_THRESHOLD}%` }}
-                title={`Threshold ${VERIFICATION_THRESHOLD}%`}
+                style={{ left: `${READINESS_TARGET}%` }}
+                title={`Target internal ${READINESS_TARGET}%`}
               />
             </div>
           </div>

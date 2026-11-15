@@ -1,11 +1,14 @@
 import type { IndustryConfig } from "@shared/config/industry-types";
+import { getPancekStats } from "./pancek-data";
+
+const pancekStats = getPancekStats();
 
 export const pancekConfig: IndustryConfig = {
   id: "pancek",
   name: "Panduan Cegah Korupsi",
   shortName: "Pancek",
-  tagline: "Platform Jaga.id KPK",
-  description: "Panduan nasional dengan 6 fase PDCAR terintegrasi Platform Jaga.id KPK",
+  tagline: "Panduan CEK KPK",
+  description: "Panduan nasional dengan 6 fase PDCAR untuk menyiapkan dokumen pendukung proses Jaga.id KPK",
   icon: "Award",
   color: "green",
   isActive: true,
@@ -15,14 +18,14 @@ export const pancekConfig: IndustryConfig = {
     badge: "Untuk Perusahaan Konstruksi Indonesia",
     headline: "Panduan Cegah",
     headlineHighlight: "Korupsi KPK",
-    subheadline: "Platform lengkap untuk implementasi Panduan Cegah Korupsi (Pancek) dengan 3 fase kesiapan terintegrasi Platform Jaga.id KPK.",
+    subheadline: "Platform untuk menjalankan alur PDCAR Pancek dan menyiapkan dokumen pendukung proses pada Platform Jaga.id KPK.",
     ctaPrimary: "Mulai Sekarang",
     ctaSecondary: "Pelajari Lebih Lanjut",
     features: [
       {
         icon: "Award",
         title: "3 Fase Kesiapan Pancek",
-        description: "Siap Pengisian Kuesioner → Siap Terverifikasi → Siap Surveilance untuk Platform Jaga.id KPK"
+        description: "Siap Pengisian Kuesioner → Siap Verifikasi Eksternal → Pemantauan berkala"
       },
       {
         icon: "FileCheck",
@@ -36,8 +39,8 @@ export const pancekConfig: IndustryConfig = {
       },
       {
         icon: "Building2",
-        title: "Integrasi Jaga.id",
-        description: "Sinkronisasi langsung dengan Platform Jaga.id KPK untuk verifikasi"
+        title: "Rujukan Jaga.id",
+        description: "Siapkan dokumen di aplikasi ini; pengisian dan verifikasi resmi dilakukan terpisah di Jaga.id"
       },
       {
         icon: "BookOpen",
@@ -51,10 +54,10 @@ export const pancekConfig: IndustryConfig = {
       }
     ],
     stats: [
-      { value: "100+", label: "Template Dokumen" },
-      { value: "6", label: "Fase PDCAR" },
-      { value: "25", label: "Indikator Jaga.id" },
-      { value: "15+", label: "Checklist Item" }
+      { value: String(pancekStats.totalDocuments), label: "Dokumen Pancek" },
+      { value: String(pancekStats.totalPhases), label: "Fase PDCAR" },
+      { value: String(pancekStats.totalChecklistItems), label: "Item Checklist" },
+      { value: String(pancekStats.requiredItems), label: "Item Wajib" }
     ]
   },
 
@@ -83,12 +86,11 @@ export const pancekConfig: IndustryConfig = {
     {
       label: "Dokumen Pancek",
       items: [
-        { title: "Produk Siap Pancek", url: "/produk-siap", icon: "Package" },
+        { title: "Tahapan PDCAR", url: "/pancek", icon: "Package" },
         { title: "Kesiapan Integritas Proyek", url: "/project-integrity", icon: "ShieldCheck", badge: "Baru" },
-        { title: "Checklist Pancek", url: "/smap-checklist", icon: "ListChecks" },
-        { title: "Template Repository", url: "/template-repository", icon: "Library" },
-        { title: "Referensi Dokumen", url: "/smap-reference", icon: "BookOpen" },
-        { title: "Generator Dokumen", url: "/documents", icon: "FileText" },
+        { title: "Checklist Pancek", url: "/pancek/checklist", icon: "ListChecks" },
+        { title: "Dokumen Pancek", url: "/pancek/documents", icon: "Library" },
+        { title: "Generator Dokumen", url: "/pancek-generator", icon: "FileText" },
         { title: "Simulator Pemeriksaan", url: "/document-simulator", icon: "FileSearch", badge: "Baru" },
         { title: "Document Builder", url: "/document-builder", icon: "FilePlus2" },
         { title: "PDCAR Generator", url: "/pdca", icon: "Zap" }

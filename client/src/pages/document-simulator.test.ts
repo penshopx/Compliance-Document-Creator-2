@@ -7,6 +7,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { JSDOM } from "jsdom";
 import { DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH, DOCUMENT_SIMULATOR_MAX_UPLOAD_BYTES } from "@shared/schema";
+import { IndustryProvider } from "@/hooks/use-industry";
 import { queryClient } from "@/lib/queryClient";
 
 type FetchMock = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -35,6 +36,7 @@ function setDomGlobals(window: Window & typeof globalThis) {
     window: { configurable: true, value: window },
     document: { configurable: true, value: window.document },
     navigator: { configurable: true, value: window.navigator },
+    localStorage: { configurable: true, value: window.localStorage },
     HTMLElement: { configurable: true, value: window.HTMLElement },
     Node: { configurable: true, value: window.Node },
     DocumentFragment: { configurable: true, value: window.DocumentFragment },
@@ -52,6 +54,7 @@ function setDomGlobals(window: Window & typeof globalThis) {
 beforeEach(async () => {
   dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost", pretendToBeVisual: true });
   setDomGlobals(dom.window as unknown as Window & typeof globalThis);
+  dom.window.localStorage.setItem("compliance-hub-industry", "smap");
   originalFetch = globalThis.fetch;
   originalCreateObjectURL = URL.createObjectURL;
   originalRevokeObjectURL = URL.revokeObjectURL;
@@ -98,7 +101,11 @@ beforeEach(async () => {
   document.body.appendChild(container);
   root = createRoot(container);
   await act(async () => {
-    root.render(createElement(QueryClientProvider, { client: queryClient }, createElement(DocumentSimulatorPage)));
+    root.render(createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      createElement(IndustryProvider, null, createElement(DocumentSimulatorPage)),
+    ));
     await pause();
   });
 });
@@ -119,6 +126,27 @@ async function switchToTextSource() {
   await act(async () => switchButton.click());
   assert.ok(container.querySelector("#source-title"));
 }
+
+test("the simulator defaults to Pancek when the selected industry is Pancek", async () => {
+  await act(async () => root.unmount());
+  queryClient.clear();
+  dom.window.localStorage.setItem("compliance-hub-industry", "pancek");
+  container.innerHTML = "";
+  root = createRoot(container);
+
+  await act(async () => {
+    root.render(createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      createElement(IndustryProvider, null, createElement(DocumentSimulatorPage)),
+    ));
+    await pause();
+  });
+
+  const standardTrigger = container.querySelector("#review-standard");
+  assert.ok(standardTrigger);
+  assert.match(standardTrigger.textContent || "", /Pancek/i);
+});
 
 async function selectFile(name: string, content: string, size?: number) {
   const fileInput = container.querySelector<HTMLInputElement>('input[type="file"]');

@@ -1,4 +1,4 @@
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, asc, sql } from "drizzle-orm";
 import { db } from "./db";
 import {
   aiCredentials,
@@ -412,7 +412,9 @@ export class DatabaseStorage implements IStorage {
 
   // Pancek KPK Progress
   async getPancekProgress(userId: string): Promise<Record<string, boolean>> {
-    const rows = await db.select().from(pancekProgress).where(eq(pancekProgress.userId, userId));
+    const rows = await db.select().from(pancekProgress)
+      .where(eq(pancekProgress.userId, userId))
+      .orderBy(asc(pancekProgress.updatedAt), asc(pancekProgress.id));
     return rows.reduce((acc, row) => {
       acc[row.itemId] = row.checked ?? false;
       return acc;
@@ -420,18 +422,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async savePancekProgress(userId: string, items: Record<string, boolean>): Promise<void> {
-    for (const [itemId, checked] of Object.entries(items)) {
-      const existing = await db.select().from(pancekProgress)
-        .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.itemId, itemId)))
-        .limit(1);
-      if (existing.length > 0) {
-        await db.update(pancekProgress)
-          .set({ checked, updatedAt: new Date() })
-          .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.itemId, itemId)));
-      } else {
-        await db.insert(pancekProgress).values({ userId, itemId, checked });
+    await db.transaction(async (tx) => {
+      // Serialize full progress snapshots across tabs so competing saves cannot
+      // leave duplicate or out-of-order checklist rows for the same user.
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
+      for (const [itemId, checked] of Object.entries(items)) {
+        const existing = await tx.select().from(pancekProgress)
+          .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.itemId, itemId)))
+          .limit(1);
+        if (existing.length > 0) {
+          await tx.update(pancekProgress)
+            .set({ checked, updatedAt: new Date() })
+            .where(and(eq(pancekProgress.userId, userId), eq(pancekProgress.itemId, itemId)));
+        } else {
+          await tx.insert(pancekProgress).values({ userId, itemId, checked });
+        }
       }
-    }
+    });
   }
 
   // Dashboard Stats

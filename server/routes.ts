@@ -61,12 +61,13 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
-import { getPancekStats } from "@shared/data/pancek-data";
+import { getAllPancekChecklistItems, getPancekStats } from "@shared/data/pancek-data";
 import {
   extractDocumentPageNumbers,
   sanitizeFindingPageNumbers,
 } from "./lib/document-review-pages";
 import { registerDocumentExtractionRoute } from "./lib/document-extraction-route";
+import { normalizePancekPlanFeatures } from "./lib/pancek-plan-copy";
 import {
   mapDocumentExtractionFailure,
   mapDocumentUploadMiddlewareFailure,
@@ -286,8 +287,15 @@ export async function registerRoutes(
     try {
       const userId = (req.user as any)?.id || (req.user as any)?.claims?.sub;
       if (!userId) return res.status(401).json({ error: "Unauthorized" });
-      const { items } = req.body as { items: Record<string, boolean> };
-      if (!items || typeof items !== "object") return res.status(400).json({ error: "Invalid items" });
+      const parsedBody = z.object({
+        items: z.record(z.boolean()),
+      }).safeParse(req.body);
+      if (!parsedBody.success) return res.status(400).json({ error: "Data progres checklist tidak valid." });
+      const items = parsedBody.data.items;
+      const validItemIds = new Set(getAllPancekChecklistItems().map((item) => item.id));
+      if (Object.keys(items).some((itemId) => !validItemIds.has(itemId))) {
+        return res.status(400).json({ error: "Item checklist Pancek tidak dikenal." });
+      }
       await storage.savePancekProgress(userId, items);
       res.json({ ok: true });
     } catch (error) {
@@ -4288,6 +4296,7 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
   app.get("/api/subscription-plans", async (req, res) => {
     try {
       let plans = await storage.getSubscriptionPlans();
+      const pancekPlanCounts = getPancekStats();
       
       // Seed default plans if none exist
       if (plans.length === 0) {
@@ -4335,7 +4344,7 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
             category: "pancek",
             description: "Persiapan pengisian kuesioner Platform Jaga.id",
             price: 1500000,
-            features: "Profil Perusahaan,Panduan 6 Fase PDCAR,30+ Checklist Item Pancek,25+ Template Dokumen Pancek,AI Prompt Generator,Pancek Mentor AI,Integrasi Referensi Jaga.id,Export PDF",
+            features: `Profil Perusahaan,Panduan ${pancekPlanCounts.totalPhases} Fase PDCAR,${pancekPlanCounts.totalChecklistItems} Item Checklist Pancek,${pancekPlanCounts.totalDocuments} Dokumen Pancek,AI Prompt Generator,Pancek Mentor AI,Panduan Jaga.id (proses resmi dilakukan manual),Export PDF`,
             materials: "Pedoman Cegah Korupsi (Pancek),Kebijakan Anti Korupsi,Kode Etik Perusahaan,SOP Pencegahan Korupsi,Prosedur Pelaporan Pelanggaran,Formulir Komitmen Integritas,Panduan Pengisian Kuesioner Jaga.id,Checklist Dokumen Pendukung,Template Bukti Implementasi",
             sortOrder: 5,
           },
@@ -4365,7 +4374,11 @@ ${validated.focus ? `FOKUS SAAT INI: ${validated.focus}` : ''}`,
         plans = await storage.getSubscriptionPlans();
       }
       
-      res.json(plans);
+      res.json(plans.map((plan) => (
+        plan.category === "pancek" && plan.features
+          ? { ...plan, features: normalizePancekPlanFeatures(plan.features, pancekPlanCounts) }
+          : plan
+      )));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch subscription plans" });
     }

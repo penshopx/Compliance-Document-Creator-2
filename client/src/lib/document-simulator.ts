@@ -1,6 +1,10 @@
 export type DocumentReviewStandard = "smap" | "pancek";
 export type DocumentSourceType = "saved" | "pasted";
 
+export function getDefaultDocumentReviewStandard(industryId: string): DocumentReviewStandard {
+  return industryId === "pancek" ? "pancek" : "smap";
+}
+
 export type EditableDocument = {
   title: string;
   content: string;

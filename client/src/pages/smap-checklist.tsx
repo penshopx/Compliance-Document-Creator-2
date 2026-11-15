@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
 import {
   CheckCircle2,
   XCircle,
@@ -132,6 +133,7 @@ const DOKUMEN_REKAMAN = [
 
 export default function SMAPChecklist() {
   const { toast } = useToast();
+  const { currentIndustryId } = useIndustry();
   const [activeTab, setActiveTab] = useState("checklist");
   const [checklistData, setChecklistData] = useState<ChecklistSection[]>(CHECKLIST_DATA);
 
@@ -213,6 +215,26 @@ export default function SMAPChecklist() {
 
     toast({ title: "Berhasil!", description: "Checklist berhasil diunduh" });
   };
+
+  if (currentIndustryId === "pancek") {
+    return (
+      <div className="p-6">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Checklist ini khusus SMAP</CardTitle>
+            <CardDescription>
+              Checklist Pancek memiliki indikator dan status progres tersendiri agar tidak tercampur dengan checklist SMAP.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <a href="/pancek/checklist">Buka checklist Pancek</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   buildDocumentReviewPayload,
   createEditableDocument,
+  getDefaultDocumentReviewStandard,
   getDocumentPageText,
   isPastedDocumentReady,
 } from "./document-simulator";
@@ -19,6 +20,12 @@ test("review is ready only when editable text is present and within the limit", 
   assert.equal(isPastedDocumentReady(" \n ", 100), false);
   assert.equal(isPastedDocumentReady("abc", 3), true);
   assert.equal(isPastedDocumentReady("abcd", 3), false);
+});
+
+test("the review standard follows the selected compliance framework", () => {
+  assert.equal(getDefaultDocumentReviewStandard("pancek"), "pancek");
+  assert.equal(getDefaultDocumentReviewStandard("smap"), "smap");
+  assert.equal(getDefaultDocumentReviewStandard("other"), "smap");
 });
 
 test("gets the editable text for one marked PDF page", () => {

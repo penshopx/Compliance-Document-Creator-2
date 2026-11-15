@@ -17,6 +17,7 @@ import {
   ChevronUp
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
 
 interface DocumentReference {
   id: string;
@@ -98,6 +99,7 @@ const kategoriConfig = {
 };
 
 export default function SMAPReferencePage() {
+  const { currentIndustryId } = useIndustry();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedKategori, setSelectedKategori] = useState<string>("all");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -162,6 +164,26 @@ export default function SMAPReferencePage() {
     register: documentReferences.filter(d => d.kategori === "Register").length,
     instruksi: documentReferences.filter(d => d.kategori === "Instruksi").length,
   };
+
+  if (currentIndustryId === "pancek") {
+    return (
+      <div className="p-6">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Referensi ini khusus SMAP</CardTitle>
+            <CardDescription>
+              Daftar ini merujuk dokumen ISO 37001. Untuk Pancek, gunakan alur PDCAR dan referensi dasar hukum di ruang kerja Pancek.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <a href="/pancek">Buka ruang kerja Pancek</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

@@ -28,11 +28,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useIndustry } from "@/hooks/use-industry";
 import { apiRequest } from "@/lib/queryClient";
 import { assertDocumentUploadSize, extractPlainTextDocument } from "@/lib/document-extraction";
 import {
   buildDocumentReviewPayload,
   createEditableDocument,
+  getDefaultDocumentReviewStandard,
   isPastedDocumentReady,
   type DocumentReviewStandard,
   type DocumentSourceType,
@@ -160,9 +162,10 @@ function statusLabel(status: string) {
 
 export default function DocumentSimulatorPage() {
   const { toast } = useToast();
+  const { currentIndustryId } = useIndustry();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [standard, setStandard] = useState<Standard>("smap");
+  const [standard, setStandard] = useState<Standard>(() => getDefaultDocumentReviewStandard(currentIndustryId));
   const [sourceType, setSourceType] = useState<SourceType>("saved");
   const [selectedDocumentId, setSelectedDocumentId] = useState("");
   const [pastedDocument, setPastedDocument] = useState<EditableDocument>(() => createEditableDocument("", ""));
@@ -176,6 +179,10 @@ export default function DocumentSimulatorPage() {
     if (!scanPreview?.url) return;
     return () => URL.revokeObjectURL(scanPreview.url);
   }, [scanPreview?.url]);
+
+  useEffect(() => {
+    setStandard(getDefaultDocumentReviewStandard(currentIndustryId));
+  }, [currentIndustryId]);
 
   const generatedQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/generated-documents"] });
   const documentsQuery = useQuery<SavedDocument[]>({ queryKey: ["/api/documents"] });

@@ -303,6 +303,26 @@ FORMAT OUTPUT:
     selectedArea !== "all" ||
     selectedKritis !== "all";
 
+  if (currentIndustryId === "pancek") {
+    return (
+      <div className="p-6">
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Template ini khusus SMAP</CardTitle>
+            <CardDescription>
+              Repository ini berisi template berbasis ISO 37001. Gunakan daftar dokumen Pancek agar indikator dan alurnya tetap sesuai.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <a href="/pancek/documents">Buka dokumen Pancek</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col gap-2">

@@ -390,7 +390,7 @@ export default function WelcomePage() {
                           <p className="text-sm text-muted-foreground">
                             {selectedIndustry === 'smap' 
                               ? 'Akses dashboard SMAP dengan 270+ template, checklist, dan AI prompt generator'
-                              : 'Akses dashboard Pancek dengan 6 fase PDCAR dan integrasi Platform Jaga.id'}
+                              : 'Akses dashboard Pancek dengan 6 fase PDCAR dan rujukan manual ke Platform Jaga.id'}
                           </p>
                         </div>
                       </div>
