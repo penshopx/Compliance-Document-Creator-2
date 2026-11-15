@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
 import mammoth from "mammoth";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, OPS, type PDFPageProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 import {
   DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
@@ -27,6 +27,7 @@ const OCR_LOW_CONFIDENCE_THRESHOLD = 70;
 const OCR_LOW_CONFIDENCE_WORD_THRESHOLD = 60;
 const OCR_LOW_CONFIDENCE_WORD_PERCENT_THRESHOLD = 15;
 const OCR_MIN_RELIABLE_WORD_COUNT = 5;
+const OCR_MIN_RASTER_IMAGE_PIXELS = 250_000;
 
 export type OcrPageQuality = {
   pageNumber: number;
@@ -102,6 +103,23 @@ function formatPdfPages(pageTexts: string[]): string {
     .map((text, index) => `--- Halaman ${index + 1} ---\n${text}`)
     .join("\n\n")
     .trim();
+}
+
+async function pageHasSubstantialRasterImage(page: PDFPageProxy): Promise<boolean> {
+  const operatorList = await page.getOperatorList();
+  return operatorList.fnArray.some((operator, index) => {
+    if (
+      operator !== OPS.paintImageXObject
+      && operator !== OPS.paintInlineImageXObject
+      && operator !== OPS.paintImageXObjectRepeat
+    ) {
+      return false;
+    }
+    const args = operatorList.argsArray[index];
+    const width = Number(args?.[1]);
+    const height = Number(args?.[2]);
+    return Number.isFinite(width) && Number.isFinite(height) && width * height >= OCR_MIN_RASTER_IMAGE_PIXELS;
+  });
 }
 
 async function recognizePdfPages(
@@ -310,7 +328,13 @@ export async function extractDocumentText(
             "text_too_long",
           );
         }
-        if (!pageText) pagesNeedingOcr.push(pageNumber);
+        const nativeWordCount = pageText.split(/\s+/).filter(Boolean).length;
+        if (
+          !pageText
+          || (nativeWordCount < OCR_MIN_RELIABLE_WORD_COUNT && await pageHasSubstantialRasterImage(page))
+        ) {
+          pagesNeedingOcr.push(pageNumber);
+        }
       }
 
       if (pagesNeedingOcr.length) {
@@ -323,9 +347,10 @@ export async function extractDocumentText(
         ocrPages = recognizedPages.map(({ quality }) => quality);
         recognizedPages.forEach(({ text }, index) => {
           const pageNumber = pagesNeedingOcr[index];
-          pageTexts[pageNumber - 1] = text
-            ? `[Halaman ${pageNumber} — hasil OCR]\n${text}`
-            : "";
+          const ocrText = text ? `[Halaman ${pageNumber} — hasil OCR]\n${text}` : "";
+          pageTexts[pageNumber - 1] = pageTexts[pageNumber - 1]
+            ? [pageTexts[pageNumber - 1], ocrText].filter(Boolean).join("\n\n")
+            : ocrText;
         });
       }
       if (!pageTexts.some((text) => text.trim())) {

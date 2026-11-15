@@ -62,17 +62,23 @@ function makeNativePdf(text: string | string[]): Buffer {
   return makePdf(objects);
 }
 
-function makeScannedPdf(scannedPageNumber = 1, totalPageCount = scannedPageNumber): Buffer {
+function makeScannedPdf(
+  scannedPageNumber = 1,
+  totalPageCount = scannedPageNumber,
+  nativeOverlay = "",
+  scale = 14,
+): Buffer {
   const glyphs = {
     S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
     M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
     A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
     P: ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
   };
-  const scale = 14;
   const text = "SMAP";
   const width = text.length * 6 * scale;
   const height = 7 * scale;
+  const displayWidth = text.length * 6 * 14;
+  const displayHeight = 7 * 14;
   const pixels = Buffer.alloc(width * height * 3, 255);
   [...text].forEach((character, characterIndex) => {
     glyphs[character as keyof typeof glyphs].forEach((row, rowIndex) => {
@@ -99,7 +105,7 @@ function makeScannedPdf(scannedPageNumber = 1, totalPageCount = scannedPageNumbe
   const pageObjects = Array.from({ length: pageCount }, (_, index) => {
     const pageNumber = index + 1;
     const resource = pageNumber === scannedPageNumber
-      ? `<< /XObject << /Im1 ${imageId} 0 R >> >>`
+      ? `<< /XObject << /Im1 ${imageId} 0 R >> /Font << /F1 ${fontId} 0 R >> >>`
       : `<< /Font << /F1 ${fontId} 0 R >> >>`;
     return Buffer.from(
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources ${resource} /Contents ${firstContentId + index} 0 R >>`,
@@ -107,8 +113,9 @@ function makeScannedPdf(scannedPageNumber = 1, totalPageCount = scannedPageNumbe
   });
   const contentStreams = Array.from({ length: pageCount }, (_, index) => {
     const pageNumber = index + 1;
+    const escapedOverlay = nativeOverlay.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
     const stream = pageNumber === scannedPageNumber
-      ? Buffer.from(`q ${width} 0 0 ${height} 60 300 cm /Im1 Do Q`)
+      ? Buffer.from(`q ${displayWidth} 0 0 ${displayHeight} 60 300 cm /Im1 Do Q${nativeOverlay ? ` BT /F1 12 Tf 72 720 Td (${escapedOverlay}) Tj ET` : ""}`)
       : Buffer.from(`BT /F1 12 Tf 72 720 Td (Cover page ${pageNumber}) Tj ET`);
     return Buffer.concat([
       Buffer.from(`<< /Length ${stream.length} >>\nstream\n`),
@@ -240,7 +247,7 @@ test("keeps OCR warnings accurate across real Indonesian scan samples", async ()
   // is the dense table page downsampled and softened to model a poor scan.
   const samples = [
     { fileName: "clear-indonesian-scan.pdf", needsReview: false, minConfidence: 80 },
-    { fileName: "dense-indonesian-table-scan.pdf", needsReview: false, minConfidence: 70 },
+    { fileName: "dense-indonesian-table-scan.pdf", needsReview: true, minConfidence: 70 },
     { fileName: "blurred-indonesian-table-scan.pdf", needsReview: true, maxConfidence: 69 },
   ];
 
@@ -283,6 +290,17 @@ test("preserves the original page number when OCR follows selectable PDF text", 
   assert.match(result.content, /\[Halaman 2 — hasil OCR\]\s+SMAP/i);
 });
 
+test("OCRs substantial scan images on pages that also contain sparse selectable text", async () => {
+  const result = await extractDocumentText(makeScannedPdf(1, 1, "Cover", 50), "hybrid-policy.pdf");
+
+  assert.equal(result.pageCount, 1);
+  assert.equal(result.ocrPageCount, 1);
+  assert.equal(result.ocrPages?.[0].pageNumber, 1);
+  assert.equal(result.ocrPages?.[0].needsReview, true);
+  assert.match(result.content, /Cover/);
+  assert.match(result.content, /\[Halaman 1 — hasil OCR\]\s+\S+/i);
+});
+
 test("flags OCR pages with low or missing word confidence for review", () => {
   const lowConfidence = parseOcrPage(
     4,
@@ -292,9 +310,15 @@ test("flags OCR pages with low or missing word confidence for review", () => {
     7,
     "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n",
   );
+  const clearRows = Array.from({ length: 5 }, (_, index) =>
+    `5\t1\t1\t1\t1\t${index + 1}\t0\t0\t10\t10\t95\tWord${index + 1}`,
+  );
   const clearPage = parseOcrPage(
     9,
-    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\tSMAP\n",
+    [
+      "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext",
+      ...clearRows,
+    ].join("\n"),
   );
 
   assert.equal(lowConfidence.text, "Kebijakan");
