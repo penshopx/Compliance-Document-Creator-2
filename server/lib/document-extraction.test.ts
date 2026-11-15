@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { deflateSync, gunzipSync } from "node:zlib";
 import { test } from "node:test";
 import {
@@ -232,6 +233,41 @@ test("recognizes Indonesian and English text from scanned PDF pages", async () =
   assert.ok(result.ocrPages?.[0].confidence !== null);
   assert.equal(result.ocrPages?.[0].needsReview, true);
   assert.match(result.content, /\[Halaman 1 — hasil OCR\]\s+SMAP/i);
+});
+
+test("keeps OCR warnings accurate across real Indonesian scan samples", async () => {
+  // The clear and dense pages are real image-only PDF pages. The blurred sample
+  // is the dense table page downsampled and softened to model a poor scan.
+  const samples = [
+    { fileName: "clear-indonesian-scan.pdf", needsReview: false, minConfidence: 80 },
+    { fileName: "dense-indonesian-table-scan.pdf", needsReview: false, minConfidence: 70 },
+    { fileName: "blurred-indonesian-table-scan.pdf", needsReview: true, maxConfidence: 69 },
+  ];
+
+  for (const sample of samples) {
+    const buffer = await readFile(
+      new URL(`./fixtures/document-extraction/${sample.fileName}`, import.meta.url),
+    );
+    const result = await extractDocumentText(buffer, sample.fileName);
+    const quality = result.ocrPages?.[0];
+
+    assert.equal(result.pageCount, 1, sample.fileName);
+    assert.equal(result.ocrPages?.length, 1, sample.fileName);
+    assert.ok(quality?.confidence !== null && quality?.confidence !== undefined, sample.fileName);
+    assert.equal(quality?.needsReview, sample.needsReview, `${sample.fileName}: confidence ${quality?.confidence}`);
+    if ("minConfidence" in sample) {
+      assert.ok(
+        quality.confidence >= sample.minConfidence,
+        `${sample.fileName}: confidence ${quality.confidence} should remain readable`,
+      );
+    }
+    if ("maxConfidence" in sample) {
+      assert.ok(
+        quality.confidence <= sample.maxConfidence,
+        `${sample.fileName}: confidence ${quality.confidence} should trigger review`,
+      );
+    }
+  }
 });
 
 test("preserves the original page number when OCR follows selectable PDF text", async () => {
