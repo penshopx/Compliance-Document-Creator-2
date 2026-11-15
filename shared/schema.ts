@@ -269,6 +269,27 @@ export type InsertGeneratedDocument = z.infer<typeof insertGeneratedDocumentSche
 export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
 
 // Saved document simulator reviews
+export const documentSimulatorFindingSchema = z.object({
+  severity: z.enum(["kritis", "tinggi", "sedang", "rendah"]),
+  criterion: z.string(),
+  reference: z.string(),
+  evidence: z.string(),
+  gap: z.string(),
+  recommendation: z.string(),
+  pageNumbers: z.array(z.number().int().positive()).catch([]),
+});
+
+export const documentSimulatorResultSchema = z.object({
+  overallScore: z.number().int().min(0).max(100),
+  overallStatus: z.enum(["memadai", "perlu_perbaikan", "belum_memadai"]),
+  executiveSummary: z.string().min(1),
+  findings: z.array(documentSimulatorFindingSchema),
+  strengths: z.array(z.string()),
+  missingEvidence: z.array(z.string()),
+});
+
+export type DocumentSimulatorResult = z.infer<typeof documentSimulatorResultSchema>;
+
 export const documentSimulatorReviews = pgTable("document_simulator_reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   ownerId: varchar("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -276,7 +297,7 @@ export const documentSimulatorReviews = pgTable("document_simulator_reviews", {
   sourceTitle: text("source_title").notNull(),
   overallScore: integer("overall_score").notNull(),
   overallStatus: text("overall_status").notNull(),
-  result: jsonb("result").notNull(),
+  result: jsonb("result").$type<DocumentSimulatorResult>().notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

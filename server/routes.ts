@@ -56,6 +56,7 @@ import {
   documents,
   generatedDocuments,
   documentSimulatorReviews,
+  documentSimulatorResultSchema,
   documentSimulatorRequestSchema,
   DOCUMENT_SIMULATOR_MAX_CONTENT_LENGTH,
 } from "@shared/schema";
@@ -101,23 +102,6 @@ const saveAiKeySchema = z.object({
   provider: z.enum(AI_PROVIDER_IDS as [string, ...string[]]),
   apiKey: z.string().min(8).max(400),
   model: z.string().max(100).optional(),
-});
-
-const documentSimulatorResultSchema = z.object({
-  overallScore: z.number().int().min(0).max(100),
-  overallStatus: z.enum(["memadai", "perlu_perbaikan", "belum_memadai"]),
-  executiveSummary: z.string().min(1),
-  findings: z.array(z.object({
-    severity: z.enum(["kritis", "tinggi", "sedang", "rendah"]),
-    criterion: z.string(),
-    reference: z.string(),
-    evidence: z.string(),
-    gap: z.string(),
-    recommendation: z.string(),
-    pageNumbers: z.array(z.number().int().positive()).catch([]),
-  })),
-  strengths: z.array(z.string()),
-  missingEvidence: z.array(z.string()),
 });
 
 const smapGenerateSchema = z.object({

@@ -16,6 +16,7 @@ let dom: JSDOM;
 let root: Root;
 let container: HTMLDivElement;
 let reviewRequests: Array<Record<string, unknown>>;
+let reviewResponseFindings: Array<Record<string, unknown>>;
 let extractionResponse: { status: number; body: Record<string, unknown> };
 let DocumentSimulatorPage: ComponentType;
 let originalFetch: typeof fetch;
@@ -61,6 +62,7 @@ beforeEach(async () => {
   URL.createObjectURL = (() => "blob:scan-preview") as typeof URL.createObjectURL;
   URL.revokeObjectURL = (() => undefined) as typeof URL.revokeObjectURL;
   reviewRequests = [];
+  reviewResponseFindings = [];
   extractionResponse = { status: 200, body: { title: "Imported policy", content: "Extracted policy text." } };
   queryClient.clear();
 
@@ -83,7 +85,7 @@ beforeEach(async () => {
           overallScore: 75,
           overallStatus: "perlu_perbaikan",
           executiveSummary: "Review test",
-          findings: [],
+          findings: reviewResponseFindings,
           strengths: [],
           missingEvidence: [],
           sourceTitle: "Imported policy",
@@ -250,6 +252,83 @@ test("scanned PDF can be compared page by page with its editable extracted text"
     "blob:scan-preview#page=4&view=FitH",
   );
   assert.equal(container.querySelector<HTMLTextAreaElement>("#scan-extracted-page-text")?.value, "OCR text from page four");
+});
+
+test("review findings display source pages when page references are present", async () => {
+  reviewResponseFindings = [{
+    severity: "sedang",
+    criterion: "Pengendalian dokumen",
+    reference: "Klausul 7.5",
+    evidence: "Prosedur berlaku pada halaman dua.",
+    gap: "Belum ada bukti persetujuan.",
+    recommendation: "Tambahkan catatan persetujuan.",
+    pageNumbers: [2, 4],
+  }];
+  await switchToTextSource();
+  await selectFile("policy.txt", "--- Halaman 2 ---\nPolicy text\n--- Halaman 4 ---\nMore text");
+  await act(async () => {
+    reviewButton().click();
+    await pause();
+  });
+
+  assert.match(container.textContent || "", /Halaman sumber:\s*2,\s*4/);
+});
+
+test("review findings without page references do not show a page label", async () => {
+  reviewResponseFindings = [{
+    severity: "sedang",
+    criterion: "Pengendalian dokumen",
+    reference: "Klausul 7.5",
+    evidence: "Prosedur disebutkan.",
+    gap: "Halaman sumber tidak dapat dipastikan.",
+    recommendation: "Verifikasi dokumen secara manual.",
+  }];
+  await switchToTextSource();
+  await selectFile("policy.txt", "Policy text without page markers.");
+  await act(async () => {
+    reviewButton().click();
+    await pause();
+  });
+
+  assert.doesNotMatch(container.textContent || "", /Halaman sumber:/);
+});
+
+test("saved review history retains and displays source page references", async () => {
+  queryClient.setQueryData(["/api/document-simulator/reviews"], [{
+    id: "saved-review-1",
+    ownerId: "user-1",
+    standard: "smap",
+    sourceTitle: "Saved policy",
+    overallScore: 82,
+    overallStatus: "memadai",
+    result: {
+      overallScore: 82,
+      overallStatus: "memadai",
+      executiveSummary: "Saved review",
+      findings: [{
+        severity: "rendah",
+        criterion: "Kontrol dokumen",
+        reference: "Klausul 7.5",
+        evidence: "Pernyataan pada halaman tiga.",
+        gap: "",
+        recommendation: "Pertahankan kontrol.",
+        pageNumbers: [3],
+      }],
+      strengths: [],
+      missingEvidence: [],
+      sourceTitle: "Saved policy",
+      createdAt: new Date().toISOString(),
+    },
+    createdAt: new Date().toISOString(),
+  }]);
+  await act(async () => pause());
+
+  const savedReviewButton = Array.from(container.querySelectorAll("button"))
+    .find((button) => button.textContent?.includes("Saved policy"));
+  assert.ok(savedReviewButton, "the saved review should appear in history");
+  await act(async () => savedReviewButton.click());
+
+  assert.match(container.textContent || "", /Halaman sumber:\s*3/);
 });
 
 test("failed replacement imports preserve the current draft and scan preview", async () => {
