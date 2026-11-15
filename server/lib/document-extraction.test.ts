@@ -62,7 +62,7 @@ function makeNativePdf(text: string | string[]): Buffer {
   return makePdf(objects);
 }
 
-function makeScannedPdf(scannedPageNumber = 1): Buffer {
+function makeScannedPdf(scannedPageNumber = 1, totalPageCount = scannedPageNumber): Buffer {
   const glyphs = {
     S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
     M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
@@ -91,7 +91,7 @@ function makeScannedPdf(scannedPageNumber = 1): Buffer {
   });
 
   const image = deflateSync(pixels);
-  const pageCount = Math.max(1, scannedPageNumber);
+  const pageCount = Math.max(1, scannedPageNumber, totalPageCount);
   const firstPageId = 3;
   const firstContentId = firstPageId + pageCount;
   const fontId = firstContentId + pageCount;
@@ -271,11 +271,15 @@ test("keeps OCR warnings accurate across real Indonesian scan samples", async ()
 });
 
 test("preserves the original page number when OCR follows selectable PDF text", async () => {
-  const result = await extractDocumentText(makeScannedPdf(2), "mixed-policy.pdf");
+  const result = await extractDocumentText(makeScannedPdf(2, 4), "mixed-policy.pdf");
 
-  assert.equal(result.pageCount, 2);
+  assert.equal(result.pageCount, 4);
+  assert.equal(result.ocrPageCount, 1);
+  assert.equal(result.ocrPages?.length, 1);
   assert.equal(result.ocrPages?.[0].pageNumber, 2);
   assert.match(result.content, /Cover page 1/);
+  assert.match(result.content, /Cover page 3/);
+  assert.match(result.content, /Cover page 4/);
   assert.match(result.content, /\[Halaman 2 — hasil OCR\]\s+SMAP/i);
 });
 
@@ -296,22 +300,33 @@ test("flags OCR pages with low or missing word confidence for review", () => {
   assert.equal(lowConfidence.text, "Kebijakan");
   assert.deepEqual(lowConfidence.quality, {
     pageNumber: 4,
+    wordCount: 1,
     confidence: 42,
     lowConfidenceWordPercent: 100,
     needsReview: true,
   });
   assert.deepEqual(unreadable.quality, {
     pageNumber: 7,
+    wordCount: 0,
     confidence: null,
     lowConfidenceWordPercent: null,
     needsReview: true,
   });
-  assert.deepEqual(clearPage.quality, {
-    pageNumber: 9,
-    confidence: 95,
-    lowConfidenceWordPercent: 0,
-    needsReview: false,
-  });
+  assert.equal(clearPage.quality.wordCount, 5);
+  assert.equal(clearPage.quality.confidence, 95);
+  assert.equal(clearPage.quality.lowConfidenceWordPercent, 0);
+  assert.equal(clearPage.quality.needsReview, false);
+});
+
+test("flags sparse OCR output even when its only recognized word has high confidence", () => {
+  const sparsePage = parseOcrPage(
+    12,
+    "level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n5\t1\t1\t1\t1\t1\t0\t0\t10\t10\t95\tSMAP\n",
+  );
+
+  assert.equal(sparsePage.quality.wordCount, 1);
+  assert.equal(sparsePage.quality.confidence, 95);
+  assert.equal(sparsePage.quality.needsReview, true);
 });
 
 test("flags pages with many uncertain words even when their average score is high", () => {

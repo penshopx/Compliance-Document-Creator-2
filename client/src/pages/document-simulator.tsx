@@ -100,6 +100,7 @@ type SavedReview = {
 type ReviewResponse = SavedReview & { model: string };
 type OcrPageQuality = {
   pageNumber: number;
+  wordCount?: number;
   confidence: number | null;
   lowConfidenceWordPercent?: number | null;
   needsReview: boolean;
@@ -568,12 +569,12 @@ export default function DocumentSimulatorPage() {
                                 ? "ada kata yang perlu dicocokkan"
                                 : "tidak terdeteksi kata berkeyakinan rendah"}
                             {page.confidence !== null
-                              ? ` (rata-rata ${page.confidence}%${page.lowConfidenceWordPercent ? `; ${page.lowConfidenceWordPercent}% kata rendah` : ""})`
-                              : " (teks tidak terbaca)"}
+                              ? ` (${page.wordCount ?? "?"} kata; rata-rata ${page.confidence}%${page.lowConfidenceWordPercent ? `; ${page.lowConfidenceWordPercent}% kata rendah` : ""})`
+                              : ` (${page.wordCount ?? 0} kata terdeteksi; teks tidak terbaca)`}
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-1 text-xs opacity-80">Peringatan diberikan jika rata-rata di bawah 70% atau ≥15% kata skornya di bawah 60%. Persentase yang lebih kecil tetap ditampilkan. Cocokkan dengan scan asli; skor tinggi bukan jaminan teks pasti benar.</p>
+                      <p className="mt-1 text-xs opacity-80">Peringatan diberikan jika kurang dari 5 kata terbaca, rata-rata di bawah 70%, atau ≥15% kata skornya di bawah 60%. Cocokkan hasil dengan scan asli; skor tinggi bukan jaminan teks pasti benar.</p>
                       <p className="mt-1 text-xs opacity-80">Penanda halaman dan teks hasil OCR tetap dapat diedit di bawah ini sebelum menjalankan review.</p>
                     </div>
                   ) : null}

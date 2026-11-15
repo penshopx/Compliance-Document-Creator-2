@@ -26,9 +26,11 @@ const LEGACY_WORD_TIMEOUT_MS = 15_000;
 const OCR_LOW_CONFIDENCE_THRESHOLD = 70;
 const OCR_LOW_CONFIDENCE_WORD_THRESHOLD = 60;
 const OCR_LOW_CONFIDENCE_WORD_PERCENT_THRESHOLD = 15;
+const OCR_MIN_RELIABLE_WORD_COUNT = 5;
 
 export type OcrPageQuality = {
   pageNumber: number;
+  wordCount: number;
   confidence: number | null;
   lowConfidenceWordPercent: number | null;
   needsReview: boolean;
@@ -84,9 +86,11 @@ export function parseOcrPage(
     text: words.map((word) => word.text).join(" ").trim(),
     quality: {
       pageNumber,
+      wordCount: words.length,
       confidence,
       lowConfidenceWordPercent,
-      needsReview: confidence === null
+      needsReview: words.length < OCR_MIN_RELIABLE_WORD_COUNT
+        || confidence === null
         || confidence < OCR_LOW_CONFIDENCE_THRESHOLD
         || (lowConfidenceWordPercent ?? 0) >= OCR_LOW_CONFIDENCE_WORD_PERCENT_THRESHOLD,
     },
