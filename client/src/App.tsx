@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -10,81 +11,84 @@ import { IndustryProvider } from "@/hooks/use-industry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import NotFound from "@/pages/not-found";
-import LandingPage from "@/pages/landing";
-import WelcomePage from "@/pages/welcome";
-import Dashboard from "@/pages/dashboard";
-import CompanyPage from "@/pages/company";
-import ManagementPage from "@/pages/management";
-import FkapPage from "@/pages/fkap";
-import AuditInternalPage from "@/pages/audit-internal";
-import EmployeesPage from "@/pages/employees";
-import QualificationsPage from "@/pages/qualifications";
-import EquipmentPage from "@/pages/equipment";
-import ProjectsPage from "@/pages/projects";
-import VendorsPage from "@/pages/vendors";
-import DocumentsPage from "@/pages/documents";
-import PDCAGenerator from "@/pages/pdca-generator";
-import DocumentBuilder from "@/pages/document-builder";
-import SMAPReferencePage from "@/pages/smap-reference";
-import TemplateRepository from "@/pages/template-repository";
-import SMAPChecklist from "@/pages/smap-checklist";
-import ProdukSiap from "@/pages/produk-siap";
-import PancekPage from "@/pages/pancek";
-import PancekGenerator from "@/pages/pancek-generator";
-import IndustrySettingsPage from "@/pages/industry-settings";
-import AiSettingsPage from "@/pages/ai-settings";
 import HelpDeskChatbot from "@/components/help-desk-chatbot";
 import KnowledgeChatbot from "@/components/knowledge-chatbot";
-import CheckoutPage from "@/pages/checkout";
-import KnowledgeBasePage from "@/pages/knowledge-base";
-import PathwayPage from "@/pages/pathway";
-import AdminPaymentsPage from "@/pages/admin-payments";
-import GustafdaDialog from "@/pages/gustafta-dialog";
-import GustafdaCollab from "@/pages/gustafta-collab";
-import ProjectIntegrityPage from "@/pages/project-integrity";
-import DocumentSimulatorPage from "@/pages/document-simulator";
 import AiAvailabilityBanner from "@/components/ai-availability-banner";
 import { isIndustryEnabled } from "@/data/industry-configs";
 
+const NotFound = lazy(() => import("@/pages/not-found"));
+const LandingPage = lazy(() => import("@/pages/landing"));
+const WelcomePage = lazy(() => import("@/pages/welcome"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const CompanyPage = lazy(() => import("@/pages/company"));
+const ManagementPage = lazy(() => import("@/pages/management"));
+const FkapPage = lazy(() => import("@/pages/fkap"));
+const AuditInternalPage = lazy(() => import("@/pages/audit-internal"));
+const EmployeesPage = lazy(() => import("@/pages/employees"));
+const QualificationsPage = lazy(() => import("@/pages/qualifications"));
+const EquipmentPage = lazy(() => import("@/pages/equipment"));
+const ProjectsPage = lazy(() => import("@/pages/projects"));
+const VendorsPage = lazy(() => import("@/pages/vendors"));
+const DocumentsPage = lazy(() => import("@/pages/documents"));
+const PDCAGenerator = lazy(() => import("@/pages/pdca-generator"));
+const DocumentBuilder = lazy(() => import("@/pages/document-builder"));
+const SMAPReferencePage = lazy(() => import("@/pages/smap-reference"));
+const TemplateRepository = lazy(() => import("@/pages/template-repository"));
+const SMAPChecklist = lazy(() => import("@/pages/smap-checklist"));
+const ProdukSiap = lazy(() => import("@/pages/produk-siap"));
+const PancekPage = lazy(() => import("@/pages/pancek"));
+const PancekGenerator = lazy(() => import("@/pages/pancek-generator"));
+const IndustrySettingsPage = lazy(() => import("@/pages/industry-settings"));
+const AiSettingsPage = lazy(() => import("@/pages/ai-settings"));
+const CheckoutPage = lazy(() => import("@/pages/checkout"));
+const KnowledgeBasePage = lazy(() => import("@/pages/knowledge-base"));
+const PathwayPage = lazy(() => import("@/pages/pathway"));
+const AdminPaymentsPage = lazy(() => import("@/pages/admin-payments"));
+const GustafdaDialog = lazy(() => import("@/pages/gustafta-dialog"));
+const GustafdaCollab = lazy(() => import("@/pages/gustafta-collab"));
+const ProjectIntegrityPage = lazy(() => import("@/pages/project-integrity"));
+const DocumentSimulatorPage = lazy(() => import("@/pages/document-simulator"));
+
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={LandingPage} />
-      <Route path="/welcome" component={WelcomePage} />
-      <Route path="/checkout" component={CheckoutPage} />
-      {isIndustryEnabled("pancek") && <Route path="/pancek/checklist">{() => <PancekPage initialTab="checklist" />}</Route>}
-      {isIndustryEnabled("pancek") && <Route path="/pancek/documents">{() => <PancekPage initialTab="documents" />}</Route>}
-      {isIndustryEnabled("pancek") && <Route path="/pancek">{() => <PancekPage />}</Route>}
-      {isIndustryEnabled("pancek") && <Route path="/pancek-generator" component={PancekGenerator} />}
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/company" component={CompanyPage} />
-      <Route path="/management" component={ManagementPage} />
-      <Route path="/fkap" component={FkapPage} />
-      <Route path="/audit-internal" component={AuditInternalPage} />
-      <Route path="/employees" component={EmployeesPage} />
-      <Route path="/qualifications" component={QualificationsPage} />
-      <Route path="/equipment" component={EquipmentPage} />
-      <Route path="/projects" component={ProjectsPage} />
-      <Route path="/project-integrity" component={ProjectIntegrityPage} />
-      <Route path="/vendors" component={VendorsPage} />
-      <Route path="/documents" component={DocumentsPage} />
-      <Route path="/document-simulator" component={DocumentSimulatorPage} />
-      <Route path="/pdca" component={PDCAGenerator} />
-      <Route path="/document-builder" component={DocumentBuilder} />
-      <Route path="/smap-reference" component={SMAPReferencePage} />
-      <Route path="/template-repository" component={TemplateRepository} />
-      <Route path="/smap-checklist" component={SMAPChecklist} />
-      <Route path="/produk-siap" component={ProdukSiap} />
-      <Route path="/industry-settings" component={IndustrySettingsPage} />
-      <Route path="/ai-settings" component={AiSettingsPage} />
-      <Route path="/knowledge-base" component={KnowledgeBasePage} />
-      <Route path="/pathway/:industryId/:domainId" component={PathwayPage} />
-      <Route path="/admin/payments" component={AdminPaymentsPage} />
-      <Route path="/gustafta-dialog" component={GustafdaDialog} />
-      <Route path="/gustafta-collab" component={GustafdaCollab} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground" role="status">Memuat halaman…</div>}>
+      <Switch>
+        <Route path="/" component={LandingPage} />
+        <Route path="/welcome" component={WelcomePage} />
+        <Route path="/checkout" component={CheckoutPage} />
+        {isIndustryEnabled("pancek") && <Route path="/pancek/checklist">{() => <PancekPage initialTab="checklist" />}</Route>}
+        {isIndustryEnabled("pancek") && <Route path="/pancek/documents">{() => <PancekPage initialTab="documents" />}</Route>}
+        {isIndustryEnabled("pancek") && <Route path="/pancek">{() => <PancekPage />}</Route>}
+        {isIndustryEnabled("pancek") && <Route path="/pancek-generator" component={PancekGenerator} />}
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/company" component={CompanyPage} />
+        <Route path="/management" component={ManagementPage} />
+        <Route path="/fkap" component={FkapPage} />
+        <Route path="/audit-internal" component={AuditInternalPage} />
+        <Route path="/employees" component={EmployeesPage} />
+        <Route path="/qualifications" component={QualificationsPage} />
+        <Route path="/equipment" component={EquipmentPage} />
+        <Route path="/projects" component={ProjectsPage} />
+        <Route path="/project-integrity" component={ProjectIntegrityPage} />
+        <Route path="/vendors" component={VendorsPage} />
+        <Route path="/documents" component={DocumentsPage} />
+        <Route path="/document-simulator" component={DocumentSimulatorPage} />
+        <Route path="/pdca" component={PDCAGenerator} />
+        <Route path="/document-builder" component={DocumentBuilder} />
+        <Route path="/smap-reference" component={SMAPReferencePage} />
+        <Route path="/template-repository" component={TemplateRepository} />
+        <Route path="/smap-checklist" component={SMAPChecklist} />
+        <Route path="/produk-siap" component={ProdukSiap} />
+        <Route path="/industry-settings" component={IndustrySettingsPage} />
+        <Route path="/ai-settings" component={AiSettingsPage} />
+        <Route path="/knowledge-base" component={KnowledgeBasePage} />
+        <Route path="/pathway/:industryId/:domainId" component={PathwayPage} />
+        <Route path="/admin/payments" component={AdminPaymentsPage} />
+        <Route path="/gustafta-dialog" component={GustafdaDialog} />
+        <Route path="/gustafta-collab" component={GustafdaCollab} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

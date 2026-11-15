@@ -30,6 +30,22 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          const moduleId = id.replace(/\\/g, "/");
+          if (/\/node_modules\/(react|react-dom|scheduler)\//.test(moduleId)) {
+            return "react-vendor";
+          }
+          if (moduleId.includes("/node_modules/lucide-react/")) {
+            return "icons";
+          }
+          if (moduleId.includes("/node_modules/@radix-ui/")) {
+            return "radix-ui";
+          }
+        },
+      },
+    },
   },
   server: {
     fs: {
